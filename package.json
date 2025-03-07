@@ -1,0 +1,8 @@
+{
+  "name": "llm-playground-cot-cod",
+  "version": "1.0.0",
+  "description": "LLM Playground for comparing Chain of Thought and Chain of Draft reasoning",
+  "dependencies": {
+    "node-fetch": "^2.6.7"
+  }
+}

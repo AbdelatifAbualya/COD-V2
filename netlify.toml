@@ -1,0 +1,36 @@
+# Netlify configuration file
+# This file should be in the root of your project
+
+[build]
+  # Directory that contains the deploy-ready HTML files and assets
+  publish = "/"
+  
+  # Directory with the serverless functions
+  functions = "netlify/functions"
+
+# Function settings
+[functions]
+  node_bundler = "esbuild"
+  external_node_modules = ["node-fetch"]
+  included_files = []
+
+# Set function timeout (must be in build.environment)  
+[build.environment]
+  AWS_LAMBDA_FUNCTION_TIMEOUT = "120"
+
+# Set up chunked uploads for large request bodies
+[build.processing]
+  skip_processing = false
+
+# Increase client side timeouts for long-running functions
+[[headers]]
+  for = "/*"
+  [headers.values]
+    # Increase client-side timeout expectations
+    X-Function-Timeout = "120"
+
+# Properly configured redirect for single-page application
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
