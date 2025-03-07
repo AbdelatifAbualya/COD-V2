@@ -142,10 +142,9 @@
       padding: 1rem;
       box-shadow: 0 -2px 4px rgba(0,0,0,0.3);
     }
-    
     .chat-input textarea {
       flex: 1;
-      resize: none; /* Disable manual resize since we'll handle it with JS */
+      resize: none;
       border: none;
       background-color: #2e2e2e;
       color: #fff;
@@ -154,14 +153,7 @@
       font-size: 1rem;
       outline: none;
       box-shadow: inset 0 1px 3px rgba(0,0,0,0.4);
-      min-height: 40px; /* Smaller initial height */
-      max-height: 400px; /* Increased max height */
-      overflow-y: auto; /* Enable scrolling when content exceeds max-height */
-      transition: height 0.1s ease; /* Smooth height transition */
-      line-height: 1.4; /* Consistent line height for better calculations */
-      height: 40px; /* Start with small height */
     }
-    
     .chat-input button {
       margin-left: 1rem;
       padding: 0.5rem 1rem;
@@ -173,11 +165,9 @@
       font-size: 1rem;
       transition: background-color 0.3s ease;
       box-shadow: 0 1px 3px rgba(0,0,0,0.4);
-      align-self: flex-end; /* Align button to bottom of container */
     }
     .chat-input button:hover {
       background-color: #4a4a4a;
-    }
     }
     /* --------------------------------
        Message Styles
@@ -1051,11 +1041,10 @@
       <div class="chat-messages" id="chatMessages">
         <!-- Chat messages will be rendered here -->
       </div>
-      <!-- Chat Input - Fixed Version -->
-<div class="chat-input">
-  <textarea id="userInput" placeholder="Type your message..."></textarea>
-  <button id="sendBtn">Send</button>
-</div>
+      <div class="chat-input">
+        <textarea id="userInput" rows="2" placeholder="Type your message..."></textarea>
+        <button id="sendBtn">Send</button>
+      </div>
     </div>
   </div>
 
@@ -1319,9 +1308,7 @@
       hasMath: false,
       hasLogic: false,
       multiStep: false,
-      complexity: "normal", // Options: "simple", "normal", "complex"
-      hasDigitalRoot: false, // Track digital root problems specifically
-      hasLargeNumbers: false // Track problems with very large numbers
+      complexity: "normal" // Options: "simple", "normal", "complex"
     };
     
     // Prompts for different reasoning methods
@@ -1359,9 +1346,7 @@ For complex problems, use as many steps as needed to work through the solution t
 
 Check your calculations and logic at each step. After you've completed your reasoning process, provide your final answer.`,
       
-      cod5: `Think step by step to solve this complex problem. For each step, use at most 5 words to capture the essential reasoning, but use AS MANY STEPS as needed to thoroughly work through the problem. Use mathematical notation where efficient. Show ALL intermediate calculations and logical inferences. 
-      
-For problems with very large numbers, maintain full precision without using scientific notation when the exact value is important. For digital root calculations, compute the exact sum of all digits and continue until you reach a single digit.
+      cod5: `Think step by step to solve this complex problem. For each step, use at most 5 words to capture the essential reasoning, but use AS MANY STEPS as needed to thoroughly work through the problem. Use mathematical notation where efficient. Show ALL intermediate calculations and logical inferences.
 
 IMPORTANT: Instead of trying to fit complex reasoning into fewer steps, break your reasoning into more numerous simple steps. For example, instead of one step with "Calculate area using length×width=50×30=1500", use multiple steps:
 1. Length = 50.
@@ -1414,25 +1399,7 @@ Separate your steps with periods. Write your final answer after the #### separat
 
 Example of solving a complex problem:
 Q: A car travels at 60 mph. After 2 hours, it increases speed to 75 mph for 1 hour. It then decreases to 50 mph for the final 30 minutes. What is the total distance traveled?
-A: First segment: The car travels at 60 mph for 2 hours, so the distance covered in this segment is 60 × 2 = 120 miles. Second segment: The car then increases speed to 75 mph and maintains this for 1 hour, covering 75 × 1 = 75 miles. Third segment: Finally, the car decreases speed to 50 mph for 30 minutes (0.5 hours), covering 50 × 0.5 = 25 miles. Total distance traveled over the entire journey = 120 + 75 + 25 = 220 miles. #### 220 miles`,
-    
-      cod20_math: `Think step by step to solve this complex math problem. For each step, use up to 20 words to provide clear reasoning, with particular attention to precise calculations with large numbers or sequences.
-
-For digital root calculations:
-1. The digital root is the sum of all digits, reduced to a single digit by repeated summing.
-2. For large numbers, calculate this sum exactly without using scientific notation.
-3. Example: Digital root of 12345 is 1+2+3+4+5=15, then 1+5=6.
-
-For sequence problems:
-1. Verify each term carefully before proceeding to the next term.
-2. Maintain full precision without rounding or using scientific notation.
-3. Show each step of any digital root calculation by explicitly summing all digits.
-
-Separate your steps with periods. Write your final answer after the #### separator.
-
-Example digital root calculation:
-Q: Find the digital root of 9876543210.
-A: Sum all digits: 9+8+7+6+5+4+3+2+1+0=45. Sum digits of 45: 4+5=9. Digital root is 9. #### 9`
+A: First segment: The car travels at 60 mph for 2 hours, so the distance covered in this segment is 60 × 2 = 120 miles. Second segment: The car then increases speed to 75 mph and maintains this for 1 hour, covering 75 × 1 = 75 miles. Third segment: Finally, the car decreases speed to 50 mph for 30 minutes (0.5 hours), covering 50 × 0.5 = 25 miles. Total distance traveled over the entire journey = 120 + 75 + 25 = 220 miles. #### 220 miles`
     };
     
     // Default generation parameters
@@ -1603,9 +1570,7 @@ A: Sum all digits: 9+8+7+6+5+4+3+2+1+0=45. Sum digits of 45: 4+5=9. Digital root
         multiStep: false,
         complexity: "normal",
         wordCount: message.split(/\s+/).length, // Count words in the problem
-        estimatedSteps: 0, // Will be calculated below
-        hasDigitalRoot: false, // Track digital root problems specifically
-        hasLargeNumbers: false // Track problems with very large numbers
+        estimatedSteps: 0 // Will be calculated below
       };
       
       // Mathematical expressions and calculations
@@ -1641,19 +1606,6 @@ A: Sum all digits: 9+8+7+6+5+4+3+2+1+0=45. Sum digits of 45: 4+5=9. Digital root
           PROBLEM_COMPLEXITY.hasMath = true;
           break;
         }
-      }
-      
-      // Check for digital root problems
-      if (/digital\s*root|digit(al)?\s*sum|sum\s*of\s*digits/i.test(message)) {
-        PROBLEM_COMPLEXITY.hasDigitalRoot = true;
-        PROBLEM_COMPLEXITY.complexity = "complex"; // Digital root problems need precision
-        console.log("Digital root problem detected");
-      }
-      
-      // Check for problems involving large numbers or number sequences
-      if (/large|huge|big|massive|enormous|sequence|recurring|recurrence|nth term|factorial|power|exponent/i.test(message)) {
-        PROBLEM_COMPLEXITY.hasLargeNumbers = true;
-        console.log("Large number problem detected");
       }
       
       // Check for logic patterns
@@ -1985,67 +1937,6 @@ A: Sum all digits: 9+8+7+6+5+4+3+2+1+0=45. Sum digits of 45: 4+5=9. Digital root
     }
 
     /***********************
-     * Special Math Handling
-     ***********************/
-    function addSpecialMathInstructions(message) {
-      // Add additional system instructions for digital root calculations
-      if (PROBLEM_COMPLEXITY.hasDigitalRoot) {
-        // Enhance all CoD prompts with digital root specific guidance
-        const digitalRootInstructions = `
-IMPORTANT FOR DIGITAL ROOT CALCULATIONS: 
-1. When calculating digital roots, NEVER use scientific notation for intermediate or final values.
-2. The digital root of a number is found by adding all its digits, then repeating until a single digit remains.
-3. For very large numbers, calculate this methodically. The digital root of a number is equivalent to the number mod 9 (or 9 if the result is 0).
-4. Example: For 12345, first calculate 1+2+3+4+5=15, then 1+5=6. So the digital root is 6.
-5. Always verify your digital root calculation by showing all steps of summing the digits.
-`;
-
-        // For each CoD prompt type, add the special instructions
-        Object.keys(ENHANCED_PROMPTS).forEach(key => {
-          if (key.startsWith('cod')) {
-            if (!ENHANCED_PROMPTS[key].includes("DIGITAL ROOT CALCULATIONS")) {
-              ENHANCED_PROMPTS[key] += digitalRootInstructions;
-            }
-          }
-        });
-        
-        // Also add to standard CoD prompt
-        if (!PROMPTS.cod.includes("DIGITAL ROOT CALCULATIONS")) {
-          PROMPTS.cod += digitalRootInstructions;
-        }
-        
-        console.log("Added special digital root calculation instructions");
-      }
-      
-      // Add special instructions for large number problems
-      if (PROBLEM_COMPLEXITY.hasLargeNumbers) {
-        const largeNumberInstructions = `
-IMPORTANT FOR LARGE NUMBER CALCULATIONS:
-1. Maintain full precision when calculating with large numbers.
-2. Avoid using scientific notation for intermediate calculations when precision matters.
-3. For sequence problems, verify each term carefully before proceeding to the next.
-4. If exact values are too large to display, show the method and process for calculation.
-`;
-
-        // Add to all CoD prompts
-        Object.keys(ENHANCED_PROMPTS).forEach(key => {
-          if (key.startsWith('cod')) {
-            if (!ENHANCED_PROMPTS[key].includes("LARGE NUMBER CALCULATIONS")) {
-              ENHANCED_PROMPTS[key] += largeNumberInstructions;
-            }
-          }
-        });
-        
-        // Also add to standard CoD prompt
-        if (!PROMPTS.cod.includes("LARGE NUMBER CALCULATIONS")) {
-          PROMPTS.cod += largeNumberInstructions;
-        }
-        
-        console.log("Added special large number calculation instructions");
-      }
-    }
-
-    /***********************
      * Process Bot Messages - IMPROVED VERSION FOR COD
      ***********************/
     function processBotMessage(content, reasoningMethod) {
@@ -2181,18 +2072,6 @@ IMPORTANT FOR LARGE NUMBER CALCULATIONS:
           thinkingWordCount: 0,
           answerWordCount: countWords(content)
         };
-      }
-      
-      // Special handling for digital root problems
-      if (PROBLEM_COMPLEXITY && PROBLEM_COMPLEXITY.hasDigitalRoot) {
-        // Try to identify if there's a specific section about digital root calculation
-        const digitalRootRegex = /digital\s*root.*?=\s*(\d+)/i;
-        const match = content.match(digitalRootRegex);
-        
-        if (match && match[1]) {
-          console.log("Found explicit digital root result: " + match[1]);
-          // We could potentially validate this result if needed
-        }
       }
       
       // Default: if unable to separate, return entire content
@@ -2465,20 +2344,6 @@ IMPORTANT FOR LARGE NUMBER CALCULATIONS:
           problemType = "mathematical";
           console.log("Using enhanced prompts for mathematical problem detected");
         }
-        
-        // Special case for digital root problems - always use enhanced prompts
-        if (PROBLEM_COMPLEXITY.hasDigitalRoot) {
-          shouldUseEnhancedPrompt = true;
-          problemType = "digital_root";
-          console.log("Using enhanced prompts for digital root problem");
-        }
-        
-        // Special case for problems with large numbers/sequences
-        if (PROBLEM_COMPLEXITY.hasLargeNumbers) {
-          shouldUseEnhancedPrompt = true;
-          problemType = "large_numbers";
-          console.log("Using enhanced prompts for large number problem");
-        }
       }
       
       // If we have a reasoning method other than standard, add the system prompt
@@ -2488,12 +2353,8 @@ IMPORTANT FOR LARGE NUMBER CALCULATIONS:
           if (REASONING_METHOD === "cot") {
             systemPrompt = ENHANCED_PROMPTS.cot;
           } else if (REASONING_METHOD === "cod") {
-            // Use the appropriate CoD prompt based on word limit and problem type
-            if (PROBLEM_COMPLEXITY.hasDigitalRoot || PROBLEM_COMPLEXITY.hasLargeNumbers) {
-              // For digital root and large number problems, use specialized math prompt
-              systemPrompt = ENHANCED_PROMPTS.cod20_math;
-              console.log("Using specialized math prompt for digital root/large number problem");
-            } else if (COD_WORD_LIMIT === 5) {
+            // Use the appropriate CoD prompt based on word limit
+            if (COD_WORD_LIMIT === 5) {
               systemPrompt = ENHANCED_PROMPTS.cod5;
             } else if (COD_WORD_LIMIT === 10) {
               systemPrompt = ENHANCED_PROMPTS.cod10;
@@ -2622,11 +2483,6 @@ IMPORTANT FOR LARGE NUMBER CALCULATIONS:
       const thread = threads.find(t => t.id === currentThreadId);
       const placeholderIndex = thread.messages.length - 1;
 
-      // Check for digital root or large number calculations and add special handling
-      if (PROBLEM_COMPLEXITY.hasDigitalRoot || PROBLEM_COMPLEXITY.hasLargeNumbers) {
-        addSpecialMathInstructions(message);
-      }
-      
       // Build messages array with current settings and word count request
       const messagesForApi = buildMessagesForChat(wordCountRequest);
 
@@ -3318,83 +3174,154 @@ Separate your steps with periods. Write your final answer after the #### separat
       }
     }
 
-        /***********************
+    /***********************
      * Initialization
      ***********************/
-            initFeedbackForm();
-        console.log("Feedback form initialized");
+    function loadPersistedSettings() {
+      try {
+        MODEL_NAME = localStorage.getItem("modelName") || "";
+        MODEL_NAME_DISPLAY = getModelDisplayName(MODEL_NAME);
         
-        // IMPROVED: Better auto-resize functionality for the textarea
-        const userInput = document.getElementById("userInput");
-        if (userInput) {
-          // Create hidden div to measure content height
-          const hiddenDiv = document.createElement('div');
-          hiddenDiv.classList.add('hidden-textarea-sizer');
-          hiddenDiv.style.display = 'none';
-          hiddenDiv.style.whiteSpace = 'pre-wrap';
-          hiddenDiv.style.wordWrap = 'break-word';
-          hiddenDiv.style.padding = '0.5rem'; // Match textarea padding
-          hiddenDiv.style.fontFamily = window.getComputedStyle(userInput).fontFamily;
-          hiddenDiv.style.fontSize = window.getComputedStyle(userInput).fontSize;
-          hiddenDiv.style.lineHeight = window.getComputedStyle(userInput).lineHeight;
-          document.body.appendChild(hiddenDiv);
-          
-          // Function to resize textarea based on content
-          const resizeTextarea = () => {
-            // Temporarily shrink textarea height to allow proper scrollHeight measurement
-            userInput.style.height = 'auto';
-            
-            // Copy content to hidden div for measurement (add newline to ensure proper height)
-            hiddenDiv.textContent = userInput.value + '\n';
-            hiddenDiv.style.width = userInput.offsetWidth + 'px';
-            
-            // Get the scrollHeight from hidden div
-            const contentHeight = hiddenDiv.scrollHeight;
-            
-            // Apply min/max constraints
-            const minHeight = 40; // Smaller initial height
-            const maxHeight = 400; // Maximum height
-            const newHeight = Math.min(Math.max(contentHeight, minHeight), maxHeight);
-            
-            // Set new height
-            userInput.style.height = newHeight + 'px';
-            
-            // Enable scrollbar if content exceeds max height
-            userInput.style.overflowY = contentHeight > maxHeight ? 'auto' : 'hidden';
-          };
-          
-          // Resize on input
-          userInput.addEventListener('input', resizeTextarea);
-          
-          // Resize on focus (to handle cached content)
-          userInput.addEventListener('focus', resizeTextarea);
-          
-          // Resize on window resize
-          window.addEventListener('resize', () => {
-            hiddenDiv.style.width = userInput.offsetWidth + 'px';
-            resizeTextarea();
-          });
-          
-          // Initial resize
-          setTimeout(resizeTextarea, 0);
-          
-          // Clear height when clearing input
-          document.getElementById('sendBtn').addEventListener('click', () => {
-            setTimeout(() => {
-              userInput.style.height = '40px'; // Reset to minimum height after sending
-            }, 10);
-          });
-          
-          console.log("Enhanced textarea auto-resize functionality initialized");
+        REASONING_METHOD = localStorage.getItem("reasoningMethod") || "cod";
+        
+        const codWordLimit = localStorage.getItem("codWordLimit");
+        if (codWordLimit) COD_WORD_LIMIT = parseInt(codWordLimit);
+        
+        // Load enhanced reasoning settings
+        const enhancedEnabled = localStorage.getItem("enhancedReasoningEnabled");
+        if (enhancedEnabled !== null) {
+          ENHANCED_REASONING_ENABLED = enhancedEnabled === "true";
         }
         
-        // The rest of the initialization function remains the same
+        const enhancementType = localStorage.getItem("reasoningEnhancement");
+        if (enhancementType) {
+          REASONING_ENHANCEMENT = enhancementType;
+        }
+        
+        // Load custom prompts if available
+        const storedPrompts = localStorage.getItem("customPrompts");
+        if (storedPrompts) {
+          const parsedPrompts = JSON.parse(storedPrompts);
+          // Merge with default prompts to ensure all properties exist
+          PROMPTS = { ...PROMPTS, ...parsedPrompts };
+        }
+        
+        // Load enhanced prompts if available
+        const storedEnhancedPrompts = localStorage.getItem("enhancedPrompts");
+        if (storedEnhancedPrompts) {
+          const parsedEnhancedPrompts = JSON.parse(storedEnhancedPrompts);
+          // Merge with default prompts to ensure all properties exist
+          ENHANCED_PROMPTS = { ...ENHANCED_PROMPTS, ...parsedEnhancedPrompts };
+        }
+        
+        const temp = localStorage.getItem("temperature");
+        if (temp) TEMPERATURE = parseFloat(temp);
+        
+        const topP = localStorage.getItem("topP");
+        if (topP) TOP_P = parseFloat(topP);
+        
+        const topK = localStorage.getItem("topK");
+        if (topK) TOP_K = parseInt(topK);
+        
+        const maxTokens = localStorage.getItem("maxTokens");
+        if (maxTokens) MAX_TOKENS = parseInt(maxTokens);
+        
+        const presencePenalty = localStorage.getItem("presencePenalty");
+        if (presencePenalty) PRESENCE_PENALTY = parseFloat(presencePenalty);
+        
+        const frequencyPenalty = localStorage.getItem("frequencyPenalty");
+        if (frequencyPenalty) FREQUENCY_PENALTY = parseFloat(frequencyPenalty);
+      } catch (err) {
+        console.error("Error loading settings:", err);
+      }
+    }
+
+    function init() {
+      console.log("Initializing app...");
+      
+      try {
+        loadPersistedSettings();
+        console.log("Settings loaded");
+        
+        // Update CoD prompt with the correct word limit
+        updateCoDPrompt();
+        console.log("CoD prompt updated");
+        
+        createNewThread();
+        console.log("New thread created");
+        
+        initEventListeners();
+        console.log("Event listeners initialized");
+        
+        updateCurrentModelDisplay();
+        console.log("Model display updated");
+        
+        // Initialize feedback form
+        initFeedbackForm();
+        console.log("Feedback form initialized");
+        
+        // Helper function to create a button that resets the thread
+        function createClearThreadButton() {
+          const clearThreadBtn = document.createElement("button");
+          clearThreadBtn.id = "clearThreadBtn";
+          clearThreadBtn.textContent = "Clear Thread";
+          clearThreadBtn.style.marginTop = "0.5rem";
+          clearThreadBtn.style.backgroundColor = "#553333";
+          clearThreadBtn.addEventListener("click", () => {
+            if (confirm("Clear all messages in this thread?")) {
+              const thread = threads.find(t => t.id === currentThreadId);
+              if (thread) {
+                thread.messages = [];
+                renderCurrentThreadMessages();
+                showNotification("Thread cleared");
+              }
+            }
+          });
+          return clearThreadBtn;
+        }
+        
+        // Add clear thread button to the sidebar
+        const sidebar = document.querySelector(".sidebar");
+        if (sidebar) {
+          sidebar.appendChild(createClearThreadButton());
+        }
+        
+        // If we don't have a model name, open settings modal
+        if (!MODEL_NAME) {
+          console.log("No model name found, opening settings");
+          setTimeout(() => {
+            try {
+              openSettingsModal();
+              console.log("Settings modal opened");
+            } catch (err) {
+              console.error("Error opening settings modal:", err);
+            }
+          }, 1000);
+        }
       } catch (err) {
         console.error("Initialization error:", err);
       }
     }
 
-    // The rest of the JavaScript code remains the same
+    // Initialize the application
+    document.addEventListener("DOMContentLoaded", init);
+    
+    // Backup initialization - in case the DOMContentLoaded event already fired
+    if (document.readyState === "complete" || document.readyState === "interactive") {
+      setTimeout(init, 1);
+    }
   </script>
+  <form name="feedback" netlify netlify-honeypot="bot-field" hidden>
+    <input type="hidden" name="form-name" value="feedback">
+    <input type="hidden" name="model">
+    <input type="hidden" name="reasoning_method">
+    <select name="feedback_type"></select>
+    <input type="radio" name="rating" value="1">
+    <input type="radio" name="rating" value="2">
+    <input type="radio" name="rating" value="3">
+    <input type="radio" name="rating" value="4">
+    <input type="radio" name="rating" value="5">
+    <textarea name="comments"></textarea>
+  </form>
 </body>
 </html>
