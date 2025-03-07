@@ -1308,7 +1308,9 @@
       hasMath: false,
       hasLogic: false,
       multiStep: false,
-      complexity: "normal" // Options: "simple", "normal", "complex"
+      complexity: "normal", // Options: "simple", "normal", "complex"
+      hasDigitalRoot: false, // Track digital root problems specifically
+      hasLargeNumbers: false // Track problems with very large numbers
     };
     
     // Prompts for different reasoning methods
@@ -1346,7 +1348,9 @@ For complex problems, use as many steps as needed to work through the solution t
 
 Check your calculations and logic at each step. After you've completed your reasoning process, provide your final answer.`,
       
-      cod5: `Think step by step to solve this complex problem. For each step, use at most 5 words to capture the essential reasoning, but use AS MANY STEPS as needed to thoroughly work through the problem. Use mathematical notation where efficient. Show ALL intermediate calculations and logical inferences.
+      cod5: `Think step by step to solve this complex problem. For each step, use at most 5 words to capture the essential reasoning, but use AS MANY STEPS as needed to thoroughly work through the problem. Use mathematical notation where efficient. Show ALL intermediate calculations and logical inferences. 
+      
+For problems with very large numbers, maintain full precision without using scientific notation when the exact value is important. For digital root calculations, compute the exact sum of all digits and continue until you reach a single digit.
 
 IMPORTANT: Instead of trying to fit complex reasoning into fewer steps, break your reasoning into more numerous simple steps. For example, instead of one step with "Calculate area using length×width=50×30=1500", use multiple steps:
 1. Length = 50.
@@ -1399,7 +1403,25 @@ Separate your steps with periods. Write your final answer after the #### separat
 
 Example of solving a complex problem:
 Q: A car travels at 60 mph. After 2 hours, it increases speed to 75 mph for 1 hour. It then decreases to 50 mph for the final 30 minutes. What is the total distance traveled?
-A: First segment: The car travels at 60 mph for 2 hours, so the distance covered in this segment is 60 × 2 = 120 miles. Second segment: The car then increases speed to 75 mph and maintains this for 1 hour, covering 75 × 1 = 75 miles. Third segment: Finally, the car decreases speed to 50 mph for 30 minutes (0.5 hours), covering 50 × 0.5 = 25 miles. Total distance traveled over the entire journey = 120 + 75 + 25 = 220 miles. #### 220 miles`
+A: First segment: The car travels at 60 mph for 2 hours, so the distance covered in this segment is 60 × 2 = 120 miles. Second segment: The car then increases speed to 75 mph and maintains this for 1 hour, covering 75 × 1 = 75 miles. Third segment: Finally, the car decreases speed to 50 mph for 30 minutes (0.5 hours), covering 50 × 0.5 = 25 miles. Total distance traveled over the entire journey = 120 + 75 + 25 = 220 miles. #### 220 miles`,
+    
+      cod20_math: `Think step by step to solve this complex math problem. For each step, use up to 20 words to provide clear reasoning, with particular attention to precise calculations with large numbers or sequences.
+
+For digital root calculations:
+1. The digital root is the sum of all digits, reduced to a single digit by repeated summing.
+2. For large numbers, calculate this sum exactly without using scientific notation.
+3. Example: Digital root of 12345 is 1+2+3+4+5=15, then 1+5=6.
+
+For sequence problems:
+1. Verify each term carefully before proceeding to the next term.
+2. Maintain full precision without rounding or using scientific notation.
+3. Show each step of any digital root calculation by explicitly summing all digits.
+
+Separate your steps with periods. Write your final answer after the #### separator.
+
+Example digital root calculation:
+Q: Find the digital root of 9876543210.
+A: Sum all digits: 9+8+7+6+5+4+3+2+1+0=45. Sum digits of 45: 4+5=9. Digital root is 9. #### 9`
     };
     
     // Default generation parameters
@@ -1570,7 +1592,9 @@ A: First segment: The car travels at 60 mph for 2 hours, so the distance covered
         multiStep: false,
         complexity: "normal",
         wordCount: message.split(/\s+/).length, // Count words in the problem
-        estimatedSteps: 0 // Will be calculated below
+        estimatedSteps: 0, // Will be calculated below
+        hasDigitalRoot: false, // Track digital root problems specifically
+        hasLargeNumbers: false // Track problems with very large numbers
       };
       
       // Mathematical expressions and calculations
@@ -1606,6 +1630,19 @@ A: First segment: The car travels at 60 mph for 2 hours, so the distance covered
           PROBLEM_COMPLEXITY.hasMath = true;
           break;
         }
+      }
+      
+      // Check for digital root problems
+      if (/digital\s*root|digit(al)?\s*sum|sum\s*of\s*digits/i.test(message)) {
+        PROBLEM_COMPLEXITY.hasDigitalRoot = true;
+        PROBLEM_COMPLEXITY.complexity = "complex"; // Digital root problems need precision
+        console.log("Digital root problem detected");
+      }
+      
+      // Check for problems involving large numbers or number sequences
+      if (/large|huge|big|massive|enormous|sequence|recurring|recurrence|nth term|factorial|power|exponent/i.test(message)) {
+        PROBLEM_COMPLEXITY.hasLargeNumbers = true;
+        console.log("Large number problem detected");
       }
       
       // Check for logic patterns
@@ -1937,6 +1974,67 @@ A: First segment: The car travels at 60 mph for 2 hours, so the distance covered
     }
 
     /***********************
+     * Special Math Handling
+     ***********************/
+    function addSpecialMathInstructions(message) {
+      // Add additional system instructions for digital root calculations
+      if (PROBLEM_COMPLEXITY.hasDigitalRoot) {
+        // Enhance all CoD prompts with digital root specific guidance
+        const digitalRootInstructions = `
+IMPORTANT FOR DIGITAL ROOT CALCULATIONS: 
+1. When calculating digital roots, NEVER use scientific notation for intermediate or final values.
+2. The digital root of a number is found by adding all its digits, then repeating until a single digit remains.
+3. For very large numbers, calculate this methodically. The digital root of a number is equivalent to the number mod 9 (or 9 if the result is 0).
+4. Example: For 12345, first calculate 1+2+3+4+5=15, then 1+5=6. So the digital root is 6.
+5. Always verify your digital root calculation by showing all steps of summing the digits.
+`;
+
+        // For each CoD prompt type, add the special instructions
+        Object.keys(ENHANCED_PROMPTS).forEach(key => {
+          if (key.startsWith('cod')) {
+            if (!ENHANCED_PROMPTS[key].includes("DIGITAL ROOT CALCULATIONS")) {
+              ENHANCED_PROMPTS[key] += digitalRootInstructions;
+            }
+          }
+        });
+        
+        // Also add to standard CoD prompt
+        if (!PROMPTS.cod.includes("DIGITAL ROOT CALCULATIONS")) {
+          PROMPTS.cod += digitalRootInstructions;
+        }
+        
+        console.log("Added special digital root calculation instructions");
+      }
+      
+      // Add special instructions for large number problems
+      if (PROBLEM_COMPLEXITY.hasLargeNumbers) {
+        const largeNumberInstructions = `
+IMPORTANT FOR LARGE NUMBER CALCULATIONS:
+1. Maintain full precision when calculating with large numbers.
+2. Avoid using scientific notation for intermediate calculations when precision matters.
+3. For sequence problems, verify each term carefully before proceeding to the next.
+4. If exact values are too large to display, show the method and process for calculation.
+`;
+
+        // Add to all CoD prompts
+        Object.keys(ENHANCED_PROMPTS).forEach(key => {
+          if (key.startsWith('cod')) {
+            if (!ENHANCED_PROMPTS[key].includes("LARGE NUMBER CALCULATIONS")) {
+              ENHANCED_PROMPTS[key] += largeNumberInstructions;
+            }
+          }
+        });
+        
+        // Also add to standard CoD prompt
+        if (!PROMPTS.cod.includes("LARGE NUMBER CALCULATIONS")) {
+          PROMPTS.cod += largeNumberInstructions;
+        }
+        
+        console.log("Added special large number calculation instructions");
+      }
+    }
+
+    /***********************
      * Process Bot Messages - IMPROVED VERSION FOR COD
      ***********************/
     function processBotMessage(content, reasoningMethod) {
@@ -2072,6 +2170,18 @@ A: First segment: The car travels at 60 mph for 2 hours, so the distance covered
           thinkingWordCount: 0,
           answerWordCount: countWords(content)
         };
+      }
+      
+      // Special handling for digital root problems
+      if (PROBLEM_COMPLEXITY && PROBLEM_COMPLEXITY.hasDigitalRoot) {
+        // Try to identify if there's a specific section about digital root calculation
+        const digitalRootRegex = /digital\s*root.*?=\s*(\d+)/i;
+        const match = content.match(digitalRootRegex);
+        
+        if (match && match[1]) {
+          console.log("Found explicit digital root result: " + match[1]);
+          // We could potentially validate this result if needed
+        }
       }
       
       // Default: if unable to separate, return entire content
@@ -2344,6 +2454,20 @@ A: First segment: The car travels at 60 mph for 2 hours, so the distance covered
           problemType = "mathematical";
           console.log("Using enhanced prompts for mathematical problem detected");
         }
+        
+        // Special case for digital root problems - always use enhanced prompts
+        if (PROBLEM_COMPLEXITY.hasDigitalRoot) {
+          shouldUseEnhancedPrompt = true;
+          problemType = "digital_root";
+          console.log("Using enhanced prompts for digital root problem");
+        }
+        
+        // Special case for problems with large numbers/sequences
+        if (PROBLEM_COMPLEXITY.hasLargeNumbers) {
+          shouldUseEnhancedPrompt = true;
+          problemType = "large_numbers";
+          console.log("Using enhanced prompts for large number problem");
+        }
       }
       
       // If we have a reasoning method other than standard, add the system prompt
@@ -2353,8 +2477,12 @@ A: First segment: The car travels at 60 mph for 2 hours, so the distance covered
           if (REASONING_METHOD === "cot") {
             systemPrompt = ENHANCED_PROMPTS.cot;
           } else if (REASONING_METHOD === "cod") {
-            // Use the appropriate CoD prompt based on word limit
-            if (COD_WORD_LIMIT === 5) {
+            // Use the appropriate CoD prompt based on word limit and problem type
+            if (PROBLEM_COMPLEXITY.hasDigitalRoot || PROBLEM_COMPLEXITY.hasLargeNumbers) {
+              // For digital root and large number problems, use specialized math prompt
+              systemPrompt = ENHANCED_PROMPTS.cod20_math;
+              console.log("Using specialized math prompt for digital root/large number problem");
+            } else if (COD_WORD_LIMIT === 5) {
               systemPrompt = ENHANCED_PROMPTS.cod5;
             } else if (COD_WORD_LIMIT === 10) {
               systemPrompt = ENHANCED_PROMPTS.cod10;
@@ -2483,6 +2611,11 @@ A: First segment: The car travels at 60 mph for 2 hours, so the distance covered
       const thread = threads.find(t => t.id === currentThreadId);
       const placeholderIndex = thread.messages.length - 1;
 
+      // Check for digital root or large number calculations and add special handling
+      if (PROBLEM_COMPLEXITY.hasDigitalRoot || PROBLEM_COMPLEXITY.hasLargeNumbers) {
+        addSpecialMathInstructions(message);
+      }
+      
       // Build messages array with current settings and word count request
       const messagesForApi = buildMessagesForChat(wordCountRequest);
 
