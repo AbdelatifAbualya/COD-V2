@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -1222,7 +1221,7 @@
       <button class="close-modal" id="closeFeedbackModal">&times;</button>
       <h2>Share Your Feedback</h2>
       
-      <form method='POST' name='feedback'>
+      <form name="feedback" method="POST" data-netlify="true">
         <input type="hidden" name="form-name" value="feedback">
         
         <input type="hidden" id="feedbackModel" name="model">
@@ -3312,7 +3311,7 @@ Separate your steps with periods. Write your final answer after the #### separat
       setTimeout(init, 1);
     }
   </script>
-  <form hidden method='post' name='feedback'>
+  <form name="feedback" netlify netlify-honeypot="bot-field" hidden>
     <input type="hidden" name="form-name" value="feedback">
     <input type="hidden" name="model">
     <input type="hidden" name="reasoning_method">
@@ -3324,6 +3323,5 @@ Separate your steps with periods. Write your final answer after the #### separat
     <input type="radio" name="rating" value="5">
     <textarea name="comments"></textarea>
   </form>
-
-<script async id="netlify-rum-container" src="/.netlify/scripts/rum" data-netlify-rum-site-id="46b8ee21-754a-4a63-b741-fe88bac724f4" data-netlify-deploy-branch="main" data-netlify-deploy-context="production" data-netlify-cwv-token="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzaXRlX2lkIjoiNDZiOGVlMjEtNzU0YS00YTYzLWI3NDEtZmU4OGJhYzcyNGY0IiwiYWNjb3VudF9pZCI6IjY3YzU0MzUzYzc2MjdjOTUxZDZmNTU0MSIsImRlcGxveV9pZCI6IjY3Y2IwYmYyZjM2YjA0MWM1MWNjMWU1NCIsImlzc3VlciI6Im5mc2VydmVyIn0.nJ18-uD-OgM8KRNwSv8jlyNJWDZQ_Q7P8fbDrxpFQ5M"></script></body>
+</body>
 </html>
