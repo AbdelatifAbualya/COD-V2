@@ -143,17 +143,19 @@
       box-shadow: 0 -2px 4px rgba(0,0,0,0.3);
     }
     .chat-input textarea {
-      flex: 1;
-      resize: none;
-      border: none;
-      background-color: #2e2e2e;
-      color: #fff;
-      padding: 0.5rem;
-      border-radius: 8px;
-      font-size: 1rem;
-      outline: none;
-      box-shadow: inset 0 1px 3px rgba(0,0,0,0.4);
-    }
+  flex: 1;
+  resize: vertical; /* Allow vertical resizing */
+  border: none;
+  background-color: #2e2e2e;
+  color: #fff;
+  padding: 0.5rem;
+  border-radius: 8px;
+  font-size: 1rem;
+  outline: none;
+  box-shadow: inset 0 1px 3px rgba(0,0,0,0.4);
+  min-height: 100px; /* Set minimum height */
+  max-height: 300px; /* Set maximum height */
+}
     .chat-input button {
       margin-left: 1rem;
       padding: 0.5rem 1rem;
@@ -1042,9 +1044,9 @@
         <!-- Chat messages will be rendered here -->
       </div>
       <div class="chat-input">
-        <textarea id="userInput" rows="2" placeholder="Type your message..."></textarea>
-        <button id="sendBtn">Send</button>
-      </div>
+  <textarea id="userInput" rows="5" placeholder="Type your message..."></textarea>
+  <button id="sendBtn">Send</button>
+</div>
     </div>
   </div>
 
@@ -3369,72 +3371,94 @@ Separate your steps with periods. Write your final answer after the #### separat
       }
     }
 
-    function init() {
-      console.log("Initializing app...");
+ function init() {
+  console.log("Initializing app...");
+  
+  try {
+    loadPersistedSettings();
+    console.log("Settings loaded");
+    
+    // Update CoD prompt with the correct word limit
+    updateCoDPrompt();
+    console.log("CoD prompt updated");
+    
+    createNewThread();
+    console.log("New thread created");
+    
+    initEventListeners();
+    console.log("Event listeners initialized");
+    
+    updateCurrentModelDisplay();
+    console.log("Model display updated");
+    
+    // Initialize feedback form
+    initFeedbackForm();
+    console.log("Feedback form initialized");
+    
+    // Add auto-resize functionality to the textarea
+    const userInput = document.getElementById("userInput");
+    if (userInput) {
+      // Auto-resize textarea as user types
+      userInput.addEventListener("input", function() {
+        // Reset height to auto first to get the correct scrollHeight
+        this.style.height = "auto";
+        // Set new height based on content
+        this.style.height = (this.scrollHeight) + "px";
+        
+        // Reset to min-height if content is deleted
+        if (this.value.length === 0) {
+          this.style.height = "100px";
+        }
+      });
       
-      try {
-        loadPersistedSettings();
-        console.log("Settings loaded");
-        
-        // Update CoD prompt with the correct word limit
-        updateCoDPrompt();
-        console.log("CoD prompt updated");
-        
-        createNewThread();
-        console.log("New thread created");
-        
-        initEventListeners();
-        console.log("Event listeners initialized");
-        
-        updateCurrentModelDisplay();
-        console.log("Model display updated");
-        
-        // Initialize feedback form
-        initFeedbackForm();
-        console.log("Feedback form initialized");
-        
-        // Helper function to create a button that resets the thread
-        function createClearThreadButton() {
-          const clearThreadBtn = document.createElement("button");
-          clearThreadBtn.id = "clearThreadBtn";
-          clearThreadBtn.textContent = "Clear Thread";
-          clearThreadBtn.style.marginTop = "0.5rem";
-          clearThreadBtn.style.backgroundColor = "#553333";
-          clearThreadBtn.addEventListener("click", () => {
-            if (confirm("Clear all messages in this thread?")) {
-              const thread = threads.find(t => t.id === currentThreadId);
-              if (thread) {
-                thread.messages = [];
-                renderCurrentThreadMessages();
-                showNotification("Thread cleared");
-              }
-            }
-          });
-          return clearThreadBtn;
-        }
-        
-        // Add clear thread button to the sidebar
-        const sidebar = document.querySelector(".sidebar");
-        if (sidebar) {
-          sidebar.appendChild(createClearThreadButton());
-        }
-        
-        // If we don't have a model name, open settings modal
-        if (!MODEL_NAME) {
-          console.log("No model name found, opening settings");
-          setTimeout(() => {
-            try {
-              openSettingsModal();
-              console.log("Settings modal opened");
-            } catch (err) {
-              console.error("Error opening settings modal:", err);
-            }
-          }, 1000);
-        }
-      } catch (err) {
-        console.error("Initialization error:", err);
-      }
+      // Initialize with proper height for any pre-filled content
+      userInput.style.height = "auto";
+      userInput.style.height = (userInput.scrollHeight) + "px";
+      console.log("Textarea auto-resize functionality initialized");
     }
+    
+    // Helper function to create a button that resets the thread
+    function createClearThreadButton() {
+      const clearThreadBtn = document.createElement("button");
+      clearThreadBtn.id = "clearThreadBtn";
+      clearThreadBtn.textContent = "Clear Thread";
+      clearThreadBtn.style.marginTop = "0.5rem";
+      clearThreadBtn.style.backgroundColor = "#553333";
+      clearThreadBtn.addEventListener("click", () => {
+        if (confirm("Clear all messages in this thread?")) {
+          const thread = threads.find(t => t.id === currentThreadId);
+          if (thread) {
+            thread.messages = [];
+            renderCurrentThreadMessages();
+            showNotification("Thread cleared");
+          }
+        }
+      });
+      return clearThreadBtn;
+    }
+    
+    // Add clear thread button to the sidebar
+    const sidebar = document.querySelector(".sidebar");
+    if (sidebar) {
+      sidebar.appendChild(createClearThreadButton());
+    }
+    
+    // If we don't have a model name, open settings modal
+    if (!MODEL_NAME) {
+      console.log("No model name found, opening settings");
+      setTimeout(() => {
+        try {
+          openSettingsModal();
+          console.log("Settings modal opened");
+        } catch (err) {
+          console.error("Error opening settings modal:", err);
+        }
+      }, 1000);
+    }
+  } catch (err) {
+    console.error("Initialization error:", err);
+  }
+}
 
     // Initialize the application
     document.addEventListener("DOMContentLoaded", init);
