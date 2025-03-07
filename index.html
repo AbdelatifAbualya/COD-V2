@@ -1,10 +1,10 @@
 <!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8" />
+<!-- saved from url=(0102)file:///home/abid/Downloads/enhanced-llm-playground-main%20(4)/enhanced-llm-playground-main/index.html -->
+<html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  
   <title>LLM Playground (COT vs COD)</title>
   <!-- Google Fonts -->
-  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500&family=Roboto+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link href="./LLM Playground (COT vs COD) marr7_files/css2" rel="stylesheet">
   <style>
     /* --------------------------------
        Global Styles
@@ -1016,31 +1016,45 @@
 </head>
 <body>
   <!-- Include jsPDF for PDF generation -->
-  <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
+  <script src="./LLM Playground (COT vs COD) marr7_files/jspdf.umd.min.js"></script>
 
   <div class="app-container">
     <!-- Sidebar for Thread Management -->
     <div class="sidebar">
       <h2>Threads</h2>
-      <ul id="threadList"></ul>
+      <ul id="threadList"><li class="active">Thread 1</li></ul>
       <button id="newThreadBtn">New Thread</button>
       <button id="deleteThreadBtn">Delete Thread</button>
       <button id="downloadTxtBtn">Download TXT</button>
       <button id="downloadPdfBtn">Download PDF</button>
-    </div>
+    <button id="clearThreadBtn" style="margin-top: 0.5rem; background-color: rgb(85, 51, 51);">Clear Thread</button></div>
 
     <!-- Chat Area -->
     <div class="chat-container">
       <div class="chat-header">
         <h1 id="pageTitle">LLM Playground (COT vs COD)</h1>
         <div>
-          <span id="currentModelDisplay" class="current-model-display">Model not set</span>
+          <span id="currentModelDisplay" class="current-model-display">deepseek<span class="reasoning-badge" style="background-color: #2d5038; margin-left: 3px;">Adaptive</span></span>
           <button class="settings-btn" id="openSettings">Settings ⚙️</button>
         </div>
       </div>
-      <div class="chat-messages" id="chatMessages">
-        <!-- Chat messages will be rendered here -->
-      </div>
+      <div class="chat-messages" id="chatMessages"><div class="message user"><small style="color: rgb(170, 170, 170); display: block; margin-bottom: 0.5rem;">10:27 AM</small><div>In a courtroom with Knights (always tell truth), Knaves (always lie), and Alternators (alternate between truth and lies, starting with either), three witnesses make statements:
+
+Witness 1: "If I am a Knight, then Witness 2 is not a Knave."
+Witness 2: "Witness 3 is an Alternator who started with a lie."
+Witness 3: "Both Witness 1 and Witness 2 are of the same type."
+
+If exactly one witness is of each type (Knight, Knave, Alternator), and exactly two statements made are true, which witness is the Knight?</div></div><div class="message bot"><small style="color: rgb(170, 170, 170); display: block; margin-bottom: 0.5rem;">10:27 AM</small><div class="message-container"><div>Error communicating with API: Failed to fetch
+
+Possible solutions:
+1. Make sure your API key is set correctly in Netlify
+2. Check that your model name is valid
+3. Verify your internet connection</div></div><div class="word-count-badge">0 words - HYBRID
+                <div class="word-count-breakdown">
+                  <span class="count-item count-thinking">thinking: 0</span>
+                  <span class="count-item count-answer">answer: 0</span>
+                </div>
+              </div></div></div>
       <div class="chat-input">
         <textarea id="userInput" rows="2" placeholder="Type your message..."></textarea>
         <button id="sendBtn">Send</button>
@@ -1049,22 +1063,22 @@
   </div>
 
   <!-- Status Notification -->
-  <div id="statusNotification" class="status-notification"></div>
+  <div id="statusNotification" class="status-notification">New thread created</div>
 
   <!-- Settings Modal -->
-  <div id="settingsModal" class="modal">
+  <div id="settingsModal" class="modal" style="display: none;">
     <div class="modal-content">
-      <button class="close-modal" id="closeModalX">&times;</button>
+      <button class="close-modal" id="closeModalX">×</button>
       <h2>Settings</h2>
       
       <div class="settings-tabs">
-        <button class="tab-btn active" data-tab="modelTab">Model</button>
-        <button class="tab-btn" data-tab="reasoningTab">Reasoning</button>
+        <button class="tab-btn" data-tab="modelTab">Model</button>
+        <button class="tab-btn active" data-tab="reasoningTab">Reasoning</button>
         <button class="tab-btn" data-tab="parametersTab">Parameters</button>
       </div>
       
       <!-- Model Selection Tab -->
-      <div id="modelTab" class="tab-content active">
+      <div id="modelTab" class="tab-content">
         <div class="settings-section-header">Model Configuration</div>
         <label for="modelName">Model Name/Path</label>
         <input type="text" id="modelName" placeholder="Enter full model name/path from Fireworks.ai">
@@ -1074,7 +1088,7 @@
       </div>
       
       <!-- Reasoning Tab -->
-      <div id="reasoningTab" class="tab-content">
+      <div id="reasoningTab" class="tab-content active">
         <div class="settings-section-header">Reasoning Method</div>
         <div class="feature-section">
           <div class="radio-options">
@@ -1095,7 +1109,7 @@
             </div>
             
             <div class="radio-option">
-              <input type="radio" id="codReasoning" name="reasoningMethod" value="cod" checked>
+              <input type="radio" id="codReasoning" name="reasoningMethod" value="cod" checked="">
               <label for="codReasoning">Chain of Draft (CoD)</label>
               <div class="tooltip">?
                 <span class="tooltiptext">Uses minimal words per step (research paper approach) to reduce token usage while maintaining reasoning quality.</span>
@@ -1104,7 +1118,7 @@
           </div>
           
           <!-- COD Word Limit options -->
-          <div id="codOptions" class="cod-options">
+          <div id="codOptions" class="cod-options" style="display: none;">
             <!-- This will be populated by the updateCoDOptionsUI function -->
           </div>
         </div>
@@ -1113,14 +1127,14 @@
         <div class="advanced-options-header">
           Advanced Reasoning Options
           <label class="toggle-switch">
-            <input type="checkbox" id="enhancedReasoningToggle" checked>
+            <input type="checkbox" id="enhancedReasoningToggle" checked="">
             <span class="toggle-slider"></span>
           </label>
         </div>
         
-        <div id="enhancedReasoningOptions" class="enhanced-reasoning">
+        <div id="enhancedReasoningOptions" class="enhanced-reasoning" style="display: block;">
           <div class="enhanced-reasoning-option">
-            <input type="radio" id="adaptiveReasoning" name="reasoningEnhancement" value="adaptive" checked>
+            <input type="radio" id="adaptiveReasoning" name="reasoningEnhancement" value="adaptive" checked="">
             <label for="adaptiveReasoning">Adaptive Reasoning</label>
             <span class="auto-detection-badge"><span class="indicator"></span>Auto</span>
           </div>
@@ -1162,42 +1176,42 @@
         <label for="temp">Temperature</label>
         <div class="range-container">
           <input type="range" id="temp" min="0" max="1" step="0.01" value="0.5">
-          <span id="tempValue" class="range-value">0.5</span>
+          <span id="tempValue" class="range-value">0.26</span>
         </div>
         <p style="font-size: 0.8rem; color: #aaa; margin-top: 0;">Controls randomness: lower values make responses more focused and deterministic.</p>
 
         <label for="topP">Top P</label>
         <div class="range-container">
           <input type="range" id="topP" min="0" max="1" step="0.01" value="0.90">
-          <span id="topPValue" class="range-value">0.90</span>
+          <span id="topPValue" class="range-value">0.65</span>
         </div>
         <p style="font-size: 0.8rem; color: #aaa; margin-top: 0;">Controls diversity via nucleus sampling: lower values exclude less probable tokens.</p>
 
         <label for="topK">Top K</label>
         <div class="range-container">
           <input type="range" id="topK" min="0" max="100" step="1" value="55">
-          <span id="topKValue" class="range-value">55</span>
+          <span id="topKValue" class="range-value">31</span>
         </div>
         <p style="font-size: 0.8rem; color: #aaa; margin-top: 0;">Limits sampling to the top K most likely tokens.</p>
 
         <label for="maxTokens">Max Tokens</label>
         <div class="range-container">
           <input type="range" id="maxTokens" min="256" max="4096" step="128" value="1112">
-          <span id="maxTokensValue" class="range-value">1112</span>
+          <span id="maxTokensValue" class="range-value">4096</span>
         </div>
         <p style="font-size: 0.8rem; color: #aaa; margin-top: 0;">Maximum number of tokens to generate in the response.</p>
 
         <label for="presencePenalty">Presence Penalty</label>
         <div class="range-container">
           <input type="range" id="presencePenalty" min="-2" max="2" step="0.1" value="0">
-          <span id="presencePenaltyValue" class="range-value">0</span>
+          <span id="presencePenaltyValue" class="range-value">0.3</span>
         </div>
         <p style="font-size: 0.8rem; color: #aaa; margin-top: 0;">Penalizes new tokens based on their presence in the input.</p>
 
         <label for="frequencyPenalty">Frequency Penalty</label>
         <div class="range-container">
           <input type="range" id="frequencyPenalty" min="-2" max="2" step="0.1" value="0.4">
-          <span id="frequencyPenaltyValue" class="range-value">0.4</span>
+          <span id="frequencyPenaltyValue" class="range-value">0.7</span>
         </div>
         <p style="font-size: 0.8rem; color: #aaa; margin-top: 0;">Penalizes tokens based on their frequency in the generated text.</p>
       </div>
@@ -1218,7 +1232,7 @@
 
   <div id="feedbackModal" class="modal">
     <div class="modal-content" style="max-width: 500px;">
-      <button class="close-modal" id="closeFeedbackModal">&times;</button>
+      <button class="close-modal" id="closeFeedbackModal">×</button>
       <h2>Share Your Feedback</h2>
       
       <form name="feedback" method="POST" data-netlify="true">
@@ -1238,7 +1252,7 @@
         <label>How would you rate your experience?</label>
         <div style="display: flex; justify-content: space-between; margin: 10px 0 15px 0;">
           <label style="flex: 1; text-align: center;">
-            <input type="radio" name="rating" value="1" required>
+            <input type="radio" name="rating" value="1" required="">
             <div>😞</div>
             <div style="font-size: 0.8rem;">Poor</div>
           </label>
@@ -1265,18 +1279,9 @@
         </div>
         
         <label for="feedbackComments">Comments:</label>
-        <textarea 
-          id="feedbackComments" 
-          name="comments" 
-          rows="4" 
-          style="width: 100%; background-color: #2e2e2e; color: #fff; border: 1px solid #444; border-radius: 5px; padding: 10px; margin-bottom: 20px;"
-          required
-        ></textarea>
+        <textarea id="feedbackComments" name="comments" rows="4" style="width: 100%; background-color: #2e2e2e; color: #fff; border: 1px solid #444; border-radius: 5px; padding: 10px; margin-bottom: 20px;" required=""></textarea>
         
-        <button 
-          type="submit" 
-          style="background-color: #4a8cff; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; float: right;"
-        >
+        <button type="submit" style="background-color: #4a8cff; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; float: right;">
           Submit Feedback
         </button>
       </form>
@@ -3311,7 +3316,7 @@ Separate your steps with periods. Write your final answer after the #### separat
       setTimeout(init, 1);
     }
   </script>
-  <form name="feedback" netlify netlify-honeypot="bot-field" hidden>
+  <form name="feedback" netlify="" netlify-honeypot="bot-field" hidden="">
     <input type="hidden" name="form-name" value="feedback">
     <input type="hidden" name="model">
     <input type="hidden" name="reasoning_method">
@@ -3323,5 +3328,6 @@ Separate your steps with periods. Write your final answer after the #### separat
     <input type="radio" name="rating" value="5">
     <textarea name="comments"></textarea>
   </form>
-</body>
-</html>
+
+
+</body></html>
