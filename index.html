@@ -87,11 +87,10 @@
     display: block;
   }
 
-  /* Add this to ensure word count badge stays within its container */
   .message {
     position: relative;
+    overflow: hidden; 
     padding-bottom: 40px; /* Increase space for word count badge */
-    overflow: hidden;
   }
 
   /* Word Count Badge Positioning Fix */
@@ -113,12 +112,11 @@
     text-overflow: ellipsis;
   }
 
-  /* Improved positioning for thinking steps and final answer containers */
+  /* Ensure containers have enough padding for word count badge */
   .thinking-steps, .final-answer {
-    width: calc(100% - 20px) !important; /* Ensure full width with padding */
+    width: 100% !important;
     display: block !important;
-    margin: 10px; /* Add margin to avoid overlap */
-    box-sizing: border-box;
+    padding-right: 40px; /* Add padding to make space for word count badge */
   }
 
   /* Improved word count breakdown display */
@@ -149,33 +147,6 @@
     border-radius: 6px;
     box-shadow: 0 1px 2px rgba(0,0,0,0.2);
   }
-  
-  /* Make thinking steps and final answer containers properly visible */
-  .thinking-steps, .final-answer {
-    width: 100% !important;
-    display: block !important;
-  }
-  
-  /* Improved word count breakdown display */
-  .word-count-breakdown {
-    font-size: 0.7rem;
-    color: #aaa;
-    margin-top: 3px;
-    display: flex;
-    gap: 8px;
-    flex-direction: column;
-  }
-    .sidebar button {
-      width: 100%;
-      margin-top: 0.5rem;
-      padding: 0.5rem;
-      border: none;
-      border-radius: 8px;
-      cursor: pointer;
-      font-size: 0.9rem;
-      transition: background-color 0.3s ease;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.4);
-    }
     /* Normal button style */
     .sidebar button:not(#downloadTxtBtn):not(#downloadPdfBtn) {
       background-color: #3a3a3a;
@@ -368,7 +339,7 @@
       border: 1px solid #444;
       box-shadow: 0 1px 3px rgba(0,0,0,0.3);
       position: relative;
-      overflow: visible; /* Changed from hidden to visible to prevent cutting off the badge */
+      overflow: hidden;
     }
     .message.user {
       float: right;
@@ -387,9 +358,7 @@
     /* IMPROVED: Thinking steps and final answer styling */
     .message-container {
       width: 100%;
-      overflow: visible; /* Changed from hidden to visible */
-      position: relative;
-      padding-top: 30px; /* Add space at top for the word count badge */
+      overflow: hidden;
     }
     .thinking-steps {
       background-color: #252525;
@@ -402,7 +371,6 @@
       color: #aaa;
       white-space: pre-wrap;
       overflow-x: auto;
-      position: relative;
     }
     .thinking-label {
       font-size: 0.7rem;
@@ -422,7 +390,6 @@
       padding: 15px;
       margin-top: 5px;
       color: #edf2f7;
-      position: relative;
     }
     .final-answer-label {
       font-size: 0.7rem;
@@ -452,42 +419,6 @@
       box-shadow: 0 1px 3px rgba(0,0,0,0.3);
       white-space: nowrap;
       z-index: 5;
-      max-width: 180px; /* Limit width to prevent overflow */
-      text-overflow: ellipsis;
-      overflow: hidden;
-    }
-    /* Word count breakdown */
-    .word-count-breakdown {
-      font-size: 0.7rem;
-      color: #aaa;
-      margin-top: 3px;
-      display: flex;
-      flex-direction: column; /* Changed to column layout to prevent horizontal overlap */
-      gap: 4px;
-    }
-
-    .count-item {
-      display: flex;
-      align-items: center;
-    }
-
-    .count-thinking {
-      color: #b7c9db;
-    }
-
-    .count-answer {
-      color: #90cdf4;
-    }
-    
-    /* NEW: Ensure badge doesn't overlap thinking/answer content */
-    .message-container {
-      margin-top: 25px; /* Add space for the badge at the top */
-    }
-    
-    /* Enhanced CoD styling with proper spacing */
-    .cod-thinking {
-      margin-top: 10px; /* Ensure space from top elements */
-      margin-bottom: 15px; /* Ensure space between thinking and answer */
     }
     /* --------------------------------
        Code Block Styles
@@ -1031,8 +962,7 @@
       color: #aaa;
       margin-top: 3px;
       display: flex;
-      flex-direction: column; /* Changed to column layout to prevent horizontal overlap */
-      gap: 4px;
+      gap: 8px;
     }
 
     .count-item {
@@ -1046,17 +976,6 @@
 
     .count-answer {
       color: #90cdf4;
-    }
-    
-    /* NEW: Ensure badge doesn't overlap thinking/answer content */
-    .message-container {
-      margin-top: 25px; /* Add space for the badge at the top */
-    }
-    
-    /* Enhanced CoD styling with proper spacing */
-    .cod-thinking {
-      margin-top: 10px; /* Ensure space from top elements */
-      margin-bottom: 15px; /* Ensure space between thinking and answer */
     }
     
     /* NEW STYLING: Enhanced reasoning features */
@@ -1780,7 +1699,7 @@ A: First segment: The car travels at 60 mph for 2 hours, so the distance covered
         } else {
           // Code block
           const codeSegment = segments[i].trim();
-          const firstNewlineIndex = codeSegment.index('\n');
+          const firstNewlineIndex = codeSegment.indexOf('\n');
           let language = '';
           let codeContent = codeSegment;
           if (firstNewlineIndex !== -1) {
@@ -2435,54 +2354,6 @@ A: First segment: The car travels at 60 mph for 2 hours, so the distance covered
             const messageContainer = document.createElement("div");
             messageContainer.className = "message-container";
             
-            // Add word count badge for bot messages (except placeholders)
-            if (msg.wordCount !== undefined) {
-              const wordCountBadge = document.createElement("div");
-              wordCountBadge.className = "word-count-badge";
-              
-              // Calculate token savings if we have CoD
-              let badgeText = `${msg.wordCount} words - ${msg.reasoningMethod || REASONING_METHOD.toUpperCase()}`;
-              
-              wordCountBadge.innerHTML = badgeText;
-              
-              // Add breakdown of thinking vs answer word counts
-              if (msg.thinkingWordCount !== undefined && msg.answerWordCount !== undefined) {
-                wordCountBadge.innerHTML += `
-                  <div class="word-count-breakdown">
-                    <span class="count-item count-thinking">thinking: ${msg.thinkingWordCount}</span>
-                    <span class="count-item count-answer">answer: ${msg.answerWordCount}</span>
-                  </div>
-                `;
-              }
-              
-              // If this is a CoD message, add token savings estimate
-              if (msg.reasoningMethod && msg.reasoningMethod.startsWith("COD") && thread.messages.length > 1) {
-                // Find a similar CoT message (if available) to compare token savings
-                const cotMessages = thread.messages.filter(m => 
-                  m.sender === "bot" && 
-                  m.reasoningMethod && 
-                  m.reasoningMethod === "COT" && 
-                  !m.isPlaceholder
-                );
-                
-                if (cotMessages.length > 0) {
-                  // Calculate average token savings compared to CoT
-                  const avgCotWords = cotMessages.reduce((sum, m) => sum + m.wordCount, 0) / cotMessages.length;
-                  const savings = Math.round(100 - ((msg.wordCount / avgCotWords) * 100));
-                  
-                  if (savings > 0) {
-                    const savingsEl = document.createElement("div");
-                    savingsEl.className = "token-savings";
-                    savingsEl.textContent = `${savings}% fewer words than CoT`;
-                    wordCountBadge.appendChild(savingsEl);
-                  }
-                }
-              }
-              
-              // Append the badge to the message container instead of message div
-              messageContainer.appendChild(wordCountBadge);
-            }
-            
             // If we have thinking steps (for CoT or CoD)
             if (msg.thinking) {
               const thinkingDiv = document.createElement("div");
@@ -2541,6 +2412,54 @@ A: First segment: The car travels at 60 mph for 2 hours, so the distance covered
             const contentEl = document.createElement("div");
             contentEl.innerHTML = transformMessage(msg.content);
             messageDiv.appendChild(contentEl);
+          }
+          
+          // Add word count badge for bot messages (except placeholders)
+          if (msg.sender === "bot" && !msg.isPlaceholder && msg.wordCount !== undefined) {
+            const wordCountBadge = document.createElement("div");
+            wordCountBadge.className = "word-count-badge";
+            
+            // Calculate token savings if we have CoD
+            let badgeText = `${msg.wordCount} words - ${msg.reasoningMethod || REASONING_METHOD.toUpperCase()}`;
+            
+            wordCountBadge.innerHTML = badgeText;
+            
+            // Add breakdown of thinking vs answer word counts
+            if (msg.thinkingWordCount !== undefined && msg.answerWordCount !== undefined) {
+              wordCountBadge.innerHTML += `
+                <div class="word-count-breakdown">
+                  <span class="count-item count-thinking">thinking: ${msg.thinkingWordCount}</span>
+                  <span class="count-item count-answer">answer: ${msg.answerWordCount}</span>
+                </div>
+              `;
+            }
+            
+            // If this is a CoD message, add token savings estimate
+            if (msg.reasoningMethod && msg.reasoningMethod.startsWith("COD") && thread.messages.length > 1) {
+              // Find a similar CoT message (if available) to compare token savings
+              const cotMessages = thread.messages.filter(m => 
+                m.sender === "bot" && 
+                m.reasoningMethod && 
+                m.reasoningMethod === "COT" && 
+                !m.isPlaceholder
+              );
+              
+              if (cotMessages.length > 0) {
+                // Calculate average token savings compared to CoT
+                const avgCotWords = cotMessages.reduce((sum, m) => sum + m.wordCount, 0) / cotMessages.length;
+                const savings = Math.round(100 - ((msg.wordCount / avgCotWords) * 100));
+                
+                if (savings > 0) {
+                  const savingsEl = document.createElement("div");
+                  savingsEl.className = "token-savings";
+                  savingsEl.textContent = `${savings}% fewer words than CoT`;
+                  wordCountBadge.appendChild(savingsEl);
+                }
+              }
+            }
+            
+            // Append the badge to the message div directly
+            messageDiv.appendChild(wordCountBadge);
           }
 
           chatMessagesDiv.appendChild(messageDiv);
