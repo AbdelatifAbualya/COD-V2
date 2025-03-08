@@ -89,12 +89,11 @@
   }
 
   .message {
-    position: relative;
-    overflow: hidden; 
-    padding-bottom: 40px; /* Increase space for word count badge */
+    position: relative !important;
+    overflow: visible !important;
+    padding-bottom: 20px; /* Add space for word count badge */
   }
 
-  /* Word Count Badge Positioning Fix */
   .word-count-badge {
     position: absolute;
     top: 4px;
@@ -111,23 +110,6 @@
     max-width: 200px;
     overflow: hidden;
     text-overflow: ellipsis;
-  }
-
-  /* Ensure containers have enough padding for word count badge */
-  .thinking-steps, .final-answer {
-    width: 100% !important;
-    display: block !important;
-    padding-right: 40px; /* Add padding to make space for word count badge */
-  }
-
-  /* Improved word count breakdown display */
-  .word-count-breakdown {
-    font-size: 0.7rem;
-    color: #aaa;
-    margin-top: 3px;
-    display: flex;
-    gap: 8px;
-    flex-direction: column;
   }
 
   /* Add this to ensure proper CoD styling */
@@ -148,6 +130,33 @@
     border-radius: 6px;
     box-shadow: 0 1px 2px rgba(0,0,0,0.2);
   }
+  
+  /* Make thinking steps and final answer containers properly visible */
+  .thinking-steps, .final-answer {
+    width: 100% !important;
+    display: block !important;
+  }
+  
+  /* Improved word count breakdown display */
+  .word-count-breakdown {
+    font-size: 0.7rem;
+    color: #aaa;
+    margin-top: 3px;
+    display: flex;
+    gap: 8px;
+    flex-direction: column;
+  }
+    .sidebar button {
+      width: 100%;
+      margin-top: 0.5rem;
+      padding: 0.5rem;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 0.9rem;
+      transition: background-color 0.3s ease;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.4);
+    }
     /* Normal button style */
     .sidebar button:not(#downloadTxtBtn):not(#downloadPdfBtn) {
       background-color: #3a3a3a;
@@ -1401,7 +1410,7 @@
       <button class="close-modal" id="closeFeedbackModal">&times;</button>
       <h2>Share Your Feedback</h2>
       
-      <form name="feedback" method="POST" data-netlify="true">
+      <form method='POST' name='feedback'>
         <input type="hidden" name="form-name" value="feedback">
         
         <input type="hidden" id="feedbackModel" name="model">
@@ -3589,7 +3598,7 @@ Separate your steps with periods. Write your final answer after the #### separat
       setTimeout(init, 1);
     }
   </script>
-  <form name="feedback" netlify netlify-honeypot="bot-field" hidden>
+  <form hidden method='post' name='feedback'>
     <input type="hidden" name="form-name" value="feedback">
     <input type="hidden" name="model">
     <input type="hidden" name="reasoning_method">
@@ -3601,5 +3610,6 @@ Separate your steps with periods. Write your final answer after the #### separat
     <input type="radio" name="rating" value="5">
     <textarea name="comments"></textarea>
   </form>
-</body>
+
+<script async id="netlify-rum-container" src="/.netlify/scripts/rum" data-netlify-rum-site-id="46b8ee21-754a-4a63-b741-fe88bac724f4" data-netlify-deploy-branch="main" data-netlify-deploy-context="production" data-netlify-cwv-token="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzaXRlX2lkIjoiNDZiOGVlMjEtNzU0YS00YTYzLWI3NDEtZmU4OGJhYzcyNGY0IiwiYWNjb3VudF9pZCI6IjY3YzU0MzUzYzc2MjdjOTUxZDZmNTU0MSIsImRlcGxveV9pZCI6IjY3Y2JjOGE0NzRlY2E1MDAwODQ5MWVhYiIsImlzc3VlciI6Im5mc2VydmVyIn0.eeKx8JPS1uEj-YKOwtWMAEBFgcCAjTWkB8RLzmCfMmI"></script></body>
 </html>
