@@ -1,11 +1,10 @@
-
 <!DOCTYPE html>
-<!-- saved from url=(0102)file:///home/abid/Downloads/enhanced-llm-playground-main%20(4)/enhanced-llm-playground-main/index.html -->
-<html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-  
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
   <title>LLM Playground (COT vs COD)</title>
   <!-- Google Fonts -->
-  <link href="./LLM Playground (COT vs COD) marr7_files/css2" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500&family=Roboto+Mono:wght@400;500&display=swap" rel="stylesheet">
   <style>
     /* --------------------------------
        Global Styles
@@ -61,6 +60,108 @@
     .sidebar li.active {
       background-color: #444;
     }
+      /* Enhanced Final Answer Styling */
+  .final-answer {
+    background-color: #2d3748;
+    border: 1px solid #4a5568;
+    border-radius: 8px;
+    padding: 15px;
+    margin-top: 10px;
+    color: #edf2f7;
+    font-family: 'Roboto', sans-serif;
+    line-height: 1.5;
+    position: relative;
+    clear: both;
+    overflow: hidden;
+  }
+
+  .final-answer-label {
+    font-size: 0.7rem;
+    color: #90cdf4;
+    margin-bottom: 12px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    font-weight: bold;
+    border-bottom: 1px dotted #5a7299;
+    padding-bottom: 5px;
+    display: block;
+  }
+
+  .message {
+  position: relative !important;
+  overflow: visible !important; 
+  padding-bottom: 20px; /* Add space for word count badge */
+}
+
+/* Word Count Badge Positioning Fix */
+.word-count-badge {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  background-color: rgba(30, 30, 30, 0.9);
+  color: #ddd;
+  font-size: 0.7rem;
+  padding: 3px 8px;
+  border-radius: 12px;
+  border: 1px solid #555;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+  white-space: nowrap;
+  z-index: 5;
+  max-width: 200px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Make thinking steps and final answer containers properly visible */
+.thinking-steps, .final-answer {
+  width: 100% !important;
+  display: block !important;
+}
+
+/* Improved word count breakdown display */
+.word-count-breakdown {
+  font-size: 0.7rem;
+  color: #aaa;
+  margin-top: 3px;
+  display: flex;
+  gap: 8px;
+  flex-direction: column;
+}
+
+  /* Add this to ensure proper CoD styling */
+  .cod-thinking {
+    background-color: #1e293b !important;
+    border-color: #3d4e63 !important;
+    font-family: 'Roboto Mono', monospace !important;
+  }
+
+  /* Improved CoD step styling */
+  .cod-step {
+    display: flex;
+    align-items: flex-start;
+    padding: 8px 10px;
+    margin-bottom: 12px !important;
+    border-left: none !important;
+    background-color: #2c3b4f;
+    border-radius: 6px;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.2);
+  }
+  
+  /* Make thinking steps and final answer containers properly visible */
+  .thinking-steps, .final-answer {
+    width: 100% !important;
+    display: block !important;
+  }
+  
+  /* Improved word count breakdown display */
+  .word-count-breakdown {
+    font-size: 0.7rem;
+    color: #aaa;
+    margin-top: 3px;
+    display: flex;
+    gap: 8px;
+    flex-direction: column;
+  }
     .sidebar button {
       width: 100%;
       margin-top: 0.5rem;
@@ -170,6 +271,85 @@
     .chat-input button:hover {
       background-color: #4a4a4a;
     }
+    /* Model Selection Styles */
+.model-select-container {
+  position: relative;
+  margin-bottom: 15px;
+}
+
+.model-dropdown {
+  width: 100%;
+  padding: 10px 15px;
+  border: 1px solid #444;
+  border-radius: 8px;
+  background-color: #2a2a2a;
+  color: #fff;
+  font-size: 0.95rem;
+  appearance: none;
+  cursor: pointer;
+  outline: none;
+  box-shadow: inset 0 1px 2px rgba(0,0,0,0.2);
+}
+
+.dropdown-arrow {
+  position: absolute;
+  right: 15px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #aaa;
+  pointer-events: none;
+  font-size: 0.7rem;
+}
+
+.model-dropdown:hover {
+  border-color: #666;
+  background-color: #333;
+}
+
+.model-dropdown:focus {
+  border-color: #4a8cff;
+  box-shadow: 0 0 0 2px rgba(74, 140, 255, 0.25);
+}
+
+.model-info-card {
+  background-color: #2a2a2a;
+  border: 1px solid #444;
+  border-radius: 8px;
+  margin-bottom: 20px;
+  overflow: hidden;
+}
+
+.model-info-header {
+  background-color: #333;
+  padding: 10px 15px;
+  font-weight: 500;
+  border-bottom: 1px solid #444;
+}
+
+.model-info-body {
+  padding: 15px;
+}
+
+.model-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.model-tag {
+  background-color: #3a4a5c;
+  color: #90cdf4;
+  padding: 3px 8px;
+  border-radius: 12px;
+  font-size: 0.75rem;
+}
+
+.model-description {
+  color: #ddd;
+  font-size: 0.9rem;
+  line-height: 1.4;
+}
     /* --------------------------------
        Message Styles
     -------------------------------- */
@@ -1017,45 +1197,31 @@
 </head>
 <body>
   <!-- Include jsPDF for PDF generation -->
-  <script src="./LLM Playground (COT vs COD) marr7_files/jspdf.umd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
 
   <div class="app-container">
     <!-- Sidebar for Thread Management -->
     <div class="sidebar">
       <h2>Threads</h2>
-      <ul id="threadList"><li class="active">Thread 1</li></ul>
+      <ul id="threadList"></ul>
       <button id="newThreadBtn">New Thread</button>
       <button id="deleteThreadBtn">Delete Thread</button>
       <button id="downloadTxtBtn">Download TXT</button>
       <button id="downloadPdfBtn">Download PDF</button>
-    <button id="clearThreadBtn" style="margin-top: 0.5rem; background-color: rgb(85, 51, 51);">Clear Thread</button></div>
+    </div>
 
     <!-- Chat Area -->
     <div class="chat-container">
       <div class="chat-header">
         <h1 id="pageTitle">LLM Playground (COT vs COD)</h1>
         <div>
-          <span id="currentModelDisplay" class="current-model-display">deepseek<span class="reasoning-badge" style="background-color: #2d5038; margin-left: 3px;">Adaptive</span></span>
+          <span id="currentModelDisplay" class="current-model-display">Model not set</span>
           <button class="settings-btn" id="openSettings">Settings ⚙️</button>
         </div>
       </div>
-      <div class="chat-messages" id="chatMessages"><div class="message user"><small style="color: rgb(170, 170, 170); display: block; margin-bottom: 0.5rem;">10:27 AM</small><div>In a courtroom with Knights (always tell truth), Knaves (always lie), and Alternators (alternate between truth and lies, starting with either), three witnesses make statements:
-
-Witness 1: "If I am a Knight, then Witness 2 is not a Knave."
-Witness 2: "Witness 3 is an Alternator who started with a lie."
-Witness 3: "Both Witness 1 and Witness 2 are of the same type."
-
-If exactly one witness is of each type (Knight, Knave, Alternator), and exactly two statements made are true, which witness is the Knight?</div></div><div class="message bot"><small style="color: rgb(170, 170, 170); display: block; margin-bottom: 0.5rem;">10:27 AM</small><div class="message-container"><div>Error communicating with API: Failed to fetch
-
-Possible solutions:
-1. Make sure your API key is set correctly in Netlify
-2. Check that your model name is valid
-3. Verify your internet connection</div></div><div class="word-count-badge">0 words - HYBRID
-                <div class="word-count-breakdown">
-                  <span class="count-item count-thinking">thinking: 0</span>
-                  <span class="count-item count-answer">answer: 0</span>
-                </div>
-              </div></div></div>
+      <div class="chat-messages" id="chatMessages">
+        <!-- Chat messages will be rendered here -->
+      </div>
       <div class="chat-input">
         <textarea id="userInput" rows="2" placeholder="Type your message..."></textarea>
         <button id="sendBtn">Send</button>
@@ -1064,32 +1230,56 @@ Possible solutions:
   </div>
 
   <!-- Status Notification -->
-  <div id="statusNotification" class="status-notification">New thread created</div>
+  <div id="statusNotification" class="status-notification"></div>
 
   <!-- Settings Modal -->
-  <div id="settingsModal" class="modal" style="display: none;">
+  <div id="settingsModal" class="modal">
     <div class="modal-content">
-      <button class="close-modal" id="closeModalX">×</button>
+      <button class="close-modal" id="closeModalX">&times;</button>
       <h2>Settings</h2>
       
       <div class="settings-tabs">
-        <button class="tab-btn" data-tab="modelTab">Model</button>
-        <button class="tab-btn active" data-tab="reasoningTab">Reasoning</button>
+        <button class="tab-btn active" data-tab="modelTab">Model</button>
+        <button class="tab-btn" data-tab="reasoningTab">Reasoning</button>
         <button class="tab-btn" data-tab="parametersTab">Parameters</button>
       </div>
       
       <!-- Model Selection Tab -->
-      <div id="modelTab" class="tab-content">
-        <div class="settings-section-header">Model Configuration</div>
-        <label for="modelName">Model Name/Path</label>
-        <input type="text" id="modelName" placeholder="Enter full model name/path from Fireworks.ai">
-        <p style="font-size: 0.8rem; color: #aaa; margin-top: 0; margin-bottom: 15px;">Enter the complete model identifier as used in Fireworks.ai API.</p>
-        
-        <button id="setModelBtn">Set Model</button>
+  <div id="modelTab" class="tab-content active">
+    <div class="settings-section-header">Model Selection</div>
+  
+    <label for="modelSelect">Select LLM Model</label>
+    <div class="model-select-container">
+        <select id="modelSelect" class="model-dropdown">
+        <option value="" disabled selected>Choose a model...</option>
+        <option value="accounts/fireworks/models/deepseek-v3">DeepSeek V3</option>
+        <option value="accounts/fireworks/models/mistral-small-24b-instruct-2501">Mistral 24B</option>
+        <option value="accounts/fireworks/models/llama-v3p3-70b-instruct">Llama 3.1 70B</option>
+        <option value="accounts/fireworks/models/qwen2p5-coder-32b-instruct">Qwen 2.5 Coder 32B</option>
+        <option value="accounts/fireworks/models/mixtral-8x22b-instruct">Mixtral 8x22B</option>
+    </select>
+    <div class="dropdown-arrow">▼</div>
+  </div>
+  
+  <div class="model-info-card" id="modelInfoCard">
+    <div class="model-info-header">
+      <span id="selectedModelName">No model selected</span>
+    </div>
+    <div class="model-info-body">
+      <div class="model-tags" id="modelTags">
+        <!-- Tags will be added dynamically -->
       </div>
+      <div class="model-description" id="modelDescription">
+        Select a model to see details
+      </div>
+    </div>
+  </div>
+  
+  <button id="setModelBtn">Set Model</button>
+</div>
       
       <!-- Reasoning Tab -->
-      <div id="reasoningTab" class="tab-content active">
+      <div id="reasoningTab" class="tab-content">
         <div class="settings-section-header">Reasoning Method</div>
         <div class="feature-section">
           <div class="radio-options">
@@ -1110,7 +1300,7 @@ Possible solutions:
             </div>
             
             <div class="radio-option">
-              <input type="radio" id="codReasoning" name="reasoningMethod" value="cod" checked="">
+              <input type="radio" id="codReasoning" name="reasoningMethod" value="cod" checked>
               <label for="codReasoning">Chain of Draft (CoD)</label>
               <div class="tooltip">?
                 <span class="tooltiptext">Uses minimal words per step (research paper approach) to reduce token usage while maintaining reasoning quality.</span>
@@ -1119,7 +1309,7 @@ Possible solutions:
           </div>
           
           <!-- COD Word Limit options -->
-          <div id="codOptions" class="cod-options" style="display: none;">
+          <div id="codOptions" class="cod-options">
             <!-- This will be populated by the updateCoDOptionsUI function -->
           </div>
         </div>
@@ -1128,14 +1318,14 @@ Possible solutions:
         <div class="advanced-options-header">
           Advanced Reasoning Options
           <label class="toggle-switch">
-            <input type="checkbox" id="enhancedReasoningToggle" checked="">
+            <input type="checkbox" id="enhancedReasoningToggle" checked>
             <span class="toggle-slider"></span>
           </label>
         </div>
         
-        <div id="enhancedReasoningOptions" class="enhanced-reasoning" style="display: block;">
+        <div id="enhancedReasoningOptions" class="enhanced-reasoning">
           <div class="enhanced-reasoning-option">
-            <input type="radio" id="adaptiveReasoning" name="reasoningEnhancement" value="adaptive" checked="">
+            <input type="radio" id="adaptiveReasoning" name="reasoningEnhancement" value="adaptive" checked>
             <label for="adaptiveReasoning">Adaptive Reasoning</label>
             <span class="auto-detection-badge"><span class="indicator"></span>Auto</span>
           </div>
@@ -1177,42 +1367,42 @@ Possible solutions:
         <label for="temp">Temperature</label>
         <div class="range-container">
           <input type="range" id="temp" min="0" max="1" step="0.01" value="0.5">
-          <span id="tempValue" class="range-value">0.26</span>
+          <span id="tempValue" class="range-value">0.5</span>
         </div>
         <p style="font-size: 0.8rem; color: #aaa; margin-top: 0;">Controls randomness: lower values make responses more focused and deterministic.</p>
 
         <label for="topP">Top P</label>
         <div class="range-container">
           <input type="range" id="topP" min="0" max="1" step="0.01" value="0.90">
-          <span id="topPValue" class="range-value">0.65</span>
+          <span id="topPValue" class="range-value">0.90</span>
         </div>
         <p style="font-size: 0.8rem; color: #aaa; margin-top: 0;">Controls diversity via nucleus sampling: lower values exclude less probable tokens.</p>
 
         <label for="topK">Top K</label>
         <div class="range-container">
           <input type="range" id="topK" min="0" max="100" step="1" value="55">
-          <span id="topKValue" class="range-value">31</span>
+          <span id="topKValue" class="range-value">55</span>
         </div>
         <p style="font-size: 0.8rem; color: #aaa; margin-top: 0;">Limits sampling to the top K most likely tokens.</p>
 
         <label for="maxTokens">Max Tokens</label>
         <div class="range-container">
           <input type="range" id="maxTokens" min="256" max="4096" step="128" value="1112">
-          <span id="maxTokensValue" class="range-value">4096</span>
+          <span id="maxTokensValue" class="range-value">1112</span>
         </div>
         <p style="font-size: 0.8rem; color: #aaa; margin-top: 0;">Maximum number of tokens to generate in the response.</p>
 
         <label for="presencePenalty">Presence Penalty</label>
         <div class="range-container">
           <input type="range" id="presencePenalty" min="-2" max="2" step="0.1" value="0">
-          <span id="presencePenaltyValue" class="range-value">0.3</span>
+          <span id="presencePenaltyValue" class="range-value">0</span>
         </div>
         <p style="font-size: 0.8rem; color: #aaa; margin-top: 0;">Penalizes new tokens based on their presence in the input.</p>
 
         <label for="frequencyPenalty">Frequency Penalty</label>
         <div class="range-container">
           <input type="range" id="frequencyPenalty" min="-2" max="2" step="0.1" value="0.4">
-          <span id="frequencyPenaltyValue" class="range-value">0.7</span>
+          <span id="frequencyPenaltyValue" class="range-value">0.4</span>
         </div>
         <p style="font-size: 0.8rem; color: #aaa; margin-top: 0;">Penalizes tokens based on their frequency in the generated text.</p>
       </div>
@@ -1233,10 +1423,10 @@ Possible solutions:
 
   <div id="feedbackModal" class="modal">
     <div class="modal-content" style="max-width: 500px;">
-      <button class="close-modal" id="closeFeedbackModal">×</button>
+      <button class="close-modal" id="closeFeedbackModal">&times;</button>
       <h2>Share Your Feedback</h2>
       
-      <form method='POST' name='feedback'>
+      <form name="feedback" method="POST" data-netlify="true">
         <input type="hidden" name="form-name" value="feedback">
         
         <input type="hidden" id="feedbackModel" name="model">
@@ -1253,7 +1443,7 @@ Possible solutions:
         <label>How would you rate your experience?</label>
         <div style="display: flex; justify-content: space-between; margin: 10px 0 15px 0;">
           <label style="flex: 1; text-align: center;">
-            <input type="radio" name="rating" value="1" required="">
+            <input type="radio" name="rating" value="1" required>
             <div>😞</div>
             <div style="font-size: 0.8rem;">Poor</div>
           </label>
@@ -1280,9 +1470,18 @@ Possible solutions:
         </div>
         
         <label for="feedbackComments">Comments:</label>
-        <textarea id="feedbackComments" name="comments" rows="4" style="width: 100%; background-color: #2e2e2e; color: #fff; border: 1px solid #444; border-radius: 5px; padding: 10px; margin-bottom: 20px;" required=""></textarea>
+        <textarea 
+          id="feedbackComments" 
+          name="comments" 
+          rows="4" 
+          style="width: 100%; background-color: #2e2e2e; color: #fff; border: 1px solid #444; border-radius: 5px; padding: 10px; margin-bottom: 20px;"
+          required
+        ></textarea>
         
-        <button type="submit" style="background-color: #4a8cff; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; float: right;">
+        <button 
+          type="submit" 
+          style="background-color: #4a8cff; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; float: right;"
+        >
           Submit Feedback
         </button>
       </form>
@@ -1697,6 +1896,18 @@ A: First segment: The car travels at 60 mph for 2 hours, so the distance covered
     /***********************
      * Parse User Message for Word Count Requirements
      ***********************/
+    function formatFinalAnswer(answer) {
+      if (!answer) return '';
+  
+    // Clean up the answer text
+      let formattedAnswer = answer.trim();
+  
+    // Remove any leading markers if they exist
+      formattedAnswer = formattedAnswer.replace(/^(Answer:|Final answer:|The answer is:|Therefore,|Thus,|Hence,)/i, '').trim();
+  
+    // Apply markup for better readability if needed
+      return formattedAnswer;
+    }  
     function parseWordCountRequest(message) {
       // Common patterns for word count requests
       const patterns = [
@@ -2207,7 +2418,8 @@ A: First segment: The car travels at 60 mph for 2 hours, so the distance covered
               answerDiv.appendChild(answerLabel);
               
               const answerContent = document.createElement("div");
-              answerContent.innerHTML = transformMessage(msg.answer);
+              // Use our new formatting function here
+              answerContent.innerHTML = transformMessage(formatFinalAnswer(msg.answer));
               answerDiv.appendChild(answerContent);
               
               messageContainer.appendChild(answerDiv);
@@ -2272,6 +2484,7 @@ A: First segment: The car travels at 60 mph for 2 hours, so the distance covered
               }
             }
             
+            // Append the badge to the message div directly
             messageDiv.appendChild(wordCountBadge);
           }
 
@@ -2473,29 +2686,7 @@ A: First segment: The car travels at 60 mph for 2 hours, so the distance covered
         analyzeProblemComplexity(message);
       }
       
-      // Parse message for word count requirements
-      const wordCountRequest = parseWordCountRequest(message);
-      
-      // NEW: Handle images if present
-      let messageWithImages = message;
-      let imagesToShow = "";
-      
-      if (uploadedImages.length > 0) {
-        // Add images to display in UI
-        imagesToShow = uploadedImages.map(img => 
-          `<img src="${img.data}" alt="Uploaded image" class="image-in-message">`
-        ).join('');
-        
-        // Format message with image descriptions for the API
-        let imageDescriptions = uploadedImages.map((img, index) => 
-          `[Image ${index + 1}: ${img.name}]`
-        ).join('\n');
-        
-        messageWithImages = `${message}\n\n${imageDescriptions}`;
-      }
-      
-      // Add the message to the thread with images for display
-      addMessageToCurrentThread(message + imagesToShow, "user");
+      addMessageToCurrentThread(message, "user");
 
       if (!MODEL_NAME) {
         const errorMsg = "Error: Please set the Model Name in the Settings.";
@@ -2504,25 +2695,15 @@ A: First segment: The car travels at 60 mph for 2 hours, so the distance covered
         return;
       }
 
+      // Parse message for word count requirements
+      const wordCountRequest = parseWordCountRequest(message);
+      
       addMessageToCurrentThread("Bot is typing...", "bot", true);
       const thread = threads.find(t => t.id === currentThreadId);
       const placeholderIndex = thread.messages.length - 1;
 
       // Build messages array with current settings and word count request
       const messagesForApi = buildMessagesForChat(wordCountRequest);
-      
-      // For now, we'll use a simpler approach - just add image descriptions to the text
-      // rather than trying to send actual images to the API
-      if (uploadedImages.length > 0 && messagesForApi.length > 0) {
-        // Find the last user message and append image descriptions
-        for (let i = messagesForApi.length - 1; i >= 0; i--) {
-          if (messagesForApi[i].role === 'user') {
-            // We already included the image descriptions in messageWithImages
-            messagesForApi[i].content = messageWithImages;
-            break;
-          }
-        }
-      }
 
       // Create payload
       const payload = {
@@ -2535,25 +2716,6 @@ A: First segment: The car travels at 60 mph for 2 hours, so the distance covered
         temperature: TEMPERATURE,
         messages: messagesForApi
       };
-      
-      // Clear uploaded images after sending
-      uploadedImages = [];
-      const previewContainer = document.querySelector(".image-preview");
-      if (previewContainer) {
-        previewContainer.remove();
-      }
-      
-      // Reset textarea height after sending
-      const userInput = document.getElementById("userInput");
-      if (userInput) {
-        userInput.value = "";
-        // Reset height to minimum
-        userInput.style.height = 'auto';
-        // Add a slight delay to ensure proper resizing
-        setTimeout(() => {
-          userInput.style.height = userInput.style.minHeight || '40px';
-        }, 10);
-      }
       
       console.log(`Sending request with ${REASONING_METHOD} reasoning ${REASONING_METHOD === "cod" ? `(word limit: ${COD_WORD_LIMIT})` : ""}`);
       if (wordCountRequest) {
@@ -2798,22 +2960,106 @@ A: First segment: The car travels at 60 mph for 2 hours, so the distance covered
     }
     
     // Custom model handling
-    function setupModelInput() {
-      const modelInput = document.getElementById('modelName');
-      const setModelBtn = document.getElementById('setModelBtn');
-      
-      setModelBtn.addEventListener('click', () => {
-        const modelName = modelInput.value.trim();
-        if (modelName) {
-          MODEL_NAME = modelName;
-          MODEL_NAME_DISPLAY = getModelDisplayName(modelName);
-          updateCurrentModelDisplay();
-          showNotification('Model set: ' + MODEL_NAME_DISPLAY);
-        } else {
-          showNotification('Please enter a valid model name');
-        }
-      });
+function setupModelInput() {
+  const modelSelect = document.getElementById('modelSelect');
+  const setModelBtn = document.getElementById('setModelBtn');
+  const modelInfoCard = document.getElementById('modelInfoCard');
+  const selectedModelName = document.getElementById('selectedModelName');
+  const modelTags = document.getElementById('modelTags');
+  const modelDescription = document.getElementById('modelDescription');
+  
+  // Model information database
+  const modelInfo = {
+    "accounts/fireworks/models/deepseek-v3": {
+      name: "DeepSeek V3",
+      tags: ["70B", "General Purpose", "Reasoning"],
+      description: "A powerful model with strong reasoning and problem solving capabilities. Good for complex tasks, versatile across different domains."
+    },
+    "accounts/fireworks/models/mistral-small-24b-instruct-2501": {
+      name: "Mistral 24B",
+      tags: ["24B", "Fast", "Well-balanced"],
+      description: "A fast and efficient model with good balance between performance and speed. Great for everyday tasks and conversations."
+    },
+    "accounts/fireworks/models/llama-v3p3-70b-instruct": {
+      name: "Llama 3.1 70B",
+      tags: ["70B", "High Performance", "Instruction Following"],
+      description: "Meta's flagship large language model. Excellent at following complex instructions with high accuracy and detailed outputs."
+    },
+    "accounts/fireworks/models/qwen2p5-coder-32b-instruct": {
+      name: "Qwen 2.5 Coder 32B",
+      tags: ["32B", "Coding", "Technical"],
+      description: "Specialized for coding tasks and technical problem solving. Strong at generating, explaining, and debugging code across many languages."
+    },
+    "accounts/fireworks/models/mixtral-8x22b-instruct": {
+      name: "Mixtral 8x22B",
+      tags: ["176B", "MoE", "High Capacity"],
+      description: "A Mixture of Experts model with massive capacity. Excellent for detailed, nuanced responses and specialized knowledge domains."
     }
+  };
+  
+  // Initialize with current model if set
+  if (MODEL_NAME && modelInfo[MODEL_NAME]) {
+    modelSelect.value = MODEL_NAME;
+    updateModelInfo(MODEL_NAME);
+  }
+  
+  // Update model info card when selection changes
+  modelSelect.addEventListener('change', () => {
+    const selectedModel = modelSelect.value;
+    updateModelInfo(selectedModel);
+  });
+  
+  function updateModelInfo(modelId) {
+    if (modelInfo[modelId]) {
+      const info = modelInfo[modelId];
+      
+      // Update header
+      selectedModelName.textContent = info.name;
+      
+      // Update tags
+      modelTags.innerHTML = '';
+      info.tags.forEach(tag => {
+        const tagElement = document.createElement('span');
+        tagElement.className = 'model-tag';
+        tagElement.textContent = tag;
+        modelTags.appendChild(tagElement);
+      });
+      
+      // Update description
+      modelDescription.textContent = info.description;
+      
+      // Show the card with animation
+      modelInfoCard.style.display = 'block';
+      modelInfoCard.style.opacity = '0';
+      modelInfoCard.style.transform = 'translateY(10px)';
+      
+      // Animate in
+      setTimeout(() => {
+        modelInfoCard.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
+        modelInfoCard.style.opacity = '1';
+        modelInfoCard.style.transform = 'translateY(0)';
+      }, 10);
+    } else {
+      // Hide or reset the card if no valid model
+      selectedModelName.textContent = 'No model selected';
+      modelTags.innerHTML = '';
+      modelDescription.textContent = 'Select a model to see details';
+    }
+  }
+  
+  // Set model button
+  setModelBtn.addEventListener('click', () => {
+    const modelName = modelSelect.value;
+    if (modelName) {
+      MODEL_NAME = modelName;
+      MODEL_NAME_DISPLAY = modelInfo[modelName] ? modelInfo[modelName].name : getModelDisplayName(modelName);
+      updateCurrentModelDisplay();
+      showNotification('Model set: ' + MODEL_NAME_DISPLAY);
+    } else {
+      showNotification('Please select a valid model');
+    }
+  });
+}
     
     // Improved Chain of Draft word limit options UI
     function updateCoDOptionsUI() {
@@ -3234,315 +3480,108 @@ Separate your steps with periods. Write your final answer after the #### separat
     /***********************
      * Initialization
      ***********************/
-/***********************
- * Textarea Auto-Resize
- ***********************/
- function setupAutoResizeTextarea() {
-  const textarea = document.getElementById('userInput');
-  if (!textarea) return;
-  
-  // Function to resize the textarea based on content
-  function autoResizeTextarea() {
-    // Reset height to auto to get the correct scrollHeight
-    textarea.style.height = 'auto';
-    
-    // Calculate new height based on scrollHeight
-    const newHeight = textarea.scrollHeight + 2;
-    
-    // Set the new height
-    textarea.style.height = newHeight + 'px';
-    
-    // Enable scrollbar if maximum height is reached
-    if (newHeight >= parseInt(getComputedStyle(textarea).maxHeight)) {
-      textarea.style.overflowY = 'auto';
-    } else {
-      textarea.style.overflowY = 'hidden';
-    }
-  }
-  
-  // Add event listeners for various input events
-  textarea.addEventListener('input', autoResizeTextarea);
-  textarea.addEventListener('keyup', autoResizeTextarea);
-  textarea.addEventListener('paste', () => {
-    // Delay for paste to ensure content is updated
-    setTimeout(autoResizeTextarea, 10);
-  });
-  
-  // Initialize on page load
-  autoResizeTextarea();
-  
-  // Also resize when window is resized (for responsive layouts)
-  window.addEventListener('resize', autoResizeTextarea);
-}
-
-/***********************
- * Initialization
- ***********************/
-function init() {
-  console.log("Initializing app...");
-  
-  try {
-    loadPersistedSettings();
-    console.log("Settings loaded");
-    
-    // Update CoD prompt with the correct word limit
-    updateCoDPrompt();
-    console.log("CoD prompt updated");
-    
-    createNewThread();
-    console.log("New thread created");
-    
-    initEventListeners();
-    console.log("Event listeners initialized");
-    
-    // Setup image upload functionality
-    setupImageUpload();
-    console.log("Image upload functionality initialized");
-    
-    // Setup auto-resize for textarea
-    setupAutoResizeTextarea();
-    console.log("Textarea auto-resize initialized");
-    
-    updateCurrentModelDisplay();
-    console.log("Model display updated");
-    
-    // Initialize feedback form
-    initFeedbackForm();
-    console.log("Feedback form initialized");
-    
-    // Helper function to create a button that resets the thread
-    function createClearThreadButton() {
-      const clearThreadBtn = document.createElement("button");
-      clearThreadBtn.id = "clearThreadBtn";
-      clearThreadBtn.textContent = "Clear Thread";
-      clearThreadBtn.style.marginTop = "0.5rem";
-      clearThreadBtn.style.backgroundColor = "#553333";
-      clearThreadBtn.addEventListener("click", () => {
-        if (confirm("Clear all messages in this thread?")) {
-          const thread = threads.find(t => t.id === currentThreadId);
-          if (thread) {
-            thread.messages = [];
-            renderCurrentThreadMessages();
-            showNotification("Thread cleared");
-          }
+    function loadPersistedSettings() {
+      try {
+        MODEL_NAME = localStorage.getItem("modelName") || "";
+        MODEL_NAME_DISPLAY = getModelDisplayName(MODEL_NAME);
+        
+        REASONING_METHOD = localStorage.getItem("reasoningMethod") || "cod";
+        
+        const codWordLimit = localStorage.getItem("codWordLimit");
+        if (codWordLimit) COD_WORD_LIMIT = parseInt(codWordLimit);
+        
+        // Load enhanced reasoning settings
+        const enhancedEnabled = localStorage.getItem("enhancedReasoningEnabled");
+        if (enhancedEnabled !== null) {
+          ENHANCED_REASONING_ENABLED = enhancedEnabled === "true";
         }
-      });
-      return clearThreadBtn;
-    }
-    
-    // Add clear thread button to the sidebar
-    const sidebar = document.querySelector(".sidebar");
-    if (sidebar) {
-      sidebar.appendChild(createClearThreadButton());
-    }
-    
-    // If we don't have a model name, open settings modal
-    if (!MODEL_NAME) {
-      console.log("No model name found, opening settings");
-      setTimeout(() => {
-        try {
-          openSettingsModal();
-          console.log("Settings modal opened");
-        } catch (err) {
-          console.error("Error opening settings modal:", err);
+        
+        const enhancementType = localStorage.getItem("reasoningEnhancement");
+        if (enhancementType) {
+          REASONING_ENHANCEMENT = enhancementType;
         }
-      }, 1000);
-    }
-  } catch (err) {
-    console.error("Initialization error:", err);
-  }
-}
-
-/***********************
- * Message Sending
- ***********************/
-async function sendMessage(message) {
-  // NEW: Analyze problem complexity if enhanced reasoning is enabled
-  if (ENHANCED_REASONING_ENABLED && REASONING_ENHANCEMENT === "adaptive") {
-    analyzeProblemComplexity(message);
-  }
-  
-  // Parse message for word count requirements
-  const wordCountRequest = parseWordCountRequest(message);
-  
-  // NEW: Handle images if present
-  let messageWithImages = message;
-  let imagesToShow = "";
-  
-  if (uploadedImages.length > 0) {
-    // Add images to display in UI
-    imagesToShow = uploadedImages.map(img => 
-      `<img src="${img.data}" alt="Uploaded image" class="image-in-message">`
-    ).join('');
-    
-    // Format message with image descriptions for the API
-    let imageDescriptions = uploadedImages.map((img, index) => 
-      `[Image ${index + 1}: ${img.name}]`
-    ).join('\n');
-    
-    messageWithImages = `${message}\n\n${imageDescriptions}`;
-  }
-  
-  // Add the message to the thread with images for display
-  addMessageToCurrentThread(message + imagesToShow, "user");
-
-  if (!MODEL_NAME) {
-    const errorMsg = "Error: Please set the Model Name in the Settings.";
-    addMessageToCurrentThread(errorMsg, "bot");
-    console.error(errorMsg);
-    return;
-  }
-
-  addMessageToCurrentThread("Bot is typing...", "bot", true);
-  const thread = threads.find(t => t.id === currentThreadId);
-  const placeholderIndex = thread.messages.length - 1;
-
-  // Build messages array with current settings and word count request
-  const messagesForApi = buildMessagesForChat(wordCountRequest);
-  
-  // For now, we'll use a simpler approach - just add image descriptions to the text
-  // rather than trying to send actual images to the API
-  if (uploadedImages.length > 0 && messagesForApi.length > 0) {
-    // Find the last user message and append image descriptions
-    for (let i = messagesForApi.length - 1; i >= 0; i--) {
-      if (messagesForApi[i].role === 'user') {
-        // We already included the image descriptions in messageWithImages
-        messagesForApi[i].content = messageWithImages;
-        break;
+        
+        // Load custom prompts if available
+        const storedPrompts = localStorage.getItem("customPrompts");
+        if (storedPrompts) {
+          const parsedPrompts = JSON.parse(storedPrompts);
+          // Merge with default prompts to ensure all properties exist
+          PROMPTS = { ...PROMPTS, ...parsedPrompts };
+        }
+        
+        // Load enhanced prompts if available
+        const storedEnhancedPrompts = localStorage.getItem("enhancedPrompts");
+        if (storedEnhancedPrompts) {
+          const parsedEnhancedPrompts = JSON.parse(storedEnhancedPrompts);
+          // Merge with default prompts to ensure all properties exist
+          ENHANCED_PROMPTS = { ...ENHANCED_PROMPTS, ...parsedEnhancedPrompts };
+        }
+        
+        const temp = localStorage.getItem("temperature");
+        if (temp) TEMPERATURE = parseFloat(temp);
+        
+        const topP = localStorage.getItem("topP");
+        if (topP) TOP_P = parseFloat(topP);
+        
+        const topK = localStorage.getItem("topK");
+        if (topK) TOP_K = parseInt(topK);
+        
+        const maxTokens = localStorage.getItem("maxTokens");
+        if (maxTokens) MAX_TOKENS = parseInt(maxTokens);
+        
+        const presencePenalty = localStorage.getItem("presencePenalty");
+        if (presencePenalty) PRESENCE_PENALTY = parseFloat(presencePenalty);
+        
+        const frequencyPenalty = localStorage.getItem("frequencyPenalty");
+        if (frequencyPenalty) FREQUENCY_PENALTY = parseFloat(frequencyPenalty);
+      } catch (err) {
+        console.error("Error loading settings:", err);
       }
     }
-  }
 
-  // Create payload
-  const payload = {
-    model: MODEL_NAME,
-    max_tokens: MAX_TOKENS,
-    top_p: TOP_P,
-    top_k: TOP_K,
-    presence_penalty: PRESENCE_PENALTY,
-    frequency_penalty: FREQUENCY_PENALTY,
-    temperature: TEMPERATURE,
-    messages: messagesForApi
-  };
-  
-  // Clear uploaded images after sending
-  uploadedImages = [];
-  const previewContainer = document.querySelector(".image-preview");
-  if (previewContainer) {
-    previewContainer.remove();
-  }
-  
-  // Reset textarea height after sending
-  const userInput = document.getElementById("userInput");
-  if (userInput) {
-    userInput.value = "";
-    // Reset height to minimum
-    userInput.style.height = 'auto';
-    // Add a slight delay to ensure proper resizing
-    setTimeout(() => {
-      userInput.style.height = userInput.style.minHeight || '40px';
-    }, 10);
-  }
-  
-  console.log(`Sending request with ${REASONING_METHOD} reasoning ${REASONING_METHOD === "cod" ? `(word limit: ${COD_WORD_LIMIT})` : ""}`);
-  if (wordCountRequest) {
-    console.log(`Final answer word limit requested: ${wordCountRequest} words`);
-  }
-  console.log(`Parameters: temp=${TEMPERATURE}, top_p=${TOP_P}, top_k=${TOP_K}`);
-
-  try {
-    // Add timestamp to URL to prevent caching
-    const timestamp = new Date().getTime();
-    const cacheBuster = `?t=${timestamp}`;
-    
-    const response = await fetch(`${API_PROXY_URL}${cacheBuster}`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify(payload)
-    });
-    
-    if (!response.ok) {
-      throw new Error(`HTTP error! Status: ${response.status}`);
-    }
-    
-    const data = await response.json();
-    const botReply = data.choices &&
-                     data.choices[0] &&
-                     data.choices[0].message &&
-                     data.choices[0].message.content;
-    if (botReply) {
-      const trimmedReply = botReply.trim();
+    function init() {
+      console.log("Initializing app...");
       
-      // Create response metadata
-      let reasoningInfo = REASONING_METHOD.toUpperCase();
-      if (REASONING_METHOD === "cod") {
-        reasoningInfo += `-${COD_WORD_LIMIT}`;
-      }
-      
-      // Add enhanced reasoning info if used
-      if (ENHANCED_REASONING_ENABLED && 
-          REASONING_ENHANCEMENT === "adaptive" && 
-          PROBLEM_COMPLEXITY.complexity === "complex") {
-        reasoningInfo += "-ENHANCED";
-      }
-      
-      // Process bot message to separate thinking and answer parts
-      const processed = processBotMessage(trimmedReply, REASONING_METHOD);
-      
-      thread.messages[placeholderIndex] = {
-        content: trimmedReply,
-        sender: "bot",
-        isPlaceholder: false,
-        timestamp: new Date(),
-        wordCount: (processed.thinkingWordCount || 0) + (processed.answerWordCount || 0),
-        reasoningMethod: reasoningInfo,
-        thinking: processed.thinking,
-        answer: processed.answer,
-        thinkingWordCount: processed.thinkingWordCount || 0,
-        answerWordCount: processed.answerWordCount || 0
-      };
-    } else {
-      thread.messages[placeholderIndex] = {
-        content: "No valid response received. Check model name and API key.",
-        sender: "bot",
-        isPlaceholder: false,
-        timestamp: new Date(),
-        wordCount: 0,
-        reasoningMethod: REASONING_METHOD.toUpperCase(),
-        thinking: null,
-        answer: null,
-        thinkingWordCount: 0,
-        answerWordCount: 0
-      };
-    }
-  } catch (error) {
-    console.error("Error communicating with API:", error);
-    
-    // Provide more detailed error message
-    let errorMessage = "Error communicating with API: " + error.message;
-    
-    // Add suggestions based on error type
-    if (error.message.includes("Failed to fetch")) {
-      errorMessage += "\n\nPossible solutions:\n1. Make sure your API key is set correctly in Netlify\n2. Check that your model name is valid\n3. Verify your internet connection";
-    }
-    
-    thread.messages[placeholderIndex] = {
-      content: errorMessage,
-      sender: "bot",
-      isPlaceholder: false,
-      timestamp: new Date(),
-      wordCount: 0,
-      reasoningMethod: REASONING_METHOD.toUpperCase(),
-      thinking: null,
-      answer: null,
-      thinkingWordCount: 0,
-      answerWordCount: 0
-    };
-  }
-  renderCurrentThreadMessages();
-}
+      try {
+        loadPersistedSettings();
+        console.log("Settings loaded");
+        
+        // Update CoD prompt with the correct word limit
+        updateCoDPrompt();
+        console.log("CoD prompt updated");
+        
+        createNewThread();
+        console.log("New thread created");
+        
+        initEventListeners();
+        console.log("Event listeners initialized");
+        
+        updateCurrentModelDisplay();
+        console.log("Model display updated");
+        
+        // Initialize feedback form
+        initFeedbackForm();
+        console.log("Feedback form initialized");
+        
+        // Helper function to create a button that resets the thread
+        function createClearThreadButton() {
+          const clearThreadBtn = document.createElement("button");
+          clearThreadBtn.id = "clearThreadBtn";
+          clearThreadBtn.textContent = "Clear Thread";
+          clearThreadBtn.style.marginTop = "0.5rem";
+          clearThreadBtn.style.backgroundColor = "#553333";
+          clearThreadBtn.addEventListener("click", () => {
+            if (confirm("Clear all messages in this thread?")) {
+              const thread = threads.find(t => t.id === currentThreadId);
+              if (thread) {
+                thread.messages = [];
+                renderCurrentThreadMessages();
+                showNotification("Thread cleared");
+              }
+            }
+          });
+          return clearThreadBtn;
+        }
         
         // Add clear thread button to the sidebar
         const sidebar = document.querySelector(".sidebar");
@@ -3575,29 +3614,17 @@ async function sendMessage(message) {
       setTimeout(init, 1);
     }
   </script>
-  <form method='post' name='feedback'>
+  <form name="feedback" netlify netlify-honeypot="bot-field" hidden>
     <input type="hidden" name="form-name" value="feedback">
     <input type="hidden" name="model">
     <input type="hidden" name="reasoning_method">
-    <label for="feedback_type">Feedback Type:</label>
-    <select name="feedback_type" id="feedback_type"></select>
-    <fieldset>
-      <legend>Rating:</legend>
-      <label for="rating1">1</label>
-      <input type="radio" name="rating" id="rating1" value="1">
-      <label for="rating2">2</label>
-      <input type="radio" name="rating" id="rating2" value="2">
-      <label for="rating3">3</label>
-      <input type="radio" name="rating" id="rating3" value="3">
-      <label for="rating4">4</label>
-      <input type="radio" name="rating" id="rating4" value="4">
-      <label for="rating5">5</label>
-      <input type="radio" name="rating" id="rating5" value="5">
-    </fieldset>
-    <label for="comments">Comments:</label>
-    <textarea name="comments" id="comments"></textarea>
+    <select name="feedback_type"></select>
+    <input type="radio" name="rating" value="1">
+    <input type="radio" name="rating" value="2">
+    <input type="radio" name="rating" value="3">
+    <input type="radio" name="rating" value="4">
+    <input type="radio" name="rating" value="5">
+    <textarea name="comments"></textarea>
   </form>
-
-
-
-<script async id="netlify-rum-container" src="/.netlify/scripts/rum" data-netlify-rum-site-id="46b8ee21-754a-4a63-b741-fe88bac724f4" data-netlify-deploy-branch="main" data-netlify-deploy-context="production" data-netlify-cwv-token="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzaXRlX2lkIjoiNDZiOGVlMjEtNzU0YS00YTYzLWI3NDEtZmU4OGJhYzcyNGY0IiwiYWNjb3VudF9pZCI6IjY3YzU0MzUzYzc2MjdjOTUxZDZmNTU0MSIsImRlcGxveV9pZCI6IjY3Y2I0ODRhNTcxMmRiMDAwOGJhM2RlYiIsImlzc3VlciI6Im5mc2VydmVyIn0.2rA8T3MzgV3uKpBIwi-pW073Xyx0Sy-7WUXFXCKPLMg"></script></body></html>
+</body>
+</html>
