@@ -87,46 +87,49 @@
     display: block;
   }
 
+  /* Add this to ensure word count badge stays within its container */
   .message {
-  position: relative !important;
-  overflow: visible !important; 
-  padding-bottom: 20px; /* Add space for word count badge */
-}
+    position: relative;
+    padding-bottom: 40px; /* Increase space for word count badge */
+    overflow: hidden;
+  }
 
-/* Word Count Badge Positioning Fix */
-.word-count-badge {
-  position: absolute;
-  top: 4px;
-  right: 4px;
-  background-color: rgba(30, 30, 30, 0.9);
-  color: #ddd;
-  font-size: 0.7rem;
-  padding: 3px 8px;
-  border-radius: 12px;
-  border: 1px solid #555;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.3);
-  white-space: nowrap;
-  z-index: 5;
-  max-width: 200px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
+  /* Word Count Badge Positioning Fix */
+  .word-count-badge {
+    position: absolute;
+    top: 4px;
+    right: 4px;
+    background-color: rgba(30, 30, 30, 0.9);
+    color: #ddd;
+    font-size: 0.7rem;
+    padding: 3px 8px;
+    border-radius: 12px;
+    border: 1px solid #555;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+    white-space: nowrap;
+    z-index: 5;
+    max-width: 200px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
 
-/* Make thinking steps and final answer containers properly visible */
-.thinking-steps, .final-answer {
-  width: 100% !important;
-  display: block !important;
-}
+  /* Improved positioning for thinking steps and final answer containers */
+  .thinking-steps, .final-answer {
+    width: calc(100% - 20px) !important; /* Ensure full width with padding */
+    display: block !important;
+    margin: 10px; /* Add margin to avoid overlap */
+    box-sizing: border-box;
+  }
 
-/* Improved word count breakdown display */
-.word-count-breakdown {
-  font-size: 0.7rem;
-  color: #aaa;
-  margin-top: 3px;
-  display: flex;
-  gap: 8px;
-  flex-direction: column;
-}
+  /* Improved word count breakdown display */
+  .word-count-breakdown {
+    font-size: 0.7rem;
+    color: #aaa;
+    margin-top: 3px;
+    display: flex;
+    gap: 8px;
+    flex-direction: column;
+  }
 
   /* Add this to ensure proper CoD styling */
   .cod-thinking {
@@ -1725,7 +1728,7 @@ A: First segment: The car travels at 60 mph for 2 hours, so the distance covered
         } else {
           // Code block
           const codeSegment = segments[i].trim();
-          const firstNewlineIndex = codeSegment.indexOf('\n');
+          const firstNewlineIndex = codeSegment.index('\n');
           let language = '';
           let codeContent = codeSegment;
           if (firstNewlineIndex !== -1) {
