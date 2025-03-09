@@ -99,6 +99,7 @@ exports.handler = async function(event, context) {
         messages: requestBody.messages,
         temperature: requestBody.temperature,
         top_p: requestBody.top_p,
+        top_k: requestBody.top_k, // Added support for top_k
         max_tokens: requestBody.max_tokens || 1024, // Ensure max_tokens is set
         frequency_penalty: requestBody.frequency_penalty,
         presence_penalty: requestBody.presence_penalty
@@ -108,6 +109,8 @@ exports.handler = async function(event, context) {
       console.log(`Sending request to Groq API: ${JSON.stringify({
         model: groqRequest.model,
         temperature: groqRequest.temperature,
+        top_p: groqRequest.top_p,
+        top_k: groqRequest.top_k,
         max_tokens: groqRequest.max_tokens
       })}`);
       
