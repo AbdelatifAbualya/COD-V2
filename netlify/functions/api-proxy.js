@@ -72,8 +72,21 @@ exports.handler = async function(event, context) {
       // Parse the request body
       const requestBody = JSON.parse(event.body);
       
+      // Check for required model parameter
+      if (!requestBody.model) {
+        console.error("Missing required 'model' parameter");
+        return {
+          statusCode: 400,
+          body: JSON.stringify({ error: 'Missing required parameter: model' }),
+          headers: {
+            'Content-Type': 'application/json',
+            'Access-Control-Allow-Origin': '*'
+          }
+        };
+      }
+      
       // Log model info
-      const modelName = requestBody.model || 'not specified';
+      const modelName = requestBody.model;
       console.log(`Model requested: ${modelName}`);
       
       // Add timing metrics for monitoring CoD vs CoT performance
@@ -90,29 +103,57 @@ exports.handler = async function(event, context) {
       console.log(`Using reasoning method: ${reasoningMethod}`);
       console.log(`Messages count: ${requestBody.messages ? requestBody.messages.length : 0}`);
       
+      // Ensure messages is an array and has at least one message
+      if (!Array.isArray(requestBody.messages) || requestBody.messages.length === 0) {
+        console.error("Invalid or empty 'messages' array");
+        return {
+          statusCode: 400,
+          body: JSON.stringify({ error: 'Invalid or empty messages array' }),
+          headers: {
+            'Content-Type': 'application/json',
+            'Access-Control-Allow-Origin': '*'
+          }
+        };
+      }
+      
       // Start timer
       const startTime = Date.now();
       
-      // Prepare request for Groq API
+      // Prepare request for Groq API - only include supported parameters
       const groqRequest = {
-        model: requestBody.model,
+        model: modelName,
         messages: requestBody.messages,
-        temperature: requestBody.temperature,
-        top_p: requestBody.top_p,
-        top_k: requestBody.top_k, // Added support for top_k
-        max_tokens: requestBody.max_tokens || 1024, // Ensure max_tokens is set
-        frequency_penalty: requestBody.frequency_penalty,
-        presence_penalty: requestBody.presence_penalty
       };
       
-      // Log request body for debugging
-      console.log(`Sending request to Groq API: ${JSON.stringify({
-        model: groqRequest.model,
-        temperature: groqRequest.temperature,
-        top_p: groqRequest.top_p,
-        top_k: groqRequest.top_k,
-        max_tokens: groqRequest.max_tokens
-      })}`);
+      // Add optional parameters only if they exist and are valid
+      if (typeof requestBody.temperature === 'number') {
+        groqRequest.temperature = requestBody.temperature;
+      }
+      
+      if (typeof requestBody.top_p === 'number') {
+        groqRequest.top_p = requestBody.top_p;
+      }
+      
+      // Note: Groq API may not support top_k directly, check their API docs
+      // Some models may use it with a different name or not at all
+      if (typeof requestBody.max_tokens === 'number') {
+        groqRequest.max_tokens = requestBody.max_tokens;
+      } else {
+        groqRequest.max_tokens = 1024; // Default if not specified
+      }
+      
+      if (typeof requestBody.frequency_penalty === 'number') {
+        groqRequest.frequency_penalty = requestBody.frequency_penalty;
+      }
+      
+      if (typeof requestBody.presence_penalty === 'number') {
+        groqRequest.presence_penalty = requestBody.presence_penalty;
+      }
+      
+      // Log request body for debugging (exclude messages to keep logs clean)
+      const logRequest = { ...groqRequest };
+      delete logRequest.messages;
+      console.log(`Sending request to Groq API: ${JSON.stringify(logRequest)}`);
       
       // Forward the request to Groq API
       const response = await fetchWithTimeout('https://api.groq.com/openai/v1/chat/completions', {
@@ -132,9 +173,17 @@ exports.handler = async function(event, context) {
       if (!response.ok) {
         // Get error details
         let errorText = "";
+        let errorJson = null;
+        
         try {
           errorText = await response.text();
-          console.error(`API error (${response.status}): ${errorText}`);
+          // Try to parse as JSON for better error details
+          try {
+            errorJson = JSON.parse(errorText);
+            console.error(`API error (${response.status}): ${JSON.stringify(errorJson)}`);
+          } catch (jsonParseError) {
+            console.error(`API error (${response.status}): ${errorText}`);
+          }
         } catch (e) {
           errorText = "Could not read error response";
           console.error(`API error (${response.status}): Unable to read error details`);
@@ -144,7 +193,7 @@ exports.handler = async function(event, context) {
           statusCode: response.status,
           body: JSON.stringify({ 
             error: `API Error: ${response.statusText}`, 
-            details: errorText
+            details: errorJson || errorText
           }),
           headers: { 
             'Content-Type': 'application/json',
