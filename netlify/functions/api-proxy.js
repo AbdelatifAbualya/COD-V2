@@ -7,7 +7,7 @@ exports.handler = async function(event, context) {
   const fetch = require('node-fetch');
   
   // Configure fetch timeout to 120 seconds (Netlify's maximum)
-  const fetchWithTimeout = async (url, options, timeout = 150000) => {
+  const fetchWithTimeout = async (url, options, timeout = 120000) => {
     const controller = new AbortController();
     const timeoutId = setTimeout(() => {
       console.log("Request is taking too long, aborting...");
@@ -71,12 +71,14 @@ exports.handler = async function(event, context) {
     try {
       // Parse the request body
       const requestBody = JSON.parse(event.body);
+      
+      // Log model info
       const modelName = requestBody.model || 'not specified';
       console.log(`Model requested: ${modelName}`);
       
       // Add timing metrics for monitoring CoD vs CoT performance
       let reasoningMethod = 'Standard';
-      if (requestBody.messages && requestBody.messages[0] && requestBody.messages[0].content) {
+      if (requestBody.messages && requestBody.messages.length > 0 && requestBody.messages[0].role === 'system') {
         const systemPrompt = requestBody.messages[0].content;
         if (systemPrompt.includes('Chain of Draft')) {
           reasoningMethod = 'CoD';
@@ -86,31 +88,55 @@ exports.handler = async function(event, context) {
       }
       
       console.log(`Using reasoning method: ${reasoningMethod}`);
-      console.log(`Request complexity: ${JSON.stringify({
-        messages_count: requestBody.messages ? requestBody.messages.length : 0,
-        max_tokens: requestBody.max_tokens || 'default'
-      })}`);
+      console.log(`Messages count: ${requestBody.messages ? requestBody.messages.length : 0}`);
       
+      // Start timer
       const startTime = Date.now();
       
-      // Forward the request to Groq API with timeout
+      // Prepare request for Groq API
+      const groqRequest = {
+        model: requestBody.model,
+        messages: requestBody.messages,
+        temperature: requestBody.temperature,
+        top_p: requestBody.top_p,
+        max_tokens: requestBody.max_tokens || 1024, // Ensure max_tokens is set
+        frequency_penalty: requestBody.frequency_penalty,
+        presence_penalty: requestBody.presence_penalty
+      };
+      
+      // Log request body for debugging
+      console.log(`Sending request to Groq API: ${JSON.stringify({
+        model: groqRequest.model,
+        temperature: groqRequest.temperature,
+        max_tokens: groqRequest.max_tokens
+      })}`);
+      
+      // Forward the request to Groq API
       const response = await fetchWithTimeout('https://api.groq.com/openai/v1/chat/completions', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${API_KEY}`
         },
-        body: JSON.stringify(requestBody)
-      }, 120000); // 120 seconds timeout
+        body: JSON.stringify(groqRequest)
+      });
 
       const endTime = Date.now();
       const responseTime = endTime - startTime;
-      console.log(`Groq API response status: ${response.status}, time: ${responseTime}ms, method: ${reasoningMethod}`);
+      console.log(`Groq API response status: ${response.status}, time: ${responseTime}ms`);
       
       // Check if response is ok
       if (!response.ok) {
-        const errorText = await response.text();
-        console.error(`API error (${response.status}): ${errorText}`);
+        // Get error details
+        let errorText = "";
+        try {
+          errorText = await response.text();
+          console.error(`API error (${response.status}): ${errorText}`);
+        } catch (e) {
+          errorText = "Could not read error response";
+          console.error(`API error (${response.status}): Unable to read error details`);
+        }
+        
         return {
           statusCode: response.status,
           body: JSON.stringify({ 
@@ -134,6 +160,8 @@ exports.handler = async function(event, context) {
           reasoning_method: reasoningMethod
         };
       }
+      
+      console.log("Successfully received response from Groq API");
       
       // Return the response from Groq
       return {
