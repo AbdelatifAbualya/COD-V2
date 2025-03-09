@@ -1218,200 +1218,184 @@
   <div id="statusNotification" class="status-notification"></div>
 
   <!-- Settings Modal -->
-  <div id="settingsModal" class="modal">
-    <div class="modal-content">
-      <button class="close-modal" id="closeModalX">&times;</button>
-      <h2>Settings</h2>
-      
-      <div class="settings-tabs">
-        <button class="tab-btn active" data-tab="modelTab">Model</button>
-        <button class="tab-btn" data-tab="reasoningTab">Reasoning</button>
-        <button class="tab-btn" data-tab="parametersTab">Parameters</button>
-      </div>
-      
-<!-- Model Selection Tab -->
-<div id="modelTab" class="tab-content active">
-  <div class="settings-section-header">Model Selection</div>
-
-  <label for="modelSelect">Select LLM Model</label>
-  <div class="model-select-container">
-    <select id="modelSelect" class="model-dropdown">
-      <option value="" disabled selected>Choose a model...</option>
-      <option value="deepseek-r1-distill-llama-70b-specdec">DeepSeek R1 Llama 70B (Specialized)</option>
-      <option value="deepseek-r1-distill-llama-70b">DeepSeek R1 Llama 70B</option>
-    </select>
-    <div class="dropdown-arrow">▼</div>
-  </div>
-
-  <div class="model-info-card" id="modelInfoCard">
-    <div class="model-info-header">
-      <span id="selectedModelName">No model selected</span>
+  <!-- Settings Modal -->
+<div id="settingsModal" class="modal">
+  <div class="modal-content">
+    <button class="close-modal" id="closeModalX">&times;</button>
+    <h2>Settings</h2>
+    
+    <div class="settings-tabs">
+      <button class="tab-btn active" data-tab="modelTab">Model</button>
+      <button class="tab-btn" data-tab="reasoningTab">Reasoning</button>
+      <button class="tab-btn" data-tab="parametersTab">Parameters</button>
     </div>
-    <div class="model-info-body">
-      <div class="model-tags" id="modelTags">
-        <!-- Tags will be added dynamically -->
+    
+    <!-- Model Selection Tab -->
+    <div id="modelTab" class="tab-content active">
+      <div class="settings-section-header">Model Selection</div>
+
+      <label for="modelSelect">Select LLM Model</label>
+      <div class="model-select-container">
+        <select id="modelSelect" class="model-dropdown">
+          <option value="" disabled selected>Choose a model...</option>
+          <option value="deepseek-r1-distill-llama-70b-specdec">DeepSeek R1 Llama 70B (Specialized)</option>
+          <option value="deepseek-r1-distill-llama-70b">DeepSeek R1 Llama 70B</option>
+        </select>
+        <div class="dropdown-arrow">▼</div>
       </div>
-      <div class="model-description" id="modelDescription">
-        Select a model to see details
+
+      <div class="model-info-card" id="modelInfoCard">
+        <div class="model-info-header">
+          <span id="selectedModelName">No model selected</span>
+        </div>
+        <div class="model-info-body">
+          <div class="model-tags" id="modelTags">
+            <!-- Tags will be added dynamically -->
+          </div>
+          <div class="model-description" id="modelDescription">
+            Select a model to see details
+          </div>
+        </div>
+      </div>
+
+      <button id="setModelBtn">Set Model</button>
+    </div>
+    
+    <!-- Reasoning Tab -->
+    <div id="reasoningTab" class="tab-content">
+      <div class="settings-section-header">Reasoning Method</div>
+      <div class="feature-section">
+        <div class="radio-options">
+          <div class="radio-option">
+            <input type="radio" id="standardReasoning" name="reasoningMethod" value="standard">
+            <label for="standardReasoning">Standard (No special prompt)</label>
+            <div class="tooltip">?
+              <span class="tooltiptext">Default model behavior with no special reasoning instructions.</span>
+            </div>
+          </div>
+          
+          <div class="radio-option">
+            <input type="radio" id="cotReasoning" name="reasoningMethod" value="cot">
+            <label for="cotReasoning">Chain of Thought (CoT)</label>
+            <div class="tooltip">?
+              <span class="tooltiptext">Instructs the model to think step-by-step to solve problems. Improves reasoning but uses more tokens.</span>
+            </div>
+          </div>
+          
+          <div class="radio-option">
+            <input type="radio" id="codReasoning" name="reasoningMethod" value="cod" checked>
+            <label for="codReasoning">Chain of Draft (CoD)</label>
+            <div class="tooltip">?
+              <span class="tooltiptext">Uses minimal words per step (research paper approach) to reduce token usage while maintaining reasoning quality.</span>
+            </div>
+          </div>
+        </div>
+        
+        <!-- COD Word Limit options -->
+        <div id="codOptions" class="cod-options">
+          <!-- This will be populated by the updateCoDOptionsUI function -->
+        </div>
+      </div>
+      
+      <!-- NEW: Enhanced Reasoning Controls -->
+      <div class="advanced-options-header">
+        Advanced Reasoning Options
+        <label class="toggle-switch">
+          <input type="checkbox" id="enhancedReasoningToggle" checked>
+          <span class="toggle-slider"></span>
+        </label>
+      </div>
+      
+      <div id="enhancedReasoningOptions" class="enhanced-reasoning">
+        <div class="enhanced-reasoning-option">
+          <input type="radio" id="adaptiveReasoning" name="reasoningEnhancement" value="adaptive" checked>
+          <label for="adaptiveReasoning">Adaptive Reasoning</label>
+          <span class="auto-detection-badge"><span class="indicator"></span>Auto</span>
+        </div>
+        <div class="option-description">
+          Automatically increases reasoning depth for complex problems (math, logic, multi-step reasoning).
+        </div>
+        
+        <div class="enhanced-reasoning-option">
+          <input type="radio" id="standardReasoning" name="reasoningEnhancement" value="standard">
+          <label for="standardReasoning">Fixed Reasoning Depth</label>
+        </div>
+        <div class="option-description">
+          Uses the same reasoning approach for all problems regardless of complexity.
+        </div>
+        
+        <div class="problem-analyzer">
+          <div class="analyzer-title">
+            <span class="analyzer-icon">🔍</span> Problem Complexity Detection
+          </div>
+          <div class="analyzer-help">
+            When adaptive reasoning is enabled, the system will automatically analyze your questions to detect:
+            <ul style="margin-top: 5px; padding-left: 20px; font-size: 0.85rem;">
+              <li>Mathematical expressions and calculations</li>
+              <li>Multi-step reasoning requirements</li>
+              <li>Logical dependencies and constraints</li>
+              <li>Complex or abstract concepts</li>
+            </ul>
+            For complex problems, the model will use more detailed reasoning steps even with CoD.
+          </div>
+        </div>
       </div>
     </div>
-  </div>
+    
+    <!-- Parameters Tab -->
+    <div id="parametersTab" class="tab-content">
+      <div class="settings-section-header">Generation Parameters</div>
+      
+      <!-- Improved range sliders with visible values -->
+      <label for="temp">Temperature</label>
+      <div class="range-container">
+        <input type="range" id="temp" min="0" max="1" step="0.01" value="0.5">
+        <span id="tempValue" class="range-value">0.5</span>
+      </div>
+      <p style="font-size: 0.8rem; color: #aaa; margin-top: 0;">Controls randomness: lower values make responses more focused and deterministic.</p>
 
-  <button id="setModelBtn">Set Model</button>
+      <label for="topP">Top P</label>
+      <div class="range-container">
+        <input type="range" id="topP" min="0" max="1" step="0.01" value="0.90">
+        <span id="topPValue" class="range-value">0.90</span>
+      </div>
+      <p style="font-size: 0.8rem; color: #aaa; margin-top: 0;">Controls diversity via nucleus sampling: lower values exclude less probable tokens.</p>
+
+      <label for="topK">Top K</label>
+      <div class="range-container">
+        <input type="range" id="topK" min="0" max="100" step="1" value="55">
+        <span id="topKValue" class="range-value">55</span>
+      </div>
+      <p style="font-size: 0.8rem; color: #aaa; margin-top: 0;">Limits sampling to the top K most likely tokens.</p>
+
+      <label for="maxTokens">Max Tokens</label>
+      <div class="range-container">
+        <input type="range" id="maxTokens" min="256" max="4096" step="128" value="1112">
+        <span id="maxTokensValue" class="range-value">1112</span>
+      </div>
+      <p style="font-size: 0.8rem; color: #aaa; margin-top: 0;">Maximum number of tokens to generate in the response.</p>
+
+      <label for="presencePenalty">Presence Penalty</label>
+      <div class="range-container">
+        <input type="range" id="presencePenalty" min="-2" max="2" step="0.1" value="0">
+        <span id="presencePenaltyValue" class="range-value">0</span>
+      </div>
+      <p style="font-size: 0.8rem; color: #aaa; margin-top: 0;">Penalizes new tokens based on their presence in the input.</p>
+
+      <label for="frequencyPenalty">Frequency Penalty</label>
+      <div class="range-container">
+        <input type="range" id="frequencyPenalty" min="-2" max="2" step="0.1" value="0.4">
+        <span id="frequencyPenaltyValue" class="range-value">0.4</span>
+      </div>
+      <p style="font-size: 0.8rem; color: #aaa; margin-top: 0;">Penalizes tokens based on their frequency in the generated text.</p>
+    </div>
+    
+    <div style="text-align: right; margin-top: 20px;">
+      <button id="saveSettings">Save</button>
+      <button id="closeSettings">Cancel</button>
+    </div>
+  </div>
 </div>
-  
-  <div class="model-info-card" id="modelInfoCard">
-    <div class="model-info-header">
-      <span id="selectedModelName">No model selected</span>
-    </div>
-    <div class="model-info-body">
-      <div class="model-tags" id="modelTags">
-        <!-- Tags will be added dynamically -->
-      </div>
-      <div class="model-description" id="modelDescription">
-        Select a model to see details
-      </div>
-    </div>
-  </div>
-  
-  <button id="setModelBtn">Set Model</button>
-</div>
-      
-      <!-- Reasoning Tab -->
-      <div id="reasoningTab" class="tab-content">
-        <div class="settings-section-header">Reasoning Method</div>
-        <div class="feature-section">
-          <div class="radio-options">
-            <div class="radio-option">
-              <input type="radio" id="standardReasoning" name="reasoningMethod" value="standard">
-              <label for="standardReasoning">Standard (No special prompt)</label>
-              <div class="tooltip">?
-                <span class="tooltiptext">Default model behavior with no special reasoning instructions.</span>
-              </div>
-            </div>
-            
-            <div class="radio-option">
-              <input type="radio" id="cotReasoning" name="reasoningMethod" value="cot">
-              <label for="cotReasoning">Chain of Thought (CoT)</label>
-              <div class="tooltip">?
-                <span class="tooltiptext">Instructs the model to think step-by-step to solve problems. Improves reasoning but uses more tokens.</span>
-              </div>
-            </div>
-            
-            <div class="radio-option">
-              <input type="radio" id="codReasoning" name="reasoningMethod" value="cod" checked>
-              <label for="codReasoning">Chain of Draft (CoD)</label>
-              <div class="tooltip">?
-                <span class="tooltiptext">Uses minimal words per step (research paper approach) to reduce token usage while maintaining reasoning quality.</span>
-              </div>
-            </div>
-          </div>
-          
-          <!-- COD Word Limit options -->
-          <div id="codOptions" class="cod-options">
-            <!-- This will be populated by the updateCoDOptionsUI function -->
-          </div>
-        </div>
-        
-        <!-- NEW: Enhanced Reasoning Controls -->
-        <div class="advanced-options-header">
-          Advanced Reasoning Options
-          <label class="toggle-switch">
-            <input type="checkbox" id="enhancedReasoningToggle" checked>
-            <span class="toggle-slider"></span>
-          </label>
-        </div>
-        
-        <div id="enhancedReasoningOptions" class="enhanced-reasoning">
-          <div class="enhanced-reasoning-option">
-            <input type="radio" id="adaptiveReasoning" name="reasoningEnhancement" value="adaptive" checked>
-            <label for="adaptiveReasoning">Adaptive Reasoning</label>
-            <span class="auto-detection-badge"><span class="indicator"></span>Auto</span>
-          </div>
-          <div class="option-description">
-            Automatically increases reasoning depth for complex problems (math, logic, multi-step reasoning).
-          </div>
-          
-          <div class="enhanced-reasoning-option">
-            <input type="radio" id="standardReasoning" name="reasoningEnhancement" value="standard">
-            <label for="standardReasoning">Fixed Reasoning Depth</label>
-          </div>
-          <div class="option-description">
-            Uses the same reasoning approach for all problems regardless of complexity.
-          </div>
-          
-          <div class="problem-analyzer">
-            <div class="analyzer-title">
-              <span class="analyzer-icon">🔍</span> Problem Complexity Detection
-            </div>
-            <div class="analyzer-help">
-              When adaptive reasoning is enabled, the system will automatically analyze your questions to detect:
-              <ul style="margin-top: 5px; padding-left: 20px; font-size: 0.85rem;">
-                <li>Mathematical expressions and calculations</li>
-                <li>Multi-step reasoning requirements</li>
-                <li>Logical dependencies and constraints</li>
-                <li>Complex or abstract concepts</li>
-              </ul>
-              For complex problems, the model will use more detailed reasoning steps even with CoD.
-            </div>
-          </div>
-        </div>
-      </div>
-      
-      <!-- Parameters Tab -->
-      <div id="parametersTab" class="tab-content">
-        <div class="settings-section-header">Generation Parameters</div>
-        
-        <!-- Improved range sliders with visible values -->
-        <label for="temp">Temperature</label>
-        <div class="range-container">
-          <input type="range" id="temp" min="0" max="1" step="0.01" value="0.5">
-          <span id="tempValue" class="range-value">0.5</span>
-        </div>
-        <p style="font-size: 0.8rem; color: #aaa; margin-top: 0;">Controls randomness: lower values make responses more focused and deterministic.</p>
-
-        <label for="topP">Top P</label>
-        <div class="range-container">
-          <input type="range" id="topP" min="0" max="1" step="0.01" value="0.90">
-          <span id="topPValue" class="range-value">0.90</span>
-        </div>
-        <p style="font-size: 0.8rem; color: #aaa; margin-top: 0;">Controls diversity via nucleus sampling: lower values exclude less probable tokens.</p>
-
-        <label for="topK">Top K</label>
-        <div class="range-container">
-          <input type="range" id="topK" min="0" max="100" step="1" value="55">
-          <span id="topKValue" class="range-value">55</span>
-        </div>
-        <p style="font-size: 0.8rem; color: #aaa; margin-top: 0;">Limits sampling to the top K most likely tokens.</p>
-
-        <label for="maxTokens">Max Tokens</label>
-        <div class="range-container">
-          <input type="range" id="maxTokens" min="256" max="4096" step="128" value="1112">
-          <span id="maxTokensValue" class="range-value">1112</span>
-        </div>
-        <p style="font-size: 0.8rem; color: #aaa; margin-top: 0;">Maximum number of tokens to generate in the response.</p>
-
-        <label for="presencePenalty">Presence Penalty</label>
-        <div class="range-container">
-          <input type="range" id="presencePenalty" min="-2" max="2" step="0.1" value="0">
-          <span id="presencePenaltyValue" class="range-value">0</span>
-        </div>
-        <p style="font-size: 0.8rem; color: #aaa; margin-top: 0;">Penalizes new tokens based on their presence in the input.</p>
-
-        <label for="frequencyPenalty">Frequency Penalty</label>
-        <div class="range-container">
-          <input type="range" id="frequencyPenalty" min="-2" max="2" step="0.1" value="0.4">
-          <span id="frequencyPenaltyValue" class="range-value">0.4</span>
-        </div>
-        <p style="font-size: 0.8rem; color: #aaa; margin-top: 0;">Penalizes tokens based on their frequency in the generated text.</p>
-      </div>
-      
-      <div style="text-align: right; margin-top: 20px;">
-        <button id="saveSettings">Save</button>
-        <button id="closeSettings">Cancel</button>
-      </div>
-    </div>
-  </div>
 
   <!-- Feedback Button and Modal -->
   <div style="position: fixed; bottom: 20px; left: 20px; z-index: 1000;">
