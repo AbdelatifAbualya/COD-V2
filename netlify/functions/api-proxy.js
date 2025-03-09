@@ -1,4 +1,4 @@
-// Netlify Function to securely proxy requests to Fireworks.ai
+// Netlify Function to securely proxy requests to Groq API
 exports.handler = async function(event, context) {
   // Set the function timeout to 120 seconds (2 minutes)
   context.callbackWaitsForEmptyEventLoop = false;
@@ -51,7 +51,7 @@ exports.handler = async function(event, context) {
 
   try {
     // Get API key from environment variable
-    const API_KEY = process.env.FIREWORKS_API_KEY;
+    const API_KEY = process.env.GROQ_API_KEY;
     
     if (!API_KEY) {
       console.log("ERROR: API key is missing");
@@ -93,9 +93,8 @@ exports.handler = async function(event, context) {
       
       const startTime = Date.now();
       
-      // Forward the request to Fireworks.ai with timeout
-      // Increased timeout to maximum allowed by Netlify (120 seconds)
-      const response = await fetchWithTimeout('https://api.fireworks.ai/inference/v1/chat/completions', {
+      // Forward the request to Groq API with timeout
+      const response = await fetchWithTimeout('https://api.groq.com/openai/v1/chat/completions', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -106,7 +105,7 @@ exports.handler = async function(event, context) {
 
       const endTime = Date.now();
       const responseTime = endTime - startTime;
-      console.log(`Fireworks API response status: ${response.status}, time: ${responseTime}ms, method: ${reasoningMethod}`);
+      console.log(`Groq API response status: ${response.status}, time: ${responseTime}ms, method: ${reasoningMethod}`);
       
       // Check if response is ok
       if (!response.ok) {
@@ -136,7 +135,7 @@ exports.handler = async function(event, context) {
         };
       }
       
-      // Return the response from Fireworks.ai
+      // Return the response from Groq
       return {
         statusCode: 200,
         body: JSON.stringify(data),
