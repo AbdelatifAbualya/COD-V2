@@ -1229,22 +1229,36 @@
         <button class="tab-btn" data-tab="parametersTab">Parameters</button>
       </div>
       
-      <!-- Model Selection Tab -->
-  <div id="modelTab" class="tab-content active">
-    <div class="settings-section-header">Model Selection</div>
-  
-    <label for="modelSelect">Select LLM Model</label>
-    <div class="model-select-container">
-        <select id="modelSelect" class="model-dropdown">
-        <option value="" disabled selected>Choose a model...</option>
-        <option value="accounts/fireworks/models/deepseek-v3">DeepSeek V3</option>
-        <option value="accounts/fireworks/models/mistral-small-24b-instruct-2501">Mistral 24B</option>
-        <option value="accounts/fireworks/models/llama-v3p3-70b-instruct">Llama 3.1 70B</option>
-        <option value="accounts/fireworks/models/qwen2p5-coder-32b-instruct">Qwen 2.5 Coder 32B</option>
-        <option value="accounts/fireworks/models/mixtral-8x22b-instruct">Mixtral 8x22B</option>
+<!-- Model Selection Tab -->
+<div id="modelTab" class="tab-content active">
+  <div class="settings-section-header">Model Selection</div>
+
+  <label for="modelSelect">Select LLM Model</label>
+  <div class="model-select-container">
+    <select id="modelSelect" class="model-dropdown">
+      <option value="" disabled selected>Choose a model...</option>
+      <option value="deepseek-r1-distill-llama-70b-specdec">DeepSeek R1 Llama 70B (Specialized)</option>
+      <option value="deepseek-r1-distill-llama-70b">DeepSeek R1 Llama 70B</option>
     </select>
     <div class="dropdown-arrow">▼</div>
   </div>
+
+  <div class="model-info-card" id="modelInfoCard">
+    <div class="model-info-header">
+      <span id="selectedModelName">No model selected</span>
+    </div>
+    <div class="model-info-body">
+      <div class="model-tags" id="modelTags">
+        <!-- Tags will be added dynamically -->
+      </div>
+      <div class="model-description" id="modelDescription">
+        Select a model to see details
+      </div>
+    </div>
+  </div>
+
+  <button id="setModelBtn">Set Model</button>
+</div>
   
   <div class="model-info-card" id="modelInfoCard">
     <div class="model-info-header">
@@ -2945,6 +2959,7 @@ A: First segment: The car travels at 60 mph for 2 hours, so the distance covered
     }
     
     // Custom model handling
+// Setup model input handling for Groq models
 function setupModelInput() {
   const modelSelect = document.getElementById('modelSelect');
   const setModelBtn = document.getElementById('setModelBtn');
@@ -2953,32 +2968,17 @@ function setupModelInput() {
   const modelTags = document.getElementById('modelTags');
   const modelDescription = document.getElementById('modelDescription');
   
-  // Model information database
+  // Model information database for Groq models
   const modelInfo = {
-    "accounts/fireworks/models/deepseek-v3": {
-      name: "DeepSeek V3",
-      tags: ["70B", "General Purpose", "Reasoning"],
-      description: "A powerful model with strong reasoning and problem solving capabilities. Good for complex tasks, versatile across different domains."
+    "deepseek-r1-distill-llama-70b-specdec": {
+      name: "DeepSeek R1 Llama 70B (Specialized)",
+      tags: ["70B", "Specialized", "Reasoning"],
+      description: "A specialized variant of DeepSeek's Llama distillation optimized for specific tasks with enhanced reasoning capabilities."
     },
-    "accounts/fireworks/models/mistral-small-24b-instruct-2501": {
-      name: "Mistral 24B",
-      tags: ["24B", "Fast", "Well-balanced"],
-      description: "A fast and efficient model with good balance between performance and speed. Great for everyday tasks and conversations."
-    },
-    "accounts/fireworks/models/llama-v3p3-70b-instruct": {
-      name: "Llama 3.1 70B",
-      tags: ["70B", "High Performance", "Instruction Following"],
-      description: "Meta's flagship large language model. Excellent at following complex instructions with high accuracy and detailed outputs."
-    },
-    "accounts/fireworks/models/qwen2p5-coder-32b-instruct": {
-      name: "Qwen 2.5 Coder 32B",
-      tags: ["32B", "Coding", "Technical"],
-      description: "Specialized for coding tasks and technical problem solving. Strong at generating, explaining, and debugging code across many languages."
-    },
-    "accounts/fireworks/models/mixtral-8x22b-instruct": {
-      name: "Mixtral 8x22B",
-      tags: ["176B", "MoE", "High Capacity"],
-      description: "A Mixture of Experts model with massive capacity. Excellent for detailed, nuanced responses and specialized knowledge domains."
+    "deepseek-r1-distill-llama-70b": {
+      name: "DeepSeek R1 Llama 70B",
+      tags: ["70B", "General Purpose", "Fast"],
+      description: "DeepSeek's high-performance 70B model distilled from Llama architecture. Great for versatile tasks with balanced speed and quality."
     }
   };
   
