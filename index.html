@@ -1943,7 +1943,7 @@ Separate your thinking steps with periods. Write your final code implementation 
 
 Example:
 Q: Write a function to find the longest substring without repeating characters.
-A: Need sliding window approach to track current substring without repeating characters. Use a map to store most recent position of each character. When finding a duplicate, adjust window start to be after previous occurrence. Calculate current window size and update max length if needed. #### 
+A: Need sliding window approach to track current substring without repeating characters. Use a map to store most recent position of each character. When finding a duplicate, adjust window start to be after previous occurrence. Calculate current window size and update max length if this window is larger. #### 
 \`\`\`javascript
 function lengthOfLongestSubstring(s) {
   // Handle edge cases
