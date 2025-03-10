@@ -1684,21 +1684,45 @@
   
 Separate your steps with periods. Write your final answer after the #### separator.
 
-Examples:
+IMPORTANT: If you need to write code as your answer, you can ignore the word limit for the code portion. Follow these guidelines:
+1. Keep your thinking steps concise as usual (${COD_WORD_LIMIT} words per step)
+2. When presenting code, place it after the #### separator
+3. For code examples, provide complete, detailed implementations without word limits
+4. Use proper formatting with code blocks (\`\`\`language) for all code
+
+Examples for problem solving:
 Q: Jason had 20 lollipops. He gave Denny some lollipops. Now Jason has 12 lollipops. How many lollipops did Jason give to Denny?
 A: 20 initial. 12 remaining. 20 - 12 = 8. #### 8 lollipops
 
-Q: Roger has $125. He spends $55 on a video game and then receives $25 for his birthday. How much money does Roger have now?
-A: Start: $125. Spent: $55. 125 - 55 = $70. Received: $25. 70 + 25 = $95. #### $95
+Example for code tasks:
+Q: Write a function to find the longest substring without repeating characters.
+A: Use sliding window approach. Track characters in set. Expand and contract window based on duplicates. Update max length when needed. #### 
+\`\`\`javascript
+function lengthOfLongestSubstring(s) {
+  // Complete implementation with detailed code
+  let maxLength = 0;
+  let start = 0;
+  const charMap = new Map();
+  
+  for (let end = 0; end < s.length; end++) {
+    const currentChar = s[end];
+    
+    if (charMap.has(currentChar) && charMap.get(currentChar) >= start) {
+      start = charMap.get(currentChar) + 1;
+    }
+    
+    charMap.set(currentChar, end);
+    maxLength = Math.max(maxLength, end - start + 1);
+  }
+  
+  return maxLength;
+}
 
-Q: A square has a perimeter of 20 cm. What is its area?
-A: Perimeter = 20 cm. Side length = 20/4 = 5 cm. Area = 5² = 25 cm². #### 25 square centimeters
-
-Q: If a fabric store received 45 yards of cotton material and used 2/9 of it for a bulk order, how many yards of cotton material does the fabric store have left?
-A: Total: 45 yards. Used: 2/9 × 45 = 10 yards. Remaining: 45 - 10 = 35 yards. #### 35 yards
-
-Q: The temperature on Monday was -3°C. On Tuesday, it was 14°C. What was the change in temperature from Monday to Tuesday?
-A: Monday: -3°C. Tuesday: 14°C. Change: 14 - (-3) = 17°C. #### 17°C`
+// Example usage:
+console.log(lengthOfLongestSubstring("abcabcbb")); // Output: 3
+console.log(lengthOfLongestSubstring("bbbbb"));    // Output: 1
+console.log(lengthOfLongestSubstring("pwwkew"));   // Output: 3
+\`\`\``
     };
     
     // NEW: Enhanced prompts for complex problems with different word limits
@@ -1992,6 +2016,7 @@ A: First segment: The car travels at 60 mph for 2 hours, so the distance covered
         hasMath: false,
         hasLogic: false,
         multiStep: false,
+        hasCode: false, // Add this new property
         complexity: "normal",
         wordCount: message.split(/\s+/).length, // Count words in the problem
         estimatedSteps: 0 // Will be calculated below
@@ -2048,11 +2073,18 @@ A: First segment: The car travels at 60 mph for 2 hours, so the distance covered
         }
       }
       
+      // Check for code-related patterns
+      if (/(?:implement|write|create|develop|build|code|function|class|algorithm)/i.test(message)) {
+        PROBLEM_COMPLEXITY.hasCode = true;
+        complexityScore += 1;
+      }
+      
       // Determine complexity
       let complexityScore = 0;
       if (PROBLEM_COMPLEXITY.hasMath) complexityScore += 1;
       if (PROBLEM_COMPLEXITY.hasLogic) complexityScore += 1;
       if (PROBLEM_COMPLEXITY.multiStep) complexityScore += 1;
+      if (PROBLEM_COMPLEXITY.hasCode) complexityScore += 1;
       
       // Apply more specific pattern checks
       
@@ -2100,6 +2132,11 @@ A: First segment: The car travels at 60 mph for 2 hours, so the distance covered
       
       if (PROBLEM_COMPLEXITY.hasLogic) {
         PROBLEM_COMPLEXITY.estimatedSteps += 1; // Add more steps for logical reasoning
+      }
+      
+      // If the problem has code, ensure minimum steps
+      if (PROBLEM_COMPLEXITY.hasCode) {
+        PROBLEM_COMPLEXITY.estimatedSteps = Math.max(PROBLEM_COMPLEXITY.estimatedSteps, 4);
       }
       
       // If the problem has math expressions, ensure minimum steps
@@ -2399,14 +2436,32 @@ A: First segment: The car travels at 60 mph for 2 hours, so the distance covered
      * Process Bot Messages - IMPROVED VERSION FOR COD
      ***********************/
     function processBotMessage(content, reasoningMethod) {
-      // For Chain of Draft (CoD) mode, extract thinking steps and final answer
+      // For Chain of Draft (CoD) mode with code, we need special handling
       if (reasoningMethod === "cod") {
+        // Special handling for code in CoD: Check for code blocks
+        const codeBlockRegex = /```[\s\S]*?```/g;
+        const hasCodeBlocks = codeBlockRegex.test(content);
+        
+        // Standard separator check
         const separatorIndex = content.indexOf("####");
         
         if (separatorIndex !== -1) {
           // Extract thinking steps and final answer
           let thinking = content.substring(0, separatorIndex).trim();
           let answer = content.substring(separatorIndex + 4).trim();
+          
+          // If the answer contains code blocks, it's likely a code response
+          if (hasCodeBlocks && answer.includes("```")) {
+            // This is a code response formatted correctly with separator
+            return {
+              content: content,
+              thinking: thinking,
+              answer: answer,
+              thinkingWordCount: countWords(thinking),
+              answerWordCount: countWords(answer),
+              hasCode: true
+            };
+          }
           
           return {
             content: content,
@@ -2415,29 +2470,58 @@ A: First segment: The car travels at 60 mph for 2 hours, so the distance covered
             thinkingWordCount: countWords(thinking),
             answerWordCount: countWords(answer)
           };
-        } else {
-          // Try to identify thinking steps and final answer based on structure
-          // Look for phrases that might indicate a conclusion
-          const conclusionPhrases = [
-            "Therefore", "Thus", "Hence", "So", "Result", "Answer", "Finally", 
-            "In conclusion", "The answer is", "This gives us"
-          ];
-          
-          // Split by periods to identify steps
-          const parts = content.split('.');
-          if (parts.length > 1) {
-            // Use the last part as the answer and everything else as thinking
-            const lastPart = parts.pop().trim();
-            const thinking = parts.join('.').trim();
+        } else if (hasCodeBlocks) {
+          // If no separator but has code blocks, try to separate thinking from code
+          const codeBlockMatches = [...content.matchAll(codeBlockRegex)];
+          if (codeBlockMatches.length > 0) {
+            // Use the first code block as an implicit separator
+            const firstCodeBlock = codeBlockMatches[0];
+            const codeStartIndex = firstCodeBlock.index;
             
-            return {
-              content: content,
-              thinking: thinking,
-              answer: lastPart,
-              thinkingWordCount: countWords(thinking),
-              answerWordCount: countWords(lastPart)
-            };
+            // Check if there's text before the code block that could be thinking steps
+            if (codeStartIndex > 10) { // Some minimal text before code
+              const thinking = content.substring(0, codeStartIndex).trim();
+              
+              // Everything from the first code block onwards is the answer
+              const answer = content.substring(codeStartIndex).trim();
+              
+              return {
+                content: content,
+                thinking: thinking,
+                answer: answer,
+                thinkingWordCount: countWords(thinking),
+                answerWordCount: countWords(answer),
+                hasCode: true
+              };
+            } else {
+              // If code appears at the very beginning, it's likely all answer without thinking steps
+              return {
+                content: content,
+                thinking: null,
+                answer: content,
+                thinkingWordCount: 0,
+                answerWordCount: countWords(content),
+                hasCode: true
+              };
+            }
           }
+        }
+        
+        // Try to identify thinking steps and final answer based on structure for non-code responses
+        // Split by periods to identify steps
+        const parts = content.split('.');
+        if (parts.length > 1) {
+          // Use the last part as the answer and everything else as thinking
+          const lastPart = parts.pop().trim();
+          const thinking = parts.join('.').trim();
+          
+          return {
+            content: content,
+            thinking: thinking,
+            answer: lastPart,
+            thinkingWordCount: countWords(thinking),
+            answerWordCount: countWords(lastPart)
+          };
         }
       }
       
@@ -2543,244 +2627,28 @@ A: First segment: The car travels at 60 mph for 2 hours, so the distance covered
       };
     }
 
-    /***********************
-     * Format Thinking Steps - IMPROVED FOR COD
-     ***********************/
-    function formatThinkingSteps(thinking, reasoningMethod) {
-      if (!thinking) return '';
+    // Add these functions after your PROMPTS object
+    function isProbablyCodeQuestion(message) {
+      const codeKeywords = [
+        /\b(function|class|implement|algorithm|code|program|script|write a|create a)\b/i,
+        /\b(html|css|javascript|python|java|c\+\+|ruby|php|swift|go|rust|typescript)\b/i,
+        /\b(import|require|from|def|func|const|let|var|public|private|interface)\b/i,
+        /\b(array|object|list|dictionary|data structure)\b/i,
+        /\b(loop|iterate|recursion|sorting|tree|graph|linked list)\b/i
+      ];
       
-      // Remove any "###" prefixes
-      let cleanedThinking = thinking.replace(/^#{1,3}\s*/gm, '');
-      
-      if (reasoningMethod === "cod") {
-        // Split by periods to separate steps for CoD
-        let steps = cleanedThinking.split(/\.\s*/).filter(step => step.trim().length > 0);
-        
-        // Create a more visually distinct format for CoD steps
-        return steps.map((step, index) => 
-          `<div class="step cod-step">
-            <span class="step-number">${index + 1}</span>
-            <span class="step-content">${step.trim()}${!step.endsWith('.') ? '.' : ''}</span>
-          </div>`
-        ).join('');
-      } else {
-        // Original formatting for CoT
-        let steps = cleanedThinking.split(/\.\s+/);
-        
-        return steps.filter(step => step.trim())
-          .map(step => 
-            `<div class="step">${step.trim()}${!step.endsWith('.') ? '.' : ''}</div>`
-          ).join('');
-      }
+      // Check if any of the code keywords are present in the message
+      return codeKeywords.some(pattern => pattern.test(message));
     }
 
-    /***********************
-     * Transform Message
-     ***********************/
-    function transformMessage(content) {
-      // Remove "###" prefixes from lines
-      let processedContent = content.replace(/^#{1,3}\s*/gm, '');
+    function getAppropriatePrompt(message, reasoningMethod) {
+      // If it's CoD and likely a code question, use the enhanced prompt
+      if (reasoningMethod === "cod" && isProbablyCodeQuestion(message)) {
+        return PROMPTS[reasoningMethod];
+      }
       
-      // Replace code blocks with syntax highlighting
-      const transformed = processedContent.replace(/```([\s\S]*?)```/g, (match, codeContent) => {
-        let language = '';
-        const lines = codeContent.split('\n');
-        if (lines.length > 0 && !lines[0].includes(' ')) {
-          language = lines[0].trim();
-          lines.shift();
-        }
-        return `<pre><code class="${language}">${lines.join('\n')}</code></pre>`;
-      });
-      return transformed;
-    }
-
-    /***********************
-     * Rendering Messages - IMPROVED VERSION
-     ***********************/
-    function renderCurrentThreadMessages() {
-      const chatMessagesDiv = document.getElementById("chatMessages");
-      chatMessagesDiv.innerHTML = "";
-      const thread = threads.find(t => t.id === currentThreadId);
-      if (thread) {
-        thread.messages.forEach(msg => {
-          const messageDiv = document.createElement("div");
-          messageDiv.classList.add("message", msg.sender);
-          if (msg.isPlaceholder) {
-            messageDiv.classList.add("placeholder");
-          }
-
-          const timestampStr = msg.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-          const timestampEl = document.createElement("small");
-          timestampEl.textContent = timestampStr;
-          timestampEl.style.color = "#aaa";
-          timestampEl.style.display = "block";
-          timestampEl.style.marginBottom = "0.5rem";
-          messageDiv.appendChild(timestampEl);
-
-          // Special handling for messages with thinking/answer components
-          if (msg.sender === "bot" && !msg.isPlaceholder) {
-            const messageContainer = document.createElement("div");
-            messageContainer.className = "message-container";
-            
-            // If we have thinking steps (for CoT or CoD)
-            if (msg.thinking) {
-              const thinkingDiv = document.createElement("div");
-              thinkingDiv.className = "thinking-steps";
-              
-              // Add different style class for CoD
-              if (msg.reasoningMethod && msg.reasoningMethod.startsWith("COD")) {
-                thinkingDiv.classList.add("cod-thinking");
-              }
-              
-              const thinkingLabel = document.createElement("div");
-              thinkingLabel.className = "thinking-label";
-              thinkingLabel.textContent = msg.reasoningMethod && msg.reasoningMethod.startsWith("COD") ? 
-                "Chain of Draft Steps" : "Thinking Steps";
-              thinkingDiv.appendChild(thinkingLabel);
-              
-              // Format thinking steps using the improved formatted steps function
-              const thinkingContent = document.createElement("div");
-              thinkingContent.innerHTML = formatThinkingSteps(
-                msg.thinking, 
-                msg.reasoningMethod ? msg.reasoningMethod.toLowerCase() : REASONING_METHOD
-              );
-              thinkingDiv.appendChild(thinkingContent);
-              
-              messageContainer.appendChild(thinkingDiv);
-            }
-            
-            // If we have an answer (for CoD, CoT or Standard)
-            if (msg.answer) {
-              const answerDiv = document.createElement("div");
-              answerDiv.className = "final-answer";
-              
-              const answerLabel = document.createElement("div");
-              answerLabel.className = "final-answer-label";
-              answerLabel.textContent = "Final Answer";
-              answerDiv.appendChild(answerLabel);
-              
-              const answerContent = document.createElement("div");
-              // Use our new formatting function here
-              answerContent.innerHTML = transformMessage(formatFinalAnswer(msg.answer));
-              answerDiv.appendChild(answerContent);
-              
-              messageContainer.appendChild(answerDiv);
-            }
-            
-            // If we have neither thinking nor answer (fall back to content)
-            if (!msg.thinking && !msg.answer) {
-              const contentEl = document.createElement("div");
-              contentEl.innerHTML = transformMessage(msg.content);
-              messageContainer.appendChild(contentEl);
-            }
-            
-            messageDiv.appendChild(messageContainer);
-          } else {
-            // Standard rendering for user messages or placeholders
-            const contentEl = document.createElement("div");
-            contentEl.innerHTML = transformMessage(msg.content);
-            messageDiv.appendChild(contentEl);
-            
-            // Add file attachments to user messages if present
-            if (msg.sender === "user" && msg.files && msg.files.length > 0) {
-              addFilesToMessage(messageDiv, msg.files);
-            }
-          }
-          
-          // Add word count badge for bot messages (except placeholders)
-          if (msg.sender === "bot" && !msg.isPlaceholder && msg.wordCount !== undefined) {
-            const wordCountBadge = document.createElement("div");
-            wordCountBadge.className = "word-count-badge";
-            
-            // Calculate token savings if we have CoD
-            let badgeText = `${msg.wordCount} words - ${msg.reasoningMethod || REASONING_METHOD.toUpperCase()}`;
-            
-            wordCountBadge.innerHTML = badgeText;
-            
-            // Add breakdown of thinking vs answer word counts
-            if (msg.thinkingWordCount !== undefined && msg.answerWordCount !== undefined) {
-              wordCountBadge.innerHTML += `
-                <div class="word-count-breakdown">
-                  <span class="count-item count-thinking">thinking: ${msg.thinkingWordCount}</span>
-                  <span class="count-item count-answer">answer: ${msg.answerWordCount}</span>
-                </div>
-              `;
-            }
-            
-            // If this is a CoD message, add token savings estimate
-            if (msg.reasoningMethod && msg.reasoningMethod.startsWith("COD") && thread.messages.length > 1) {
-              // Find a similar CoT message (if available) to compare token savings
-              const cotMessages = thread.messages.filter(m => 
-                m.sender === "bot" && 
-                m.reasoningMethod && 
-                m.reasoningMethod === "COT" && 
-                !m.isPlaceholder
-              );
-              
-              if (cotMessages.length > 0) {
-                // Calculate average token savings compared to CoT
-                const avgCotWords = cotMessages.reduce((sum, m) => sum + m.wordCount, 0) / cotMessages.length;
-                const savings = Math.round(100 - ((msg.wordCount / avgCotWords) * 100));
-                
-                if (savings > 0) {
-                  const savingsEl = document.createElement("div");
-                  savingsEl.className = "token-savings";
-                  savingsEl.textContent = `${savings}% fewer words than CoT`;
-                  wordCountBadge.appendChild(savingsEl);
-                }
-              }
-            }
-            
-            // Append the badge to the message div directly
-            messageDiv.appendChild(wordCountBadge);
-          }
-
-          chatMessagesDiv.appendChild(messageDiv);
-        });
-        chatMessagesDiv.scrollTop = chatMessagesDiv.scrollHeight;
-      }
-      addCodeCopyButtons();
-    }
-
-    function addMessageToCurrentThread(content, sender, isPlaceholder = false, files = []) {
-      const thread = threads.find(t => t.id === currentThreadId);
-      if (thread) {
-        // Process bot messages to separate thinking from answer
-        let thinking = null;
-        let answer = null;
-        let thinkingWordCount = 0;
-        let answerWordCount = 0;
-        let totalWordCount = 0;
-        
-        if (sender === "bot" && !isPlaceholder) {
-          const processed = processBotMessage(content, REASONING_METHOD);
-          thinking = processed.thinking;
-          answer = processed.answer;
-          thinkingWordCount = processed.thinkingWordCount || 0;
-          answerWordCount = processed.answerWordCount || 0;
-          totalWordCount = thinkingWordCount + answerWordCount;
-        }
-        
-        thread.messages.push({
-          content,
-          sender,
-          isPlaceholder,
-          timestamp: new Date(),
-          wordCount: sender === "bot" && !isPlaceholder ? totalWordCount : undefined,
-          reasoningMethod: sender === "bot" && !isPlaceholder ? 
-            (REASONING_METHOD === "cod" ? `${REASONING_METHOD.toUpperCase()}-${COD_WORD_LIMIT}` : REASONING_METHOD.toUpperCase()) : 
-            undefined,
-          thinking,
-          answer,
-          thinkingWordCount: sender === "bot" && !isPlaceholder ? thinkingWordCount : undefined,
-          answerWordCount: sender === "bot" && !isPlaceholder ? answerWordCount : undefined,
-          // Add files to the message
-          files: files && files.length > 0 ? files : undefined,
-          // NEW: Add complexity info for debugging
-          complexityInfo: sender === "user" ? PROBLEM_COMPLEXITY : undefined
-        });
-        renderCurrentThreadMessages();
-      }
+      // Otherwise, use the standard prompts
+      return PROMPTS[reasoningMethod];
     }
 
     /***********************
@@ -2838,8 +2706,9 @@ A: First segment: The car travels at 60 mph for 2 hours, so the distance covered
             }
           }
         } else {
-          // Use the selected reasoning method prompt
-          systemPrompt = PROMPTS[REASONING_METHOD];
+          // Use the selected reasoning method prompt with code detection
+          const userMessage = thread.messages.filter(msg => msg.sender === "user").pop()?.content || "";
+          systemPrompt = getAppropriatePrompt(userMessage, REASONING_METHOD);
           
           // If it's COD, update the word limit
           if (REASONING_METHOD === "cod") {
@@ -3675,10 +3544,16 @@ A: First segment: The car travels at 60 mph for 2 hours, so the distance covered
     
     // Improved function to update the CoD prompt when word limit changes
     function updateCoDPrompt() {
-      // Update the prompt to reflect new word limit
+      // Update the base prompt to include code handling
       const basePrompt = `Think step by step, but produce only minimal notes for each step (${COD_WORD_LIMIT} words maximum per step). Use mathematical notation where possible. Keep only essential information needed to solve the problem. Focus on key calculations and intermediate results without narrative explanation.
   
-Separate your steps with periods. Write your final answer after the #### separator.`;
+Separate your steps with periods. Write your final answer after the #### separator.
+
+IMPORTANT: If you need to write code as your answer, you can ignore the word limit for the code portion. Follow these guidelines:
+1. Keep your thinking steps concise as usual (${COD_WORD_LIMIT} words per step)
+2. When presenting code, place it after the #### separator
+3. For code examples, provide complete, detailed implementations without word limits
+4. Use proper formatting with code blocks (\`\`\`language) for all code`;
       
       // Keep the examples part of the prompt
       const examplesStart = PROMPTS.cod.indexOf('Examples:');
@@ -3688,9 +3563,9 @@ Separate your steps with periods. Write your final answer after the #### separat
         PROMPTS.cod = basePrompt;
       }
       
-      console.log(`Updated CoD prompt with word limit: ${COD_WORD_LIMIT}`);
+      console.log(`Updated CoD prompt with word limit: ${COD_WORD_LIMIT} and code handling`);
     }
-    
+
     // Setup Enhanced Reasoning options
     function setupEnhancedReasoningOptions() {
       const enhancedToggle = document.getElementById('enhancedReasoningToggle');
