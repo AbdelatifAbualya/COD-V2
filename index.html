@@ -1361,7 +1361,6 @@
   <div id="statusNotification" class="status-notification"></div>
 
   <!-- Settings Modal -->
-  <!-- Settings Modal -->
 <div id="settingsModal" class="modal">
   <div class="modal-content">
     <button class="close-modal" id="closeModalX">&times;</button>
@@ -1382,7 +1381,8 @@
         <select id="modelSelect" class="model-dropdown">
           <option value="" disabled selected>Choose a model...</option>
           <option value="qwen-2.5-coder-32b">Qwen 2.5 Coder (32B)</option>
-          <option value="distil-whisper-large-v3-en">Distil Whisper Large (EN)</option>
+          <option value="llama-3.3-70b-versatile">Llama 3.3 (70B)</option>
+          <option value="mixtral-8x7b-32768">Mixtral 8x7B</option>
        </select>
         <div class="dropdown-arrow">▼</div>
       </div>
@@ -1481,6 +1481,30 @@
             </ul>
             For complex problems, the model will use more detailed reasoning steps even with CoD.
           </div>
+        </div>
+      </div>
+
+      <!-- Add this right after the Enhanced Reasoning Options section in your reasoningTab -->
+      <div class="advanced-options-header">
+        Self-Consistency Voting
+        <label class="toggle-switch">
+          <input type="checkbox" id="selfConsistencyToggle">
+          <span class="toggle-slider"></span>
+        </label>
+      </div>
+
+      <div id="selfConsistencyOptions" class="self-consistency-options" style="display: none;">
+        <div class="option-description">
+          Generates multiple reasoning paths and selects the most common answer, improving accuracy on complex problems.
+        </div>
+        
+        <div class="range-container" style="margin-top: 15px;">
+          <label for="pathCount">Number of reasoning paths: <span id="pathCountValue">3</span></label>
+          <input type="range" id="pathCount" min="2" max="5" step="1" value="3">
+        </div>
+        
+        <div class="warning-message" style="margin-top: 10px; font-size: 0.8rem; color: #e8a56a;">
+          <span style="font-weight: bold;">⚠️ Note:</span> Each additional path increases processing time and API usage.
         </div>
       </div>
     </div>
@@ -3136,11 +3160,6 @@ A: First segment: The car travels at 60 mph for 2 hours, so the distance covered
           name: "Llama 3.3 (70B)",
           tags: ["70B", "Versatile", "Advanced"],
           description: "Meta's Llama 3.3 70B model offering strong performance across a wide range of tasks with advanced reasoning capabilities."
-        },
-        "claude-3.3-sonnet-20240229": {
-          name: "Claude 3.3 Sonnet",
-          tags: ["Advanced", "Reasoning", "Anthropic"],
-          description: "Anthropic's Claude 3.3 Sonnet model with enhanced reasoning capabilities."
         },
         "mixtral-8x7b-32768": {
           name: "Mixtral 8x7B",
