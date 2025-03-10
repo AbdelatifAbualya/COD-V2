@@ -52,8 +52,8 @@ exports.handler = async function(event, context) {
     const requestBody = JSON.parse(event.body);
     console.log('Request received for model:', requestBody.model);
     
-    // FIXED: Use the correct Groq API endpoint
-    const apiEndpoint = 'https://api.groq.com/v1/chat/completions';
+    // FIXED: Use the correct Groq API endpoint with OpenAI compatibility path
+    const apiEndpoint = 'https://api.groq.com/openai/v1/chat/completions';
     console.log(`Using Groq API endpoint: ${apiEndpoint}`);
     
     // Implement retry logic
