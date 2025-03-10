@@ -49,12 +49,32 @@ exports.handler = async function(event, context) {
     }
 
     // Parse the request body
-    const requestBody = JSON.parse(event.body);
+    let requestBody = JSON.parse(event.body);
     console.log('Request received for model:', requestBody.model);
     
     // FIXED: Use the correct Groq API endpoint with OpenAI compatibility path
     const apiEndpoint = 'https://api.groq.com/openai/v1/chat/completions';
     console.log(`Using Groq API endpoint: ${apiEndpoint}`);
+    
+    // Filter out unsupported parameters for Groq API
+    // List of supported Groq parameters based on Groq documentation
+    const supportedParams = [
+      'model', 'messages', 'max_tokens', 'temperature', 'top_p', 
+      'n', 'stream', 'presence_penalty', 'frequency_penalty',
+      'seed', 'response_format', 'stop', 'reasoning_format'
+    ];
+    
+    // Create a clean request body with only supported parameters
+    const cleanRequestBody = {};
+    for (const param of supportedParams) {
+      if (requestBody[param] !== undefined) {
+        cleanRequestBody[param] = requestBody[param];
+      }
+    }
+    
+    // Replace the request body with the cleaned version
+    requestBody = cleanRequestBody;
+    console.log('Sending cleaned request to Groq API');
     
     // Implement retry logic
     let retries = 3;
@@ -77,6 +97,11 @@ exports.handler = async function(event, context) {
           body: JSON.stringify(requestBody),
           signal: controller.signal
         });
+        
+        // Log request body if there's an error (for debugging)
+        if (!response.ok) {
+          console.log('Request body sent:', JSON.stringify(requestBody));
+        }
         
         // Clear timeout
         clearTimeout(timeoutId);
