@@ -1663,16 +1663,8 @@
     let REASONING_ENHANCEMENT = "adaptive"; // Options: "adaptive", "standard"
     
     // NEW: Self-consistency voting
-    let SELF_CONSISTENCY_ENABLED = false;
+    let SELF_CONSISTENCY_ENABLED = false; // DISABLED TEMPORARILY TO GET BASIC FUNCTIONALITY WORKING
     let SELF_CONSISTENCY_PATHS = 3;  // Default number of reasoning paths to generate
-    
-    // NEW: Problem complexity detection
-    let PROBLEM_COMPLEXITY = {
-      hasMath: false,
-      hasLogic: false,
-      multiStep: false,
-      complexity: "normal" // Options: "simple", "normal", "complex"
-    };
     
     // Prompts for different reasoning methods
     let PROMPTS = {
@@ -2804,10 +2796,8 @@ A: First segment: The car travels at 60 mph for 2 hours, so the distance covered
         analyzeProblemComplexity(message);
       }
       
-      // Check if there are files to be included
-      const filesToSend = [...attachedFiles]; // Make a copy of the current files
-      
       // Add message to thread with files
+      const filesToSend = [...attachedFiles]; // Make a copy of the current files
       addMessageToCurrentThread(message, "user", false, filesToSend);
       
       // Clear attached files after sending
@@ -2818,6 +2808,7 @@ A: First segment: The car travels at 60 mph for 2 hours, so the distance covered
         attachedFilesContainer.style.display = 'none';
       }
       
+      // Check if model name is set
       if (!MODEL_NAME) {
         const errorMsg = "Error: Please set the Model Name in the Settings.";
         addMessageToCurrentThread(errorMsg, "bot");
@@ -2828,408 +2819,108 @@ A: First segment: The car travels at 60 mph for 2 hours, so the distance covered
       // Parse message for word count requirements
       const wordCountRequest = parseWordCountRequest(message);
       
-      // If self-consistency is enabled and we're using CoD, use multiple paths
-      if (SELF_CONSISTENCY_ENABLED && REASONING_METHOD === "cod") {
-        addMessageToCurrentThread(`Generating ${SELF_CONSISTENCY_PATHS} reasoning paths to increase accuracy...`, "bot", true);
-        const thread = threads.find(t => t.id === currentThreadId);
-        const placeholderIndex = thread.messages.length - 1;
-        
-        // Build messages array with current settings and word count request
-        const messagesForApi = buildMessagesForChat(wordCountRequest);
-        
-        // Base payload 
-        const basePayload = {
-          model: MODEL_NAME,
-          max_tokens: MAX_TOKENS,
-          top_p: TOP_P,
-          top_k: TOP_K,
-          presence_penalty: PRESENCE_PENALTY,
-          frequency_penalty: FREQUENCY_PENALTY,
-          temperature: TEMPERATURE + 0.2, // Increase temperature slightly for diversity
-          messages: messagesForApi
-        };
-        
-        try {
-          // Generate multiple reasoning paths
-          const responses = [];
-          const answers = {};
-          
-          // Display progress in placeholder
-          thread.messages[placeholderIndex] = {
-            content: `Generating ${SELF_CONSISTENCY_PATHS} reasoning paths (0/${SELF_CONSISTENCY_PATHS} complete)...`,
-            sender: "bot",
-            isPlaceholder: true,
-            timestamp: new Date()
-          };
-          renderCurrentThreadMessages();
-          
-          for (let i = 0; i < SELF_CONSISTENCY_PATHS; i++) {
-            // Add timestamp to URL to prevent caching
-            const timestamp = new Date().getTime();
-            const cacheBuster = `?t=${timestamp}&path=${i}`;
-            
-            // Update payload with slightly different temperature for diversity
-            const pathPayload = {
-              ...basePayload,
-              temperature: basePayload.temperature + (i * 0.05) // Gradually increase temperature
-            };
-            
-            try {
-              // Update progress
-              thread.messages[placeholderIndex] = {
-                content: `Generating ${SELF_CONSISTENCY_PATHS} reasoning paths (${i}/${SELF_CONSISTENCY_PATHS} complete)...`,
-                sender: "bot",
-                isPlaceholder: true,
-                timestamp: new Date()
-              };
-              renderCurrentThreadMessages();
-              
-              // Set timeout for fetch to handle long-running requests
-              const controller = new AbortController();
-              const timeoutId = setTimeout(() => controller.abort(), 120000); // 2 minute timeout
-              
-              const response = await fetch(`${API_PROXY_URL}${cacheBuster}`, {
-                method: "POST",
-                headers: {
-                  "Content-Type": "application/json"
-                },
-                body: JSON.stringify(pathPayload),
-                signal: controller.signal
-              });
-              
-              clearTimeout(timeoutId); // Clear the timeout
-              
-              if (!response.ok) {
-                throw new Error(`HTTP error! Status: ${response.status}`);
-              }
-              
-              const data = await response.json();
-              const botReply = data.choices &&
-                             data.choices[0] &&
-                             data.choices[0].message &&
-                             data.choices[0].message.content;
-                             
-              if (botReply) {
-                const trimmedReply = botReply.trim();
-                responses.push(trimmedReply);
-                
-                // Process to extract answer
-                const processed = processBotMessage(trimmedReply, REASONING_METHOD);
-                const finalAnswer = processed.answer ? processed.answer.trim() : "";
-                
-                // Count this answer (simple voting)
-                if (finalAnswer) {
-                  // Normalize the answer a bit (remove common variants)
-                  const normalizedAnswer = normalizeAnswer(finalAnswer);
-                  answers[normalizedAnswer] = (answers[normalizedAnswer] || 0) + 1;
-                }
-              }
-            } catch (error) {
-              console.error(`Error in path ${i + 1}:`, error);
-              // Continue with other paths even if one fails
-            }
-          }
-          
-          // Find the most common answer
-          let mostCommonAnswer = "";
-          let highestCount = 0;
-          
-          for (const [answer, count] of Object.entries(answers)) {
-            if (count > highestCount) {
-              mostCommonAnswer = answer;
-              highestCount = count;
-            }
-          }
-          
-          // Calculate agreement percentage
-          const agreementPercentage = (highestCount / SELF_CONSISTENCY_PATHS) * 100;
-          
-          // Find a response that contains the most common answer
-          let bestResponse = "";
-          for (const response of responses) {
-            if (response.includes(mostCommonAnswer)) {
-              bestResponse = response;
-              break;
-            }
-          }
-          
-          // If no best response found (unlikely), use the first one
-          if (!bestResponse && responses.length > 0) {
-            bestResponse = responses[0];
-          }
-          
-          if (bestResponse) {
-            // Create response metadata
-            let reasoningInfo = `${REASONING_METHOD.toUpperCase()}-${COD_WORD_LIMIT}`;
-            reasoningInfo += `-SC-${SELF_CONSISTENCY_PATHS}`;
-            
-            // Add enhanced reasoning info if used
-            if (ENHANCED_REASONING_ENABLED && 
-                REASONING_ENHANCEMENT === "adaptive" && 
-                PROBLEM_COMPLEXITY.complexity === "complex") {
-              reasoningInfo += "-ENHANCED";
-            }
-            
-            // Check if this is likely a code question
-            const isCodeQuestion = bestResponse.includes("```");
-            
-            // Process the response to separate thinking and answer
-            let processed;
-            
-            if (isCodeQuestion && REASONING_METHOD === "cod") {
-              // Special handling for code questions with Chain of Draft
-              const separatorIndex = bestResponse.indexOf("####");
-              
-              if (separatorIndex !== -1) {
-                // We found the standard separator
-                processed = {
-                  content: bestResponse,
-                  thinking: bestResponse.substring(0, separatorIndex).trim(),
-                  answer: bestResponse.substring(separatorIndex + 4).trim(),
-                };
-              } else {
-                // Look for the first code block as a separator
-                const codeBlockMatch = bestResponse.match(/```[\s\S]*?```/g);
-                
-                if (codeBlockMatch && codeBlockMatch.length > 0) {
-                  const firstCodeBlock = codeBlockMatch[0];
-                  const codeIndex = bestResponse.indexOf(firstCodeBlock);
-                  
-                  if (codeIndex > 0) {
-                    // Everything before the first code block is thinking
-                    processed = {
-                      content: bestResponse,
-                      thinking: bestResponse.substring(0, codeIndex).trim(),
-                      answer: bestResponse.substring(codeIndex).trim(),
-                    };
-                  } else {
-                    // If code block is at the beginning, treat everything as answer
-                    processed = {
-                      content: bestResponse,
-                      thinking: "",
-                      answer: bestResponse,
-                    };
-                  }
-                } else {
-                  // Fall back to standard processing
-                  processed = processBotMessage(bestResponse, REASONING_METHOD);
-                }
-              }
-              
-              // Calculate word counts
-              if (processed.thinking) {
-                processed.thinkingWordCount = countWords(processed.thinking);
-              } else {
-                processed.thinkingWordCount = 0;
-              }
-              
-              if (processed.answer) {
-                processed.answerWordCount = countWords(processed.answer);
-              } else {
-                processed.answerWordCount = 0;
-              }
-            } else {
-              // Standard processing for non-code questions
-              processed = processBotMessage(bestResponse, REASONING_METHOD);
-            }
-            
-            // Build an explanation of the self-consistency results
-            const selfConsistencyInfo = `
+      // Add a typing indicator
+      addMessageToCurrentThread("Bot is typing...", "bot", true);
+      const thread = threads.find(t => t.id === currentThreadId);
+      const placeholderIndex = thread.messages.length - 1;
 
----
-**Self-Consistency Summary:**
-- Generated ${SELF_CONSISTENCY_PATHS} independent reasoning paths
-- ${highestCount} paths agreed on this answer (${Math.round(agreementPercentage)}% agreement)`;
-            
-            // Append the self-consistency info to the answer
-            if (processed.answer) {
-              processed.answer += selfConsistencyInfo;
-            } else {
-              processed.answer = bestResponse + selfConsistencyInfo;
-            }
-            
-            thread.messages[placeholderIndex] = {
-              content: bestResponse + selfConsistencyInfo,
-              sender: "bot",
-              isPlaceholder: false,
-              timestamp: new Date(),
-              wordCount: (processed.thinkingWordCount || 0) + (processed.answerWordCount || 0),
-              reasoningMethod: reasoningInfo,
-              thinking: processed.thinking,
-              answer: processed.answer,
-              thinkingWordCount: processed.thinkingWordCount || 0,
-              answerWordCount: processed.answerWordCount || 0,
-              selfConsistencyResults: {
-                paths: SELF_CONSISTENCY_PATHS,
-                agreement: agreementPercentage,
-                agreementCount: highestCount,
-                allResponses: responses
-              }
-            };
-          } else {
-            thread.messages[placeholderIndex] = {
-              content: "No valid responses received. Check model name and API key.",
-              sender: "bot",
-              isPlaceholder: false,
-              timestamp: new Date(),
-              wordCount: 0,
-              reasoningMethod: REASONING_METHOD.toUpperCase(),
-              thinking: null,
-              answer: null,
-              thinkingWordCount: 0,
-              answerWordCount: 0
-            };
-          }
-        } catch (error) {
-          console.error("Error in self-consistency:", error);
-          
-          thread.messages[placeholderIndex] = {
-            content: "Error generating multiple reasoning paths: " + error.message,
-            sender: "bot",
-            isPlaceholder: false,
-            timestamp: new Date(),
-            wordCount: 0,
-            reasoningMethod: REASONING_METHOD.toUpperCase(),
-            thinking: null,
-            answer: null,
-            thinkingWordCount: 0,
-            answerWordCount: 0
-          };
-        }
-        
-        renderCurrentThreadMessages();
-      } else {
-        // Standard message sending (existing code)
-        addMessageToCurrentThread("Bot is typing...", "bot", true);
-        const thread = threads.find(t => t.id === currentThreadId);
-        const placeholderIndex = thread.messages.length - 1;
+      // Build messages array with current settings and word count request
+      const messagesForApi = buildMessagesForChat(wordCountRequest);
 
-        // Build messages array with current settings and word count request
-        const messagesForApi = buildMessagesForChat(wordCountRequest);
-
-        // Create payload
-        const payload = {
-          model: MODEL_NAME,
-          max_tokens: MAX_TOKENS,
-          top_p: TOP_P,
-          top_k: TOP_K,
-          presence_penalty: PRESENCE_PENALTY,
-          frequency_penalty: FREQUENCY_PENALTY,
-          temperature: TEMPERATURE,
-          messages: messagesForApi
-        };
-        
-        console.log(`Sending request with ${REASONING_METHOD} reasoning ${REASONING_METHOD === "cod" ? `(word limit: ${COD_WORD_LIMIT})` : ""}`);
-        if (wordCountRequest) {
-          console.log(`Final answer word limit requested: ${wordCountRequest} words`);
-        }
-        console.log(`Parameters: temp=${TEMPERATURE}, top_p=${TOP_P}, top_k=${TOP_K}`);
-
-        try {
-          // Add timestamp to URL to prevent caching
-          const timestamp = new Date().getTime();
-          const cacheBuster = `?t=${timestamp}`;
-          
-          // Set timeout for fetch to handle long-running requests
-          const controller = new AbortController();
-          const timeoutId = setTimeout(() => controller.abort(), 120000); // 2 minute timeout
-          
-          const response = await fetch(`${API_PROXY_URL}${cacheBuster}`, {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json"
-            },
-            body: JSON.stringify(payload),
-            signal: controller.signal
-          });
-          
-          clearTimeout(timeoutId); // Clear the timeout
-          
-          if (!response.ok) {
-            console.error("API response error:", response.status, response.statusText);
-            throw new Error(`HTTP error! Status: ${response.status}`);
-          }
-          
-          const data = await response.json();
-          const botReply = data.choices &&
-                           data.choices[0] &&
-                           data.choices[0].message &&
-                           data.choices[0].message.content;
-          if (botReply) {
-            const trimmedReply = botReply.trim();
-            
-            // Create response metadata
-            let reasoningInfo = REASONING_METHOD.toUpperCase();
-            if (REASONING_METHOD === "cod") {
-              reasoningInfo += `-${COD_WORD_LIMIT}`;
-            }
-            
-            // Add enhanced reasoning info if used
-            if (ENHANCED_REASONING_ENABLED && 
-                REASONING_ENHANCEMENT === "adaptive" && 
-                PROBLEM_COMPLEXITY.complexity === "complex") {
-              reasoningInfo += "-ENHANCED";
-            }
-            
-            // Process bot message to separate thinking and answer parts
-            const processed = processBotMessage(trimmedReply, REASONING_METHOD);
-            
-            thread.messages[placeholderIndex] = {
-              content: trimmedReply,
-              sender: "bot",
-              isPlaceholder: false,
-              timestamp: new Date(),
-              wordCount: (processed.thinkingWordCount || 0) + (processed.answerWordCount || 0),
-              reasoningMethod: reasoningInfo,
-              thinking: processed.thinking,
-              answer: processed.answer,
-              thinkingWordCount: processed.thinkingWordCount || 0,
-              answerWordCount: processed.answerWordCount || 0
-            };
-          } else {
-            thread.messages[placeholderIndex] = {
-              content: "No valid response received. Check model name and API key.",
-              sender: "bot",
-              isPlaceholder: false,
-              timestamp: new Date(),
-              wordCount: 0,
-              reasoningMethod: REASONING_METHOD.toUpperCase(),
-              thinking: null,
-              answer: null,
-              thinkingWordCount: 0,
-              answerWordCount: 0
-            };
-          }
-        } catch (error) {
-          console.error("Error communicating with API:", error);
-          
-          // Provide more detailed error message
-          let errorMessage = "Error communicating with API: " + error.message;
-          
-          // Add suggestions based on error type
-          if (error.message.includes("Failed to fetch")) {
-            errorMessage += "\n\nPossible solutions:\n1. Make sure your API key is set correctly in Netlify\n2. Check that your model name is valid\n3. Verify your internet connection";
-          } else if (error.message.includes("aborted")) {
-            errorMessage += "\n\nThe request timed out after 2 minutes. Try again or use a different model.";
-          } else if (error.message.includes("502")) {
-            errorMessage += "\n\nThe Qroq API server returned a 502 Bad Gateway error. This usually indicates a temporary server issue. Please try again in a few minutes.";
-          }
-          
-          thread.messages[placeholderIndex] = {
-            content: errorMessage,
-            sender: "bot",
-            isPlaceholder: false,
-            timestamp: new Date(),
-            wordCount: 0,
-            reasoningMethod: REASONING_METHOD.toUpperCase(),
-            thinking: null,
-            answer: null,
-            thinkingWordCount: 0,
-            answerWordCount: 0
-          };
-        }
-        renderCurrentThreadMessages();
+      // Create a clean payload with only supported parameters
+      const payload = buildApiPayload(messagesForApi);
+      
+      console.log(`Sending request to model: ${payload.model}`);
+      console.log(`Reasoning method: ${REASONING_METHOD} ${REASONING_METHOD === "cod" ? `(word limit: ${COD_WORD_LIMIT})` : ""}`);
+      if (wordCountRequest) {
+        console.log(`Final answer word limit requested: ${wordCountRequest} words`);
       }
+      console.log(`Parameters: temp=${TEMPERATURE}, top_p=${TOP_P}, top_k=${TOP_K}`);
+
+      try {
+        // Add timestamp to URL to prevent caching
+        const timestamp = new Date().getTime();
+        const cacheBuster = `?t=${timestamp}`;
+        
+        // Set timeout for fetch to handle long-running requests
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => {
+          controller.abort();
+        }, 120000); // 2 minute timeout
+        
+        const response = await fetch(`${API_PROXY_URL}${cacheBuster}`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify(payload),
+          signal: controller.signal
+        });
+        
+        clearTimeout(timeoutId); // Clear the timeout
+        
+        if (!response.ok) {
+          console.error("API response error:", response.status, response.statusText);
+          const errorData = await response.json();
+          console.error("Error details:", errorData);
+          throw new Error(`HTTP error! Status: ${response.status}, Details: ${JSON.stringify(errorData)}`);
+        }
+        
+        const data = await response.json();
+        const botReply = data.choices &&
+                        data.choices[0] &&
+                        data.choices[0].message &&
+                        data.choices[0].message.content;
+        if (botReply) {
+          const trimmedReply = botReply.trim();
+          
+          // Create response metadata
+          let reasoningInfo = REASONING_METHOD.toUpperCase();
+          if (REASONING_METHOD === "cod") {
+            reasoningInfo += `-${COD_WORD_LIMIT}`;
+          }
+          
+          // Add enhanced reasoning info if used
+          if (ENHANCED_REASONING_ENABLED && 
+              REASONING_ENHANCEMENT === "adaptive" && 
+              PROBLEM_COMPLEXITY.complexity === "complex") {
+            reasoningInfo += "-ENHANCED";
+          }
+          
+          // Process bot message to separate thinking and answer parts
+          const processed = processBotMessage(trimmedReply, REASONING_METHOD);
+          
+          thread.messages[placeholderIndex] = {
+            content: trimmedReply,
+            sender: "bot",
+            isPlaceholder: false,
+            timestamp: new Date(),
+            wordCount: (processed.thinkingWordCount || 0) + (processed.answerWordCount || 0),
+            reasoningMethod: reasoningInfo,
+            thinking: processed.thinking,
+            answer: processed.answer,
+            thinkingWordCount: processed.thinkingWordCount || 0,
+            answerWordCount: processed.answerWordCount || 0
+          };
+        } else {
+          thread.messages[placeholderIndex] = {
+            content: "No valid response received. Check model name and API key.",
+            sender: "bot",
+            isPlaceholder: false,
+            timestamp: new Date(),
+            wordCount: 0,
+            reasoningMethod: REASONING_METHOD.toUpperCase(),
+            thinking: null,
+            answer: null,
+            thinkingWordCount: 0,
+            answerWordCount: 0
+          };
+        }
+      } catch (error) {
+        handleApiError(error, placeholderIndex);
+      }
+      
+      renderCurrentThreadMessages();
     }
 
     /***********************
@@ -3387,20 +3078,23 @@ A: First segment: The car travels at 60 mph for 2 hours, so the distance covered
       const modelTags = document.getElementById('modelTags');
       const modelDescription = document.getElementById('modelDescription');
       
-      // Model information database for Qroq models
+      // 4. Update the model info database to include Groq model paths
       const modelInfo = {
         "qwen-2.5-coder-32b": {
           name: "Qwen 2.5 Coder (32B)",
+          path: "qwen/qwen-2.5-32b-coder-instruct", // Add this property
           tags: ["32B", "Coding", "Reasoning"],
           description: "Alibaba's Qwen 2.5 Coder model specialized for programming tasks with strong reasoning capabilities."
         },
         "llama-3.3-70b-versatile": {
           name: "Llama 3.3 (70B)",
+          path: "llama3/llama-3.3-70b-versatile", // Add this property
           tags: ["70B", "Versatile", "Advanced"],
           description: "Meta's Llama 3.3 70B model offering strong performance across a wide range of tasks with advanced reasoning capabilities."
         },
         "mixtral-8x7b-32768": {
           name: "Mixtral 8x7B",
+          path: "mixtral-8x7b-32768", // Add this property
           tags: ["MoE", "General", "Balanced"],
           description: "Mixture of Experts model offering strong performance across diverse tasks."
         }
@@ -4274,6 +3968,93 @@ IMPORTANT: If you need to write code as your answer, you can ignore the word lim
       if (bytes < 1024) return bytes + ' bytes';
       else if (bytes < 1048576) return (bytes / 1024).toFixed(1) + ' KB';
       else return (bytes / 1048576).toFixed(1) + ' MB';
+    }
+
+    // 1. Add function to transform model names into correct Groq model path format
+    function getGroqModelPath(modelId) {
+      // Map of local model ids to Groq model paths
+      const modelMap = {
+        "qwen-2.5-coder-32b": "qwen/qwen-2.5-32b-coder-instruct",
+        "llama-3.3-70b-versatile": "llama3/llama-3.3-70b-versatile",
+        "mixtral-8x7b-32768": "mixtral-8x7b-32768",
+      };
+      
+      return modelMap[modelId] || modelId; // Return mapped value or original if no mapping exists
+    }
+
+    // 2. Create a clean payload with only supported parameters
+    function buildApiPayload(messagesForApi) {
+      // Create a clean payload with only supported parameters
+      const payload = {
+        model: getGroqModelPath(MODEL_NAME), // Transform to proper Groq model path
+        messages: messagesForApi,
+        temperature: TEMPERATURE,
+        max_tokens: MAX_TOKENS
+      };
+      
+      // Only include known supported parameters
+      if (TOP_P !== undefined && TOP_P !== null) {
+        payload.top_p = TOP_P;
+      }
+      
+      if (TOP_K !== undefined && TOP_K !== null) {
+        payload.top_k = TOP_K;
+      }
+      
+      if (PRESENCE_PENALTY !== undefined && PRESENCE_PENALTY !== null) {
+        payload.presence_penalty = PRESENCE_PENALTY;
+      }
+      
+      if (FREQUENCY_PENALTY !== undefined && FREQUENCY_PENALTY !== null) {
+        payload.frequency_penalty = FREQUENCY_PENALTY;
+      }
+      
+      return payload;
+    }
+
+    // 3. Improved API error handling function
+    function handleApiError(error, placeholderIndex) {
+      console.error("Error communicating with API:", error);
+      
+      // Get the current thread
+      const thread = threads.find(t => t.id === currentThreadId);
+      if (!thread) return;
+      
+      // Provide a detailed error message that helps with debugging
+      let errorMessage = "Error communicating with API: " + error.message;
+      
+      // Add debugging information
+      errorMessage += "\n\nDebug Information:";
+      errorMessage += "\n- Model: " + getGroqModelPath(MODEL_NAME);
+      errorMessage += "\n- Reasoning Method: " + REASONING_METHOD;
+      
+      // Add specific suggestions based on error type
+      if (error.message.includes("Failed to fetch")) {
+        errorMessage += "\n\nPossible solutions:\n1. Make sure your API key is set correctly in Netlify\n2. Check that your model name is valid\n3. Verify your internet connection";
+      } else if (error.message.includes("aborted")) {
+        errorMessage += "\n\nThe request timed out after 2 minutes. Try again or use a different model.";
+      } else if (error.message.includes("502")) {
+        errorMessage += "\n\nThe Groq API server returned a 502 Bad Gateway error. This usually indicates a temporary server issue. Please try again in a few minutes.";
+      } else if (error.message.includes("invalid model")) {
+        errorMessage += "\n\nThe model name '"+ getGroqModelPath(MODEL_NAME) +"' is not recognized by Groq API. Make sure you're using a supported model.";
+      }
+      
+      // Update the message in the thread
+      thread.messages[placeholderIndex] = {
+        content: errorMessage,
+        sender: "bot",
+        isPlaceholder: false,
+        timestamp: new Date(),
+        wordCount: 0,
+        reasoningMethod: REASONING_METHOD.toUpperCase(),
+        thinking: null,
+        answer: null,
+        thinkingWordCount: 0,
+        answerWordCount: 0
+      };
+      
+      // Re-render the messages
+      renderCurrentThreadMessages();
     }
   </script>
   <form hidden method='post' name='feedback'>
