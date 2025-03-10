@@ -1382,7 +1382,7 @@
         <select id="modelSelect" class="model-dropdown">
           <option value="" disabled selected>Choose a model...</option>
           <option value="qwen-2.5-coder-32b">Qwen 2.5 Coder (32B)</option>
-          <option value="llama-3.3-70b-versatile">Distil Whisper Large (EN)</option>
+          <option value="distil-whisper-large-v3-en">Distil Whisper Large (EN)</option>
        </select>
         <div class="dropdown-arrow">▼</div>
       </div>
@@ -2873,15 +2873,23 @@ A: First segment: The car travels at 60 mph for 2 hours, so the distance covered
         const timestamp = new Date().getTime();
         const cacheBuster = `?t=${timestamp}`;
         
+        // Set timeout for fetch to handle long-running requests
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 120000); // 2 minute timeout
+        
         const response = await fetch(`${API_PROXY_URL}${cacheBuster}`, {
           method: "POST",
           headers: {
             "Content-Type": "application/json"
           },
-          body: JSON.stringify(payload)
+          body: JSON.stringify(payload),
+          signal: controller.signal
         });
         
+        clearTimeout(timeoutId); // Clear the timeout
+        
         if (!response.ok) {
+          console.error("API response error:", response.status, response.statusText);
           throw new Error(`HTTP error! Status: ${response.status}`);
         }
         
@@ -2944,6 +2952,10 @@ A: First segment: The car travels at 60 mph for 2 hours, so the distance covered
         // Add suggestions based on error type
         if (error.message.includes("Failed to fetch")) {
           errorMessage += "\n\nPossible solutions:\n1. Make sure your API key is set correctly in Netlify\n2. Check that your model name is valid\n3. Verify your internet connection";
+        } else if (error.message.includes("aborted")) {
+          errorMessage += "\n\nThe request timed out after 2 minutes. Try again or use a different model.";
+        } else if (error.message.includes("502")) {
+          errorMessage += "\n\nThe Qroq API server returned a 502 Bad Gateway error. This usually indicates a temporary server issue. Please try again in a few minutes.";
         }
         
         thread.messages[placeholderIndex] = {
@@ -3105,92 +3117,114 @@ A: First segment: The car travels at 60 mph for 2 hours, so the distance covered
     }
     
     // Custom model handling
-// Setup model input handling for Groq models
-function setupModelInput() {
-  const modelSelect = document.getElementById('modelSelect');
-  const setModelBtn = document.getElementById('setModelBtn');
-  const modelInfoCard = document.getElementById('modelInfoCard');
-  const selectedModelName = document.getElementById('selectedModelName');
-  const modelTags = document.getElementById('modelTags');
-  const modelDescription = document.getElementById('modelDescription');
-  
-  // Model information database for Groq models
-  const modelInfo = {
-  "qwen-2.5-coder-32b": {
-    name: "Qwen 2.5 Coder (32B)",
-    tags: ["32B", "Coding", "Reasoning"],
-    description: "Alibaba's Qwen 2.5 Coder model specialized for programming tasks with strong reasoning capabilities."
-  },
-  "llama-3.3-70b-versatile": {
-    name: "Llama 3.3 (70B)",
-    tags: ["70B", "Versatile", "Advanced"],
-    description: "Meta's Llama 3.3 70B model offering strong performance across a wide range of tasks with advanced reasoning capabilities."
-  }
-};
-  
-  // Initialize with current model if set
-  if (MODEL_NAME && modelInfo[MODEL_NAME]) {
-    modelSelect.value = MODEL_NAME;
-    updateModelInfo(MODEL_NAME);
-  }
-  
-  // Update model info card when selection changes
-  modelSelect.addEventListener('change', () => {
-    const selectedModel = modelSelect.value;
-    updateModelInfo(selectedModel);
-  });
-  
-  function updateModelInfo(modelId) {
-    if (modelInfo[modelId]) {
-      const info = modelInfo[modelId];
+    function setupModelInput() {
+      const modelSelect = document.getElementById('modelSelect');
+      const setModelBtn = document.getElementById('setModelBtn');
+      const modelInfoCard = document.getElementById('modelInfoCard');
+      const selectedModelName = document.getElementById('selectedModelName');
+      const modelTags = document.getElementById('modelTags');
+      const modelDescription = document.getElementById('modelDescription');
       
-      // Update header
-      selectedModelName.textContent = info.name;
+      // Model information database for Qroq models
+      const modelInfo = {
+        "qwen-2.5-coder-32b": {
+          name: "Qwen 2.5 Coder (32B)",
+          tags: ["32B", "Coding", "Reasoning"],
+          description: "Alibaba's Qwen 2.5 Coder model specialized for programming tasks with strong reasoning capabilities."
+        },
+        "llama-3.3-70b-versatile": {
+          name: "Llama 3.3 (70B)",
+          tags: ["70B", "Versatile", "Advanced"],
+          description: "Meta's Llama 3.3 70B model offering strong performance across a wide range of tasks with advanced reasoning capabilities."
+        },
+        "claude-3.3-sonnet-20240229": {
+          name: "Claude 3.3 Sonnet",
+          tags: ["Advanced", "Reasoning", "Anthropic"],
+          description: "Anthropic's Claude 3.3 Sonnet model with enhanced reasoning capabilities."
+        },
+        "mixtral-8x7b-32768": {
+          name: "Mixtral 8x7B",
+          tags: ["MoE", "General", "Balanced"],
+          description: "Mixture of Experts model offering strong performance across diverse tasks."
+        }
+      };
       
-      // Update tags
-      modelTags.innerHTML = '';
-      info.tags.forEach(tag => {
-        const tagElement = document.createElement('span');
-        tagElement.className = 'model-tag';
-        tagElement.textContent = tag;
-        modelTags.appendChild(tagElement);
+      // Clear existing options except the default one
+      while (modelSelect.options.length > 1) {
+        modelSelect.remove(1);
+      }
+      
+      // Add models from the modelInfo object
+      for (const [id, info] of Object.entries(modelInfo)) {
+        const option = document.createElement('option');
+        option.value = id;
+        option.textContent = info.name;
+        modelSelect.appendChild(option);
+      }
+      
+      // Initialize with current model if set
+      if (MODEL_NAME && modelInfo[MODEL_NAME]) {
+        modelSelect.value = MODEL_NAME;
+        updateModelInfo(MODEL_NAME);
+      }
+      
+      // Update model info card when selection changes
+      modelSelect.addEventListener('change', () => {
+        const selectedModel = modelSelect.value;
+        updateModelInfo(selectedModel);
       });
       
-      // Update description
-      modelDescription.textContent = info.description;
+      function updateModelInfo(modelId) {
+        if (modelInfo[modelId]) {
+          const info = modelInfo[modelId];
+          
+          // Update header
+          selectedModelName.textContent = info.name;
+          
+          // Update tags
+          modelTags.innerHTML = '';
+          info.tags.forEach(tag => {
+            const tagElement = document.createElement('span');
+            tagElement.className = 'model-tag';
+            tagElement.textContent = tag;
+            modelTags.appendChild(tagElement);
+          });
+          
+          // Update description
+          modelDescription.textContent = info.description;
+          
+          // Show the card with animation
+          modelInfoCard.style.display = 'block';
+          modelInfoCard.style.opacity = '0';
+          modelInfoCard.style.transform = 'translateY(10px)';
+          
+          // Animate in
+          setTimeout(() => {
+            modelInfoCard.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
+            modelInfoCard.style.opacity = '1';
+            modelInfoCard.style.transform = 'translateY(0)';
+          }, 10);
+        } else {
+          // Hide or reset the card if no valid model
+          selectedModelName.textContent = 'No model selected';
+          modelTags.innerHTML = '';
+          modelDescription.textContent = 'Select a model to see details';
+        }
+      }
       
-      // Show the card with animation
-      modelInfoCard.style.display = 'block';
-      modelInfoCard.style.opacity = '0';
-      modelInfoCard.style.transform = 'translateY(10px)';
-      
-      // Animate in
-      setTimeout(() => {
-        modelInfoCard.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
-        modelInfoCard.style.opacity = '1';
-        modelInfoCard.style.transform = 'translateY(0)';
-      }, 10);
-    } else {
-      // Hide or reset the card if no valid model
-      selectedModelName.textContent = 'No model selected';
-      modelTags.innerHTML = '';
-      modelDescription.textContent = 'Select a model to see details';
+      // Set model button
+      setModelBtn.addEventListener('click', () => {
+        const modelName = modelSelect.value;
+        if (modelName) {
+          MODEL_NAME = modelName;
+          MODEL_NAME_DISPLAY = modelInfo[modelName] ? modelInfo[modelName].name : getModelDisplayName(modelName);
+          updateCurrentModelDisplay();
+          showNotification('Model set: ' + MODEL_NAME_DISPLAY);
+        } else {
+          showNotification('Please select a valid model');
+        }
+      });
     }
-  }
-  
-  // Set model button
-  setModelBtn.addEventListener('click', () => {
-    const modelName = modelSelect.value;
-    if (modelName) {
-      MODEL_NAME = modelName;
-      MODEL_NAME_DISPLAY = modelInfo[modelName] ? modelInfo[modelName].name : getModelDisplayName(modelName);
-      updateCurrentModelDisplay();
-      showNotification('Model set: ' + MODEL_NAME_DISPLAY);
-    } else {
-      showNotification('Please select a valid model');
-    }
-  });
-}
     
     // Improved Chain of Draft word limit options UI
     function updateCoDOptionsUI() {
@@ -3482,6 +3516,9 @@ Separate your steps with periods. Write your final answer after the #### separat
         };
         
         TEMPERATURE = getNumericValue("temp", 0.5, parseFloat);
+        // Add this line - Qroq API can sometimes reject 0 as a temperature value
+        if (TEMPERATURE === 0) TEMPERATURE = 0.01; // Ensure minimum value for Qroq API
+        
         TOP_P = getNumericValue("topP", 0.9, parseFloat);
         TOP_K = getNumericValue("topK", 55, parseInt);
         MAX_TOKENS = getNumericValue("maxTokens", 1112, parseInt);
@@ -3528,6 +3565,38 @@ Separate your steps with periods. Write your final answer after the #### separat
         console.error("Error in saveSettings:", err);
         showNotification("Error saving settings");
       }
+    }
+
+    // ADD this function to ensure tab content displays correctly
+    function fixTabContentDisplay() {
+      // Force active tabs to be properly displayed
+      const activeTab = document.querySelector('.tab-content.active');
+      if (activeTab) {
+        // Force redraw by toggling display
+        activeTab.style.display = 'none';
+        setTimeout(() => {
+          activeTab.style.display = 'block';
+        }, 10);
+      }
+      
+      // Ensure reasoning and parameters tabs display properly when clicked
+      const reasoningTab = document.getElementById('reasoningTab');
+      const parametersTab = document.getElementById('parametersTab');
+      const tabButtons = document.querySelectorAll('.tab-btn');
+      
+      tabButtons.forEach(btn => {
+        btn.addEventListener('click', () => {
+          // Add a small delay to ensure tab content is properly styled
+          setTimeout(() => {
+            const tabId = btn.getAttribute('data-tab');
+            const tabContent = document.getElementById(tabId);
+            if (tabContent) {
+              tabContent.style.width = '100%';
+              tabContent.style.display = 'block';
+            }
+          }, 50);
+        });
+      });
     }
 
     /***********************
@@ -3735,6 +3804,12 @@ Separate your steps with periods. Write your final answer after the #### separat
             }
           }, 1000);
         }
+        
+        // Fix tab content display issues
+        setTimeout(() => {
+          fixTabContentDisplay();
+          console.log("Fixed tab content display");
+        }, 200);
       } catch (err) {
         console.error("Initialization error:", err);
       }
