@@ -4,7 +4,7 @@ const { AbortController } = require('abort-controller');
 const { Buffer } = require('buffer');
 
 /**
- * Netlify serverless function to proxy requests to Groq API
+ * Netlify serverless function to proxy requests to Qroq API
  */
 exports.handler = async function(event, context) {
   // Set up CORS headers
@@ -32,59 +32,67 @@ exports.handler = async function(event, context) {
     };
   }
 
-  // Check if Groq API key is configured
-  if (!process.env.GROQ_API_KEY) {
-    console.error('GROQ_API_KEY not found in environment variables');
-    return {
-      statusCode: 500,
-      headers,
-      body: JSON.stringify({ 
-        error: 'API key configuration error',
-        details: 'GROQ_API_KEY environment variable is not set'
-      })
-    };
-  }
-
-  // Parse the request body
-  let requestBody;
   try {
-    requestBody = JSON.parse(event.body);
-  } catch (error) {
-    return {
-      statusCode: 400,
-      headers,
-      body: JSON.stringify({ error: 'Invalid JSON in request body' })
-    };
-  }
+    // Check if API key is set - explicitly check for QROQ_API_KEY first since that's what the user set
+    const apiKey = process.env.QROQ_API_KEY || process.env.GROQ_API_KEY || process.env.API_KEY;
+    if (!apiKey) {
+      console.error('No API key found in environment variables');
+      return {
+        statusCode: 500,
+        headers,
+        body: JSON.stringify({ 
+          error: 'API key not configured',
+          message: 'Please set QROQ_API_KEY in your Netlify environment variables'
+        })
+      };
+    }
 
-  // Validate required parameters
-  const { model, messages } = requestBody;
-  if (!model) {
-    return {
-      statusCode: 400,
-      headers,
-      body: JSON.stringify({ error: 'Missing required parameter: model' })
-    };
-  }
-  
-  if (!messages || !Array.isArray(messages) || messages.length === 0) {
-    return {
-      statusCode: 400,
-      headers,
-      body: JSON.stringify({ error: 'Missing or invalid messages array' })
-    };
-  }
+    // Parse the request body
+    let requestBody;
+    try {
+      requestBody = JSON.parse(event.body);
+    } catch (error) {
+      return {
+        statusCode: 400,
+        headers,
+        body: JSON.stringify({ error: 'Invalid JSON in request body' })
+      };
+    }
 
-  // Generate a request ID for tracking
-  const requestId = Date.now().toString(36) + Math.random().toString(36).substr(2);
-  console.log(`[${requestId}] Processing request for model: ${model}`);
+    // Log request info
+    console.log('Request received for model:', requestBody.model);
 
-  // Set up retry logic
-  const MAX_RETRIES = 3;
-  let retries = MAX_RETRIES;
-  let response = null;
+    // Validate required parameters
+    const { model, messages } = requestBody;
+    if (!model) {
+      return {
+        statusCode: 400,
+        headers,
+        body: JSON.stringify({ error: 'Missing required parameter: model' })
+      };
+    }
+    
+    if (!messages || !Array.isArray(messages) || messages.length === 0) {
+      return {
+        statusCode: 400,
+        headers,
+        body: JSON.stringify({ error: 'Missing or invalid messages array' })
+      };
+    }
 
-  try {
+    // We'll use the Qroq API endpoint
+    const apiEndpoint = 'https://api.qroq.com/v1/chat/completions';
+    console.log(`Using Qroq API endpoint: ${apiEndpoint}`);
+
+    // Generate a request ID for tracking
+    const requestId = Date.now().toString(36) + Math.random().toString(36).substr(2);
+    console.log(`[${requestId}] Processing request for model: ${model}`);
+
+    // Set up retry logic
+    const MAX_RETRIES = 3;
+    let retries = MAX_RETRIES;
+    let response = null;
+
     // Configure timeout
     const controller = new AbortController();
     const timeoutDuration = 110000; // 110 seconds (just under Netlify's 120s limit)
@@ -96,13 +104,13 @@ exports.handler = async function(event, context) {
     // Retry loop
     while (retries > 0) {
       try {
-        // Make a request to the Groq API
-        console.log(`Sending request to Groq API (attempts remaining: ${retries})`);
-        response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+        // Make a request to the Qroq API
+        console.log(`Sending request to Qroq API (attempts remaining: ${retries})`);
+        response = await fetch(apiEndpoint, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
-            'Authorization': `Bearer ${process.env.GROQ_API_KEY}`
+            'Authorization': `Bearer ${apiKey}`
           },
           body: JSON.stringify(requestBody),
           signal: controller.signal
@@ -128,7 +136,7 @@ exports.handler = async function(event, context) {
     
     // Check if we have a response
     if (!response) {
-      throw new Error('Failed to get response from Groq API after multiple attempts');
+      throw new Error('Failed to get response from Qroq API after multiple attempts');
     }
 
     // Parse the response
@@ -136,12 +144,12 @@ exports.handler = async function(event, context) {
     
     // Check for API errors
     if (!response.ok) {
-      console.error(`[${requestId}] Groq API error:`, responseData);
+      console.error(`[${requestId}] Qroq API error:`, responseData);
       return {
         statusCode: response.status,
         headers,
         body: JSON.stringify({ 
-          error: 'Groq API Error',
+          error: 'Qroq API Error',
           details: responseData.error || responseData
         })
       };
@@ -154,7 +162,7 @@ exports.handler = async function(event, context) {
       body: JSON.stringify(responseData)
     };
   } catch (error) {
-    console.error(`[${requestId}] Error:`, error);
+    console.error(`Error processing request:`, error);
     
     let errorMessage = 'Error processing request';
     let statusCode = 500;
@@ -163,10 +171,10 @@ exports.handler = async function(event, context) {
       errorMessage = `Request timed out after ${timeoutDuration / 1000} seconds`;
       statusCode = 504;
     } else if (error.code === 'ENOTFOUND' || error.code === 'ECONNREFUSED') {
-      errorMessage = 'Could not connect to Groq API';
+      errorMessage = 'Could not connect to Qroq API';
       statusCode = 502;
     } else if (error.code === 'ETIMEDOUT') {
-      errorMessage = 'Connection to Groq API timed out';
+      errorMessage = 'Connection to Qroq API timed out';
       statusCode = 504;
     }
     
@@ -175,8 +183,7 @@ exports.handler = async function(event, context) {
       headers,
       body: JSON.stringify({ 
         error: errorMessage,
-        details: error.message,
-        requestId
+        details: error.message
       })
     };
   }
