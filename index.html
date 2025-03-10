@@ -3101,12 +3101,73 @@ A: First segment: The car travels at 60 mph for 2 hours, so the distance covered
               reasoningInfo += "-ENHANCED";
             }
             
-            // Process bot message to separate thinking and answer parts
-            const processed = processBotMessage(bestResponse, REASONING_METHOD);
+            // Check if this is likely a code question
+            const isCodeQuestion = bestResponse.includes("```");
+            
+            // Process the response to separate thinking and answer
+            let processed;
+            
+            if (isCodeQuestion && REASONING_METHOD === "cod") {
+              // Special handling for code questions with Chain of Draft
+              const separatorIndex = bestResponse.indexOf("####");
+              
+              if (separatorIndex !== -1) {
+                // We found the standard separator
+                processed = {
+                  content: bestResponse,
+                  thinking: bestResponse.substring(0, separatorIndex).trim(),
+                  answer: bestResponse.substring(separatorIndex + 4).trim(),
+                };
+              } else {
+                // Look for the first code block as a separator
+                const codeBlockMatch = bestResponse.match(/```[\s\S]*?```/g);
+                
+                if (codeBlockMatch && codeBlockMatch.length > 0) {
+                  const firstCodeBlock = codeBlockMatch[0];
+                  const codeIndex = bestResponse.indexOf(firstCodeBlock);
+                  
+                  if (codeIndex > 0) {
+                    // Everything before the first code block is thinking
+                    processed = {
+                      content: bestResponse,
+                      thinking: bestResponse.substring(0, codeIndex).trim(),
+                      answer: bestResponse.substring(codeIndex).trim(),
+                    };
+                  } else {
+                    // If code block is at the beginning, treat everything as answer
+                    processed = {
+                      content: bestResponse,
+                      thinking: "",
+                      answer: bestResponse,
+                    };
+                  }
+                } else {
+                  // Fall back to standard processing
+                  processed = processBotMessage(bestResponse, REASONING_METHOD);
+                }
+              }
+              
+              // Calculate word counts
+              if (processed.thinking) {
+                processed.thinkingWordCount = countWords(processed.thinking);
+              } else {
+                processed.thinkingWordCount = 0;
+              }
+              
+              if (processed.answer) {
+                processed.answerWordCount = countWords(processed.answer);
+              } else {
+                processed.answerWordCount = 0;
+              }
+            } else {
+              // Standard processing for non-code questions
+              processed = processBotMessage(bestResponse, REASONING_METHOD);
+            }
             
             // Build an explanation of the self-consistency results
             const selfConsistencyInfo = `
-\n\n---
+
+---
 **Self-Consistency Summary:**
 - Generated ${SELF_CONSISTENCY_PATHS} independent reasoning paths
 - ${highestCount} paths agreed on this answer (${Math.round(agreementPercentage)}% agreement)`;
