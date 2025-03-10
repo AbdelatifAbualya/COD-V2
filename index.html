@@ -1,5 +1,6 @@
+
 <!DOCTYPE html>
-<!-- saved from url=(0076)file:///home/abid/Desktop/LLM%20Playground%20(COT%20vs%20COD)%20working.html -->
+<!-- saved from url=(0067)file:///home/abid/Desktop/LLM%20Playground%20(COT%20vs%20COD)2.html -->
 <html lang="en" data-darkreader-mode="dynamic" data-darkreader-scheme="dark" data-darkreader-proxy-injected="true"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8"><style class="darkreader darkreader--fallback" media="screen"></style><style class="darkreader darkreader--text" media="screen"></style><style class="darkreader darkreader--invert" media="screen">.jfk-bubble.gtx-bubble, .captcheck_answer_label > input + img, span#closed_text > img[src^="https://www.gstatic.com/images/branding/googlelogo"], span[data-href^="https://www.hcaptcha.com/"] > #icon, img.Wirisformula, a[data-testid="headerMediumLogo"]>svg, .d2l-navigation-link-image-container, .d2l-iframe-loading-container {
     filter: invert(100%) hue-rotate(180deg) contrast(90%) !important;
 }</style><style class="darkreader darkreader--inline" media="screen">[data-darkreader-inline-bgcolor] {
@@ -93,7 +94,7 @@ mark {
     color: var(--darkreader-text-000000, #e8e6e3);
 }
 ::placeholder {
-    color: var(--darkreader-text-a9a9a9, #b2aba1);
+    color: var (--darkreader-text-a9a9a9, #b2aba1);
 }
 input:-webkit-autofill,
 textarea:-webkit-autofill,
@@ -1468,7 +1469,7 @@ gr-main-header {
     background-color: var(--darkreader-background-faedda, #432c09) !important;
 }
 .tou-6i3zyv {
-    background-color: var (--darkreader-background-85c3d8, #245d70) !important;
+    background-color: var(--darkreader-background-85c3d8, #245d70) !important;
 }
 div.mermaid-viewer-control-panel .btn {
     background-color: var(--darkreader-neutral-background);
@@ -1608,15 +1609,14 @@ html {-webkit-transition : -webkit-filter 300ms linear;}
       <button id="deleteThreadBtn">Delete Thread</button>
       <button id="downloadTxtBtn">Download TXT</button>
       <button id="downloadPdfBtn">Download PDF</button>
-      <button id="clearThreadBtn" style="margin-top: 0.5rem; background-color: rgb(85, 51, 51); --darkreader-inline-bgcolor: var(--darkreader-background-553333, #442929);" data-darkreader-inline-bgcolor="">Clear Thread</button>
-    </div>
+    <button id="clearThreadBtn" style="margin-top: 0.5rem; background-color: rgb(85, 51, 51); --darkreader-inline-bgcolor: var(--darkreader-background-553333, #442929);" data-darkreader-inline-bgcolor="">Clear Thread</button></div>
 
     <!-- Chat Area -->
     <div class="chat-container">
       <div class="chat-header">
         <h1 id="pageTitle">LLM Playground (COT vs COD)</h1>
         <div>
-          <span id="currentModelDisplay" class="current-model-display">qwen2p5-coder-32b<span class="reasoning-badge" style="background-color: #2d5038; margin-left: 3px;">Adaptive</span></span>
+          <span id="currentModelDisplay" class="current-model-display">llama-3.3-70b<span class="reasoning-badge" style="background-color: #2d5038; margin-left: 3px;">Adaptive</span></span>
           <button class="settings-btn" id="openSettings">Settings ⚙️</button>
         </div>
       </div>
@@ -1635,7 +1635,7 @@ html {-webkit-transition : -webkit-filter 300ms linear;}
   </div>
 
   <!-- Status Notification -->
-  <div id="statusNotification" class="status-notification">Thread cleared</div>
+  <div id="statusNotification" class="status-notification">TXT file downloaded</div>
 
   <!-- Settings Modal -->
 <div id="settingsModal" class="modal" style="display: none;">
@@ -1666,11 +1666,11 @@ html {-webkit-transition : -webkit-filter 300ms linear;}
 
       <div class="model-info-card" id="modelInfoCard" style="display: block; opacity: 1; transform: translateY(0px); transition: opacity 0.3s, transform 0.3s;">
         <div class="model-info-header">
-          <span id="selectedModelName">Qwen 2.5 Coder (32B)</span>
+          <span id="selectedModelName">Llama 3.3 (70B)</span>
         </div>
         <div class="model-info-body">
-          <div class="model-tags" id="modelTags"><span class="model-tag">32B</span><span class="model-tag">Coding</span><span class="model-tag">Reasoning</span></div>
-          <div class="model-description" id="modelDescription">Alibaba's Qwen 2.5 Coder model specialized for programming tasks with strong reasoning capabilities.</div>
+          <div class="model-tags" id="modelTags"><span class="model-tag">70B</span><span class="model-tag">Versatile</span><span class="model-tag">Advanced</span></div>
+          <div class="model-description" id="modelDescription">Meta's Llama 3.3 70B model offering strong performance across a wide range of tasks with advanced reasoning capabilities.</div>
         </div>
       </div>
 
@@ -1711,7 +1711,7 @@ html {-webkit-transition : -webkit-filter 300ms linear;}
         <div id="codOptions" class="cod-options" style="display: none;">
         <div class="option-label">Word limit per step:</div>
         <div class="cod-word-limit-options">
-          <div class="cod-word-limit-option selected" data-value="5">
+          <div class="cod-word-limit-option " data-value="5">
             <span class="cod-word-limit-value">5 words</span>
             <span class="cod-word-limit-desc">Original paper recommendation</span>
           </div>
@@ -1727,7 +1727,7 @@ html {-webkit-transition : -webkit-filter 300ms linear;}
             <span class="cod-word-limit-value">17 words</span>
             <span class="cod-word-limit-desc">Better for complex reasoning</span>
           </div>
-          <div class="cod-word-limit-option " data-value="20">
+          <div class="cod-word-limit-option selected" data-value="20">
             <span class="cod-word-limit-value">20 words</span>
             <span class="cod-word-limit-desc">Detailed steps for math &amp; logic</span>
           </div>
@@ -1831,12 +1831,33 @@ html {-webkit-transition : -webkit-filter 300ms linear;}
       </div>
       <p style="font-size: 0.8rem; color: rgb(170, 170, 170); margin-top: 0px; --darkreader-inline-color: var(--darkreader-text-aaaaaa, #b2aca2);" data-darkreader-inline-color="">Controls diversity via nucleus sampling: lower values exclude less probable tokens.</p>
 
+      <label for="topK">Top K</label>
+      <div class="range-container">
+        <input type="range" id="topK" min="0" max="100" step="1" value="55">
+        <span id="topKValue" class="range-value">55</span>
+      </div>
+      <p style="font-size: 0.8rem; color: rgb(170, 170, 170); margin-top: 0px; --darkreader-inline-color: var(--darkreader-text-aaaaaa, #b2aca2);" data-darkreader-inline-color="">Limits sampling to the top K most likely tokens.</p>
+
       <label for="maxTokens">Max Tokens</label>
       <div class="range-container">
         <input type="range" id="maxTokens" min="256" max="4096" step="128" value="1112">
         <span id="maxTokensValue" class="range-value">1152</span>
       </div>
       <p style="font-size: 0.8rem; color: rgb(170, 170, 170); margin-top: 0px; --darkreader-inline-color: var(--darkreader-text-aaaaaa, #b2aca2);" data-darkreader-inline-color="">Maximum number of tokens to generate in the response.</p>
+
+      <label for="presencePenalty">Presence Penalty</label>
+      <div class="range-container">
+        <input type="range" id="presencePenalty" min="-2" max="2" step="0.1" value="0">
+        <span id="presencePenaltyValue" class="range-value">0</span>
+      </div>
+      <p style="font-size: 0.8rem; color: rgb(170, 170, 170); margin-top: 0px; --darkreader-inline-color: var(--darkreader-text-aaaaaa, #b2aca2);" data-darkreader-inline-color="">Penalizes new tokens based on their presence in the input.</p>
+
+      <label for="frequencyPenalty">Frequency Penalty</label>
+      <div class="range-container">
+        <input type="range" id="frequencyPenalty" min="-2" max="2" step="0.1" value="0.4">
+        <span id="frequencyPenaltyValue" class="range-value">0.4</span>
+      </div>
+      <p style="font-size: 0.8rem; color: rgb(170, 170, 170); margin-top: 0px; --darkreader-inline-color: var(--darkreader-text-aaaaaa, #b2aca2);" data-darkreader-inline-color="">Penalizes tokens based on their frequency in the generated text.</p>
     </div>
     
     <div style="text-align: right; margin-top: 20px;">
@@ -2037,7 +2058,10 @@ A: First segment: The car travels at 60 mph for 2 hours, so the distance covered
     // Default generation parameters
     let TEMPERATURE = 0.5;
     let TOP_P = 0.90;
+    let TOP_K = 55;
     let MAX_TOKENS = 1112;
+    let PRESENCE_PENALTY = 0;
+    let FREQUENCY_PENALTY = 0.4;
 
     /***********************
      * Self-Consistency Implementation
@@ -2210,7 +2234,7 @@ A: First segment: The car travels at 60 mph for 2 hours, so the distance covered
         } else {
           // Code block
           const codeSegment = segments[i].trim();
-          const firstNewlineIndex = codeSegment.indexOf('\n');
+          const firstNewlineIndex = codeSegment.index('\n');
           let language = '';
           let codeContent = codeSegment;
           if (firstNewlineIndex !== -1) {
@@ -2511,155 +2535,173 @@ A: First segment: The car travels at 60 mph for 2 hours, so the distance covered
     /***********************
      * Download as PDF
      ***********************/
-    async function downloadCurrentThreadAsPdf() {
-      const thread = threads.find(t => t.id === currentThreadId);
-      if (!thread) return;
+     async function downloadCurrentThreadAsPdf() {
+  const thread = threads.find(t => t.id === currentThreadId);
+  if (!thread) return;
 
-      const { jsPDF } = window.jspdf;
-      const doc = new jsPDF({
-        unit: "pt",
-        format: "letter"
-      });
+  try {
+    // Make sure jsPDF is available
+    if (!window.jspdf || !window.jspdf.jsPDF) {
+      showNotification("PDF library not loaded. Please try again.", 3000);
+      console.error("jsPDF not found:", window.jspdf);
+      return;
+    }
 
-      function setPageBackground(doc) {
-        doc.setFillColor(30, 30, 30);
-        doc.rect(0, 0, doc.internal.pageSize.width, doc.internal.pageSize.height, 'F');
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF({
+      unit: "pt",
+      format: "letter"
+    });
+
+    function setPageBackground(doc) {
+      doc.setFillColor(30, 30, 30);
+      doc.rect(0, 0, doc.internal.pageSize.width, doc.internal.pageSize.height, 'F');
+    }
+
+    setPageBackground(doc);
+    doc.setTextColor(224, 224, 224);
+
+    let yPos = 40;
+    const lineHeight = 14;
+    const leftMargin = 40;
+    const pageHeight = doc.internal.pageSize.height - 50; // Margin at bottom
+
+    // Check if we need a new page
+    function checkNewPage() {
+      if (yPos > pageHeight) {
+        doc.addPage();
+        setPageBackground(doc);
+        yPos = 40;
+        return true;
       }
+      return false;
+    }
 
-      setPageBackground(doc);
-      doc.setTextColor(224, 224, 224);
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(12);
+    let modelInfo = `Model: ${MODEL_NAME_DISPLAY} (${REASONING_METHOD.toUpperCase()}`;
+    if (REASONING_METHOD === "cod") {
+      modelInfo += `-${COD_WORD_LIMIT}`;
+    }
+    modelInfo += `)`;
+    doc.text(modelInfo, leftMargin, yPos);
+    yPos += 20;
+    doc.text(thread.name, leftMargin, yPos);
+    yPos += 20;
 
-      let yPos = 40;
-      const lineHeight = 14;
-      const leftMargin = 40;
-
+    thread.messages.forEach(msg => {
+      checkNewPage();
+      
       doc.setFont("helvetica", "bold");
-      doc.setFontSize(12);
-      let modelInfo = `Model: ${MODEL_NAME_DISPLAY} (${REASONING_METHOD.toUpperCase()}`;
-      if (REASONING_METHOD === "cod") {
-        modelInfo += `-${COD_WORD_LIMIT}`;
+      doc.setFontSize(10);
+      
+      // Add word count info for bot messages
+      let sender = msg.sender.toUpperCase() + ":";
+      if (msg.sender === "bot" && !msg.isPlaceholder && msg.wordCount !== undefined) {
+        let countInfo = `[${msg.wordCount} words - ${msg.reasoningMethod || REASONING_METHOD.toUpperCase()}]`;
+        if (msg.thinkingWordCount !== undefined && msg.answerWordCount !== undefined) {
+          countInfo += ` (thinking: ${msg.thinkingWordCount}, answer: ${msg.answerWordCount})`;
+        }
+        sender += ` ${countInfo}`;
       }
-      modelInfo += `)`;
-      doc.text(modelInfo, leftMargin, yPos);
-      yPos += 20;
-      doc.text(thread.name, leftMargin, yPos);
-      yPos += 20;
+      
+      doc.text(sender, leftMargin, yPos);
+      yPos += lineHeight;
 
-      thread.messages.forEach(msg => {
-        doc.setFont("helvetica", "bold");
-        doc.setFontSize(10);
-        
-        // Add word count info for bot messages
-        let sender = msg.sender.toUpperCase() + ":";
-        if (msg.sender === "bot" && !msg.isPlaceholder && msg.wordCount !== undefined) {
-          let countInfo = `[${msg.wordCount} words - ${msg.reasoningMethod || REASONING_METHOD.toUpperCase()}]`;
-          if (msg.thinkingWordCount !== undefined && msg.answerWordCount !== undefined) {
-            countInfo += ` (thinking: ${msg.thinkingWordCount}, answer: ${msg.answerWordCount})`;
-          }
-          sender += ` ${countInfo}`;
+      // Special handling for messages with thinking/answer components
+      if (msg.sender === "bot" && !msg.isPlaceholder && (msg.thinking || msg.answer)) {
+        // If we have thinking steps, render them
+        if (msg.thinking) {
+          checkNewPage();
+          doc.setFont("helvetica", "italic");
+          doc.setFontSize(9);
+          doc.setTextColor(180, 180, 180);
+          doc.text("THINKING STEPS:", leftMargin, yPos);
+          yPos += lineHeight;
+          
+          doc.setFont("courier", "normal");
+          const thinkingLines = msg.thinking.split(/\r?\n/);
+          thinkingLines.forEach(line => {
+            checkNewPage();
+            const wrapped = doc.splitTextToSize(line, 520);
+            wrapped.forEach(wLine => {
+              doc.text(wLine, leftMargin + 10, yPos);
+              yPos += lineHeight;
+              checkNewPage();
+            });
+          });
+          
+          yPos += lineHeight/2;
+          checkNewPage();
         }
         
-        doc.text(sender, leftMargin, yPos);
-        yPos += lineHeight;
-
-        // Special handling for messages with thinking/answer components
-        if (msg.sender === "bot" && !msg.isPlaceholder && (msg.thinking || msg.answer)) {
-          // If we have thinking steps, render them
-          if (msg.thinking) {
-            doc.setFont("helvetica", "italic");
-            doc.setFontSize(9);
-            doc.setTextColor(180, 180, 180);
-            doc.text("THINKING STEPS:", leftMargin, yPos);
-            yPos += lineHeight;
-            
-            doc.setFont("courier", "normal");
-            const thinkingLines = msg.thinking.split(/\r?\n/);
-            thinkingLines.forEach(line => {
-              if (yPos > 720) {
-                doc.addPage();
-                setPageBackground(doc);
-                yPos = 40;
-              }
-              const wrapped = doc.splitTextToSize(line, 520);
-              wrapped.forEach(wLine => {
-                doc.text(wLine, leftMargin + 10, yPos);
-                yPos += lineHeight;
-              });
-            });
-            
-            yPos += lineHeight/2;
-          }
+        // If we have an answer, render it
+        if (msg.answer) {
+          checkNewPage();
+          doc.setFont("helvetica", "bold");
+          doc.setFontSize(9);
+          doc.setTextColor(144, 205, 244);
+          doc.text("FINAL ANSWER:", leftMargin, yPos);
+          yPos += lineHeight;
           
-          // If we have an answer, render it
-          if (msg.answer) {
-            doc.setFont("helvetica", "bold");
-            doc.setFontSize(9);
-            doc.setTextColor(144, 205, 244);
-            doc.text("FINAL ANSWER:", leftMargin, yPos);
-            yPos += lineHeight;
-            
-            doc.setFont("helvetica", "normal");
-            doc.setTextColor(224, 224, 224);
-            doc.setFontSize(10);
-            const answerLines = msg.answer.split(/\r?\n/);
-            answerLines.forEach(line => {
-              if (yPos > 720) {
-                doc.addPage();
-                setPageBackground(doc);
-                yPos = 40;
-              }
-              const wrapped = doc.splitTextToSize(line, 520);
-              wrapped.forEach(wLine => {
-                doc.text(wLine, leftMargin + 10, yPos);
-                yPos += lineHeight;
-              });
-            });
-          }
-        } else {
-          // Standard rendering for other messages
-          const parsed = parseContentForExport(msg.content);
-          parsed.forEach(item => {
-            if (item.type === 'text') {
-              doc.setFont("helvetica", "normal");
-              const line = item.content;
-              if (yPos > 720) {
-                doc.addPage();
-                setPageBackground(doc);
-                yPos = 40;
-              }
-              const wrapped = doc.splitTextToSize(line, 540);
-              wrapped.forEach(wLine => {
-                doc.text(wLine, leftMargin, yPos);
-                yPos += lineHeight;
-              });
-            } else if (item.type === 'code') {
-              doc.setFont("helvetica", "bold");
-              const lang = item.language ? ` (${item.language})` : '';
-              doc.text(`Code Block${lang}:`, leftMargin, yPos);
+          doc.setFont("helvetica", "normal");
+          doc.setTextColor(224, 224, 224);
+          doc.setFontSize(10);
+          const answerLines = msg.answer.split(/\r?\n/);
+          answerLines.forEach(line => {
+            checkNewPage();
+            const wrapped = doc.splitTextToSize(line, 520);
+            wrapped.forEach(wLine => {
+              doc.text(wLine, leftMargin + 10, yPos);
               yPos += lineHeight;
-
-              doc.setFont("courier", "normal");
-              item.content.forEach(codeLine => {
-                if (yPos > 720) {
-                  doc.addPage();
-                  setPageBackground(doc);
-                  yPos = 40;
-                }
-                const wrapped = doc.splitTextToSize(codeLine, 520);
-                wrapped.forEach(wLine => {
-                  doc.text(wLine, leftMargin + 20, yPos);
-                  yPos += lineHeight;
-                });
-              });
-            }
+              checkNewPage();
+            });
           });
         }
-        yPos += lineHeight;
-      });
+      } else {
+        // Standard rendering for other messages
+        const parsed = parseContentForExport(msg.content);
+        parsed.forEach(item => {
+          if (item.type === 'text') {
+            doc.setFont("helvetica", "normal");
+            const line = item.content;
+            checkNewPage();
+            const wrapped = doc.splitTextToSize(line, 520);
+            wrapped.forEach(wLine => {
+              doc.text(wLine, leftMargin, yPos);
+              yPos += lineHeight;
+              checkNewPage();
+            });
+          } else if (item.type === 'code') {
+            checkNewPage();
+            doc.setFont("helvetica", "bold");
+            const lang = item.language ? ` (${item.language})` : '';
+            doc.text(`Code Block${lang}:`, leftMargin, yPos);
+            yPos += lineHeight;
 
-      doc.save(`${thread.name}.pdf`);
-      showNotification("PDF file downloaded");
-    }
+            doc.setFont("courier", "normal");
+            item.content.forEach(codeLine => {
+              checkNewPage();
+              const wrapped = doc.splitTextToSize(codeLine, 520);
+              wrapped.forEach(wLine => {
+                doc.text(wLine, leftMargin + 20, yPos);
+                yPos += lineHeight;
+                checkNewPage();
+              });
+            });
+          }
+        });
+      }
+      yPos += lineHeight;
+    });
+
+    doc.save(`${thread.name}.pdf`);
+    showNotification("PDF file downloaded");
+  } catch (error) {
+    console.error("PDF generation error:", error);
+    showNotification("Error generating PDF: " + error.message);
+  }
+}
 
     /***********************
      * Process Bot Messages - IMPROVED VERSION FOR COD
@@ -3239,6 +3281,9 @@ A: First segment: The car travels at 60 mph for 2 hours, so the distance covered
           model: MODEL_NAME,
           max_tokens: MAX_TOKENS,
           top_p: TOP_P,
+          top_k: TOP_K,
+          presence_penalty: PRESENCE_PENALTY,
+          frequency_penalty: FREQUENCY_PENALTY,
           temperature: TEMPERATURE + 0.2, // Increase temperature slightly for diversity
           messages: messagesForApi
         };
@@ -3506,6 +3551,9 @@ A: First segment: The car travels at 60 mph for 2 hours, so the distance covered
           model: MODEL_NAME,
           max_tokens: MAX_TOKENS,
           top_p: TOP_P,
+          top_k: TOP_K,
+          presence_penalty: PRESENCE_PENALTY,
+          frequency_penalty: FREQUENCY_PENALTY,
           temperature: TEMPERATURE,
           messages: messagesForApi
         };
@@ -3514,7 +3562,7 @@ A: First segment: The car travels at 60 mph for 2 hours, so the distance covered
         if (wordCountRequest) {
           console.log(`Final answer word limit requested: ${wordCountRequest} words`);
         }
-        console.log(`Parameters: temp=${TEMPERATURE}, top_p=${TOP_P}`);
+        console.log(`Parameters: temp=${TEMPERATURE}, top_p=${TOP_P}, top_k=${TOP_K}`);
 
         try {
           // Add timestamp to URL to prevent caching
@@ -4078,7 +4126,10 @@ Separate your steps with periods. Write your final answer after the #### separat
         // Set parameter sliders
         setSliderAndValue("temp", TEMPERATURE);
         setSliderAndValue("topP", TOP_P);
+        setSliderAndValue("topK", TOP_K);
         setSliderAndValue("maxTokens", MAX_TOKENS);
+        setSliderAndValue("presencePenalty", PRESENCE_PENALTY);
+        setSliderAndValue("frequencyPenalty", FREQUENCY_PENALTY);
         
         // Show modal
         const modal = document.getElementById("settingsModal");
@@ -4194,7 +4245,10 @@ Separate your steps with periods. Write your final answer after the #### separat
         if (TEMPERATURE === 0) TEMPERATURE = 0.01; // Ensure minimum value for Qroq API
         
         TOP_P = getNumericValue("topP", 0.9, parseFloat);
+        TOP_K = getNumericValue("topK", 55, parseInt);
         MAX_TOKENS = getNumericValue("maxTokens", 1112, parseInt);
+        PRESENCE_PENALTY = getNumericValue("presencePenalty", 0, parseFloat);
+        FREQUENCY_PENALTY = getNumericValue("frequencyPenalty", 0.4, parseFloat);
         
         // Update model display
         updateCurrentModelDisplay();
@@ -4208,7 +4262,10 @@ Separate your steps with periods. Write your final answer after the #### separat
           localStorage.setItem("reasoningEnhancement", REASONING_ENHANCEMENT);
           localStorage.setItem("temperature", TEMPERATURE.toString());
           localStorage.setItem("topP", TOP_P.toString());
+          localStorage.setItem("topK", TOP_K.toString());
           localStorage.setItem("maxTokens", MAX_TOKENS.toString());
+          localStorage.setItem("presencePenalty", PRESENCE_PENALTY.toString());
+          localStorage.setItem("frequencyPenalty", FREQUENCY_PENALTY.toString());
           
           // Save custom prompts
           localStorage.setItem("customPrompts", JSON.stringify(PROMPTS));
@@ -4369,8 +4426,17 @@ Separate your steps with periods. Write your final answer after the #### separat
         const topP = localStorage.getItem("topP");
         if (topP) TOP_P = parseFloat(topP);
         
+        const topK = localStorage.getItem("topK");
+        if (topK) TOP_K = parseInt(topK);
+        
         const maxTokens = localStorage.getItem("maxTokens");
         if (maxTokens) MAX_TOKENS = parseInt(maxTokens);
+        
+        const presencePenalty = localStorage.getItem("presencePenalty");
+        if (presencePenalty) PRESENCE_PENALTY = parseFloat(presencePenalty);
+        
+        const frequencyPenalty = localStorage.getItem("frequencyPenalty");
+        if (frequencyPenalty) FREQUENCY_PENALTY = parseFloat(frequencyPenalty);
         
         // Load self-consistency settings
         const selfConsistencyEnabled = localStorage.getItem("selfConsistencyEnabled");
@@ -4411,25 +4477,23 @@ Separate your steps with periods. Write your final answer after the #### separat
         initFeedbackForm();
         console.log("Feedback form initialized");
         
-        // Helper function to create a button that resets the thread
-        function createClearThreadButton() {
-          const clearThreadBtn = document.createElement("button");
-          clearThreadBtn.id = "clearThreadBtn";
-          clearThreadBtn.textContent = "Clear Thread";
-          clearThreadBtn.style.marginTop = "0.5rem";
-          clearThreadBtn.style.backgroundColor = "#553333";
-          clearThreadBtn.addEventListener("click", () => {
-            if (confirm("Clear all messages in this thread?")) {
-              const thread = threads.find(t => t.id === currentThreadId);
-              if (thread) {
-                thread.messages = [];
-                renderCurrentThreadMessages();
-                showNotification("Thread cleared");
-              }
-            }
-          });
-          return clearThreadBtn;
-        }
+       // Add clear thread button event listener (using existing button in HTML)
+       const clearThreadBtn = document.getElementById("clearThreadBtn");
+      if (clearThreadBtn) {
+      clearThreadBtn.addEventListener("click", () => {
+      if (confirm("Clear all messages in this thread?")) {
+        const thread = threads.find(t => t.id === currentThreadId);
+        if (thread) {
+        thread.messages = [];
+        renderCurrentThreadMessages();
+        showNotification("Thread cleared");
+      }
+    }
+  });
+  console.log("Clear thread button initialized");
+} else {
+  console.warn("Clear thread button not found in DOM");
+}
         
         // Add clear thread button to the sidebar
         const sidebar = document.querySelector(".sidebar");
