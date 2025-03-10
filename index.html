@@ -1,5 +1,3 @@
-
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -1178,6 +1176,143 @@
         gap: 10px;
       }
     }
+
+    /* File Upload Styles */
+    .file-upload-button {
+      background-color: #3a3a3a;
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      padding: 0.3rem 0.6rem;
+      margin-right: 0.5rem;
+      cursor: pointer;
+      font-size: 0.9rem;
+      display: inline-flex;
+      align-items: center;
+      transition: background-color 0.3s ease;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.4);
+    }
+
+    .file-upload-button:hover {
+      background-color: #4a4a4a;
+    }
+
+    .file-upload-icon {
+      margin-right: 5px;
+    }
+
+    .file-input {
+      display: none;
+    }
+
+    .attached-files {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      padding: 8px;
+      border-top: 1px solid #333;
+      background-color: rgba(30,30,30,0.95);
+    }
+
+    .file-preview {
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      background-color: #2e2e2e;
+      border-radius: 8px;
+      padding: 8px;
+      max-width: 100px;
+    }
+
+    .file-preview-image {
+      width: 80px;
+      height: 80px;
+      object-fit: cover;
+      border-radius: 6px;
+    }
+
+    .file-preview-icon {
+      width: 80px;
+      height: 80px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2rem;
+      color: #aaa;
+      background-color: #222;
+      border-radius: 6px;
+    }
+
+    .file-preview-name {
+      margin-top: 5px;
+      font-size: 0.7rem;
+      text-align: center;
+      width: 100%;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      color: #ddd;
+    }
+
+    .file-preview-remove {
+      position: absolute;
+      top: 0;
+      right: 0;
+      background-color: rgba(0, 0, 0, 0.6);
+      color: #fff;
+      border: none;
+      border-radius: 50%;
+      width: 20px;
+      height: 20px;
+      font-size: 0.7rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .message-file-attachment {
+      margin-top: 10px;
+      padding: 10px;
+      background-color: #2a2a2a;
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+    }
+
+    .message-file-icon {
+      margin-right: 10px;
+      font-size: 1.2rem;
+      color: #aaa;
+    }
+
+    .message-file-info {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .message-file-name {
+      font-size: 0.85rem;
+      font-weight: 500;
+    }
+
+    .message-file-size {
+      font-size: 0.7rem;
+      color: #aaa;
+    }
+
+    .message-image {
+      max-width: 100%;
+      border-radius: 6px;
+      margin-top: 10px;
+      cursor: pointer;
+      transition: transform 0.2s ease;
+    }
+
+    .message-image:hover {
+      transform: scale(1.01);
+    }
   </style>
 </head>
 <body>
@@ -1210,6 +1345,14 @@
       <div class="chat-input">
         <textarea id="userInput" rows="2" placeholder="Type your message..."></textarea>
         <button id="sendBtn">Send</button>
+        <label for="fileInput" class="file-upload-button">
+          <span class="file-upload-icon">📎</span>
+          Attach
+        </label>
+        <input type="file" id="fileInput" class="file-input" multiple>
+      </div>
+      <div id="attachedFiles" class="attached-files" style="display: none;">
+        <!-- File previews will be added here -->
       </div>
     </div>
   </div>
@@ -2421,6 +2564,11 @@ A: First segment: The car travels at 60 mph for 2 hours, so the distance covered
             const contentEl = document.createElement("div");
             contentEl.innerHTML = transformMessage(msg.content);
             messageDiv.appendChild(contentEl);
+            
+            // Add file attachments to user messages if present
+            if (msg.sender === "user" && msg.files && msg.files.length > 0) {
+              addFilesToMessage(messageDiv, msg.files);
+            }
           }
           
           // Add word count badge for bot messages (except placeholders)
@@ -2478,7 +2626,7 @@ A: First segment: The car travels at 60 mph for 2 hours, so the distance covered
       addCodeCopyButtons();
     }
 
-    function addMessageToCurrentThread(content, sender, isPlaceholder = false) {
+    function addMessageToCurrentThread(content, sender, isPlaceholder = false, files = []) {
       const thread = threads.find(t => t.id === currentThreadId);
       if (thread) {
         // Process bot messages to separate thinking from answer
@@ -2510,6 +2658,8 @@ A: First segment: The car travels at 60 mph for 2 hours, so the distance covered
           answer,
           thinkingWordCount: sender === "bot" && !isPlaceholder ? thinkingWordCount : undefined,
           answerWordCount: sender === "bot" && !isPlaceholder ? answerWordCount : undefined,
+          // Add files to the message
+          files: files && files.length > 0 ? files : undefined,
           // NEW: Add complexity info for debugging
           complexityInfo: sender === "user" ? PROBLEM_COMPLEXITY : undefined
         });
@@ -2669,8 +2819,20 @@ A: First segment: The car travels at 60 mph for 2 hours, so the distance covered
         analyzeProblemComplexity(message);
       }
       
-      addMessageToCurrentThread(message, "user");
-
+      // Check if there are files to be included
+      const filesToSend = [...attachedFiles]; // Make a copy of the current files
+      
+      // Add message to thread with files
+      addMessageToCurrentThread(message, "user", false, filesToSend);
+      
+      // Clear attached files after sending
+      attachedFiles = [];
+      const attachedFilesContainer = document.getElementById('attachedFiles');
+      if (attachedFilesContainer) {
+        attachedFilesContainer.innerHTML = '';
+        attachedFilesContainer.style.display = 'none';
+      }
+      
       if (!MODEL_NAME) {
         const errorMsg = "Error: Please set the Model Name in the Settings.";
         addMessageToCurrentThread(errorMsg, "bot");
@@ -3402,7 +3564,7 @@ Separate your steps with periods. Write your final answer after the #### separat
           const userInput = document.getElementById("userInput");
           if (userInput) {
             const message = userInput.value.trim();
-            if (message) {
+            if (message || attachedFiles.length > 0) {
               sendMessage(message);
               userInput.value = "";
             }
@@ -3419,6 +3581,9 @@ Separate your steps with periods. Write your final answer after the #### separat
             }
           });
         }
+        
+        // Initialize file upload handling
+        handleFileInput();
         
         // Close modal when clicking outside
         window.addEventListener("click", (event) => {
@@ -3581,6 +3746,181 @@ Separate your steps with periods. Write your final answer after the #### separat
     // Backup initialization - in case the DOMContentLoaded event already fired
     if (document.readyState === "complete" || document.readyState === "interactive") {
       setTimeout(init, 1);
+    }
+
+    /***********************
+     * File Upload Management
+     ***********************/
+    let attachedFiles = [];
+    
+    function handleFileInput() {
+      const fileInput = document.getElementById('fileInput');
+      const attachedFilesContainer = document.getElementById('attachedFiles');
+      
+      fileInput.addEventListener('change', (event) => {
+        const files = event.target.files;
+        
+        if (files.length > 0) {
+          // Show the container if it was hidden
+          attachedFilesContainer.style.display = 'flex';
+          
+          // Process each file
+          for (let i = 0; i < files.length; i++) {
+            const file = files[i];
+            
+            // Check if the file is already in the list
+            const isDuplicate = attachedFiles.some(f => f.name === file.name && f.size === file.size);
+            if (isDuplicate) continue;
+            
+            // Add file to attachedFiles array
+            attachedFiles.push(file);
+            
+            // Create file preview
+            createFilePreview(file);
+          }
+          
+          // Reset the file input
+          fileInput.value = '';
+        }
+      });
+    }
+    
+    function createFilePreview(file) {
+      const attachedFilesContainer = document.getElementById('attachedFiles');
+      const filePreview = document.createElement('div');
+      filePreview.className = 'file-preview';
+      
+      // Create preview content based on file type
+      if (file.type.startsWith('image/')) {
+        // Create image preview for image files
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          const img = document.createElement('img');
+          img.className = 'file-preview-image';
+          img.src = e.target.result;
+          filePreview.appendChild(img);
+          
+          // Add file name
+          const fileName = document.createElement('div');
+          fileName.className = 'file-preview-name';
+          fileName.textContent = file.name;
+          filePreview.appendChild(fileName);
+        };
+        reader.readAsDataURL(file);
+      } else {
+        // Create icon preview for non-image files
+        const icon = document.createElement('div');
+        icon.className = 'file-preview-icon';
+        icon.textContent = getFileIcon(file.type);
+        filePreview.appendChild(icon);
+        
+        // Add file name
+        const fileName = document.createElement('div');
+        fileName.className = 'file-preview-name';
+        fileName.textContent = file.name;
+        filePreview.appendChild(fileName);
+      }
+      
+      // Add remove button
+      const removeButton = document.createElement('button');
+      removeButton.className = 'file-preview-remove';
+      removeButton.textContent = '×';
+      removeButton.addEventListener('click', () => {
+        // Remove from array
+        attachedFiles = attachedFiles.filter(f => f !== file);
+        
+        // Remove from DOM
+        filePreview.remove();
+        
+        // Hide container if no files left
+        if (attachedFiles.length === 0) {
+          attachedFilesContainer.style.display = 'none';
+        }
+      });
+      filePreview.appendChild(removeButton);
+      
+      // Add the preview to the container
+      attachedFilesContainer.appendChild(filePreview);
+    }
+    
+    function getFileIcon(fileType) {
+      if (fileType.startsWith('image/')) {
+        return '🖼️';
+      } else if (fileType.startsWith('text/')) {
+        return '📄';
+      } else if (fileType.includes('pdf')) {
+        return '📑';
+      } else if (fileType.includes('word') || fileType.includes('document')) {
+        return '📝';
+      } else if (fileType.includes('excel') || fileType.includes('spreadsheet')) {
+        return '📊';
+      } else if (fileType.includes('audio')) {
+        return '🎵';
+      } else if (fileType.includes('video')) {
+        return '🎬';
+      } else if (fileType.includes('zip') || fileType.includes('compressed')) {
+        return '🗜️';
+      } else if (fileType.includes('code') || fileType.includes('javascript') || fileType.includes('html') || fileType.includes('css')) {
+        return '📱';
+      } else {
+        return '📦';
+      }
+    }
+    
+    function addFilesToMessage(messageDiv, files) {
+      if (!files || files.length === 0) return;
+      
+      files.forEach(file => {
+        if (file.type.startsWith('image/')) {
+          // Display images inline
+          const reader = new FileReader();
+          reader.onload = (e) => {
+            const img = document.createElement('img');
+            img.className = 'message-image';
+            img.src = e.target.result;
+            img.alt = file.name;
+            
+            // Add click event to open full size image
+            img.addEventListener('click', () => {
+              window.open(e.target.result, '_blank');
+            });
+            
+            messageDiv.appendChild(img);
+          };
+          reader.readAsDataURL(file);
+        } else {
+          // For non-image files, display as attachment
+          const attachment = document.createElement('div');
+          attachment.className = 'message-file-attachment';
+          
+          const icon = document.createElement('div');
+          icon.className = 'message-file-icon';
+          icon.textContent = getFileIcon(file.type);
+          attachment.appendChild(icon);
+          
+          const fileInfo = document.createElement('div');
+          fileInfo.className = 'message-file-info';
+          
+          const fileName = document.createElement('div');
+          fileName.className = 'message-file-name';
+          fileName.textContent = file.name;
+          fileInfo.appendChild(fileName);
+          
+          const fileSize = document.createElement('div');
+          fileSize.className = 'message-file-size';
+          fileSize.textContent = formatFileSize(file.size);
+          fileInfo.appendChild(fileSize);
+          
+          attachment.appendChild(fileInfo);
+          messageDiv.appendChild(attachment);
+        }
+      });
+    }
+    
+    function formatFileSize(bytes) {
+      if (bytes < 1024) return bytes + ' bytes';
+      else if (bytes < 1048576) return (bytes / 1024).toFixed(1) + ' KB';
+      else return (bytes / 1048576).toFixed(1) + ' MB';
     }
   </script>
   <form hidden method='post' name='feedback'>
