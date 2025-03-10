@@ -1773,6 +1773,62 @@ A: First segment: The car travels at 60 mph for 2 hours, so the distance covered
     let PRESENCE_PENALTY = 0;
     let FREQUENCY_PENALTY = 0.4;
 
+    /***********************
+     * Self-Consistency Implementation
+     ***********************/
+    function initSelfConsistency() {
+      // Try to load saved settings
+      const savedEnabled = localStorage.getItem("selfConsistencyEnabled");
+      if (savedEnabled !== null) {
+        SELF_CONSISTENCY_ENABLED = savedEnabled === "true";
+      }
+      
+      const savedPaths = localStorage.getItem("selfConsistencyPaths");
+      if (savedPaths) {
+        SELF_CONSISTENCY_PATHS = parseInt(savedPaths);
+      }
+      
+      // Setup UI elements
+      const toggle = document.getElementById('selfConsistencyToggle');
+      const options = document.getElementById('selfConsistencyOptions');
+      const pathSlider = document.getElementById('pathCount');
+      const pathValue = document.getElementById('pathCountValue');
+      
+      if (toggle) {
+        toggle.checked = SELF_CONSISTENCY_ENABLED;
+        if (options) {
+          options.style.display = SELF_CONSISTENCY_ENABLED ? 'block' : 'none';
+        }
+        
+        toggle.addEventListener('change', () => {
+          SELF_CONSISTENCY_ENABLED = toggle.checked;
+          if (options) {
+            options.style.display = SELF_CONSISTENCY_ENABLED ? 'block' : 'none';
+          }
+          updateCurrentModelDisplay();
+        });
+      }
+      
+      if (pathSlider && pathValue) {
+        pathSlider.value = SELF_CONSISTENCY_PATHS;
+        pathValue.textContent = SELF_CONSISTENCY_PATHS;
+        
+        pathSlider.addEventListener('input', () => {
+          SELF_CONSISTENCY_PATHS = parseInt(pathSlider.value);
+          pathValue.textContent = SELF_CONSISTENCY_PATHS;
+        });
+      }
+    }
+
+    function saveSelfConsistencySettings() {
+      try {
+        localStorage.setItem("selfConsistencyEnabled", SELF_CONSISTENCY_ENABLED.toString());
+        localStorage.setItem("selfConsistencyPaths", SELF_CONSISTENCY_PATHS.toString());
+      } catch (err) {
+        console.error("Error saving self-consistency settings to localStorage:", err);
+      }
+    }
+
     function getModelDisplayName(fullStr) {
       if (!fullStr) return "Model not set";
       
