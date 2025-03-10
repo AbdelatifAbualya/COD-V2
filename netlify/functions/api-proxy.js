@@ -52,9 +52,9 @@ exports.handler = async function(event, context) {
     const requestBody = JSON.parse(event.body);
     console.log('Request received for model:', requestBody.model);
     
-    // We'll use the Qroq API endpoint
-    const apiEndpoint = 'https://api.qroq.com/v1/chat/completions';
-    console.log(`Using Qroq API endpoint: ${apiEndpoint}`);
+    // We'll use the Groq API endpoint
+    const apiEndpoint = 'https://api.groq.com/openai/v1/chat/completions';
+    console.log(`Using Groq API endpoint: ${apiEndpoint}`);
     
     // Implement retry logic
     let retries = 3;
@@ -66,8 +66,8 @@ exports.handler = async function(event, context) {
         const controller = new AbortController();
         const timeoutId = setTimeout(() => controller.abort(), 60000); // 60-second timeout
         
-        // Make a request to the Qroq API
-        console.log(`Sending request to Qroq API (attempts remaining: ${retries})`);
+        // Make a request to the Groq API
+        console.log(`Sending request to Groq API (attempts remaining: ${retries})`);
         response = await fetch(apiEndpoint, {
           method: 'POST',
           headers: {
@@ -83,7 +83,7 @@ exports.handler = async function(event, context) {
         
         // If we get a 502, retry; otherwise, break the loop
         if (response.status === 502) {
-          console.log('Received 502 from Qroq API, retrying...');
+          console.log('Received 502 from Groq API, retrying...');
           retries--;
           // Wait before retrying (exponential backoff)
           await new Promise(resolve => setTimeout(resolve, (3 - retries) * 2000));
@@ -102,13 +102,13 @@ exports.handler = async function(event, context) {
 
     // If we exhausted retries and still don't have a response
     if (!response) {
-      throw new Error('Failed to get response from Qroq API after multiple attempts');
+      throw new Error('Failed to get response from Groq API after multiple attempts');
     }
 
     // Handle response errors
     if (!response.ok) {
       const errorData = await response.text();
-      console.error(`Qroq API error: ${response.status}`, errorData);
+      console.error(`Groq API error: ${response.status}`, errorData);
       
       let errorMessage;
       try {
@@ -128,13 +128,13 @@ exports.handler = async function(event, context) {
       return {
         statusCode: response.status,
         body: JSON.stringify({ 
-          error: `Qroq API error: ${response.status}`,
+          error: `Groq API error: ${response.status}`,
           message: errorMessage,
           details: {
             possible_fixes: [
               "Verify the API key is correct in Netlify",
-              "Check that the model name is valid for Qroq API",
-              "Ensure your Qroq API subscription is active"
+              "Check that the model name is valid for Groq API",
+              "Ensure your Groq API subscription is active"
             ]
           }
         }),
@@ -147,7 +147,7 @@ exports.handler = async function(event, context) {
 
     // Parse the response
     const data = await response.json();
-    console.log('Received successful response from Qroq API');
+    console.log('Received successful response from Groq API');
 
     // Return the response
     return {
@@ -169,9 +169,9 @@ exports.handler = async function(event, context) {
           stack: process.env.NODE_ENV === 'development' ? error.stack : undefined,
           suggestions: [
             "Verify QROQ_API_KEY is set correctly in Netlify environment variables",
-            "Check if the model name is valid for Qroq API",
+            "Check if the model name is valid for Groq API",
             "Ensure network connection is stable",
-            "Verify your Qroq API subscription is active"
+            "Verify your Groq API subscription is active"
           ]
         }
       }),
