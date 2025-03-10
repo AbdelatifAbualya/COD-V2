@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <!-- saved from url=(0067)file:///home/abid/Desktop/LLM%20Playground%20(COT%20vs%20COD)2.html -->
 <html lang="en" data-darkreader-mode="dynamic" data-darkreader-scheme="dark" data-darkreader-proxy-injected="true"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8"><style class="darkreader darkreader--fallback" media="screen"></style><style class="darkreader darkreader--text" media="screen"></style><style class="darkreader darkreader--invert" media="screen">.jfk-bubble.gtx-bubble, .captcheck_answer_label > input + img, span#closed_text > img[src^="https://www.gstatic.com/images/branding/googlelogo"], span[data-href^="https://www.hcaptcha.com/"] > #icon, img.Wirisformula, a[data-testid="headerMediumLogo"]>svg, .d2l-navigation-link-image-container, .d2l-iframe-loading-container {
@@ -66,7 +65,7 @@
    --darkreader-neutral-background: var(--darkreader-background-ffffff, #181a1b);
    --darkreader-neutral-text: var(--darkreader-text-000000, #e8e6e3);
    --darkreader-selection-background: var(--darkreader-background-0060d4, #004daa);
-   --darkreader-selection-text: var(--darkreader-text-ffffff, #e8e6e3);
+   --darkreader-selection-text: var (--darkreader-text-ffffff, #e8e6e3);
 }</style><style class="darkreader darkreader--root-vars" media="screen"></style><style class="darkreader darkreader--user-agent" media="screen">@layer {
 html {
     background-color: var(--darkreader-background-ffffff, #181a1b) !important;
@@ -1427,6 +1426,62 @@ select:-webkit-autofill {
     .message-image:hover {
       transform: scale(1.01);
     }
+
+    /* Add new self-reflection CSS */
+    .reflection-step {
+      background-color: #3d4661 !important;
+      border-left: 3px solid #8a5cf7 !important;
+    }
+
+    .reflection-step .step-number {
+      background-color: #5d4d8a !important;
+      color: #d4c5ff !important;
+    }
+
+    .reflection-step .step-content {
+      color: #d4c5ff !important;
+      font-style: italic;
+    }
+
+    /* Simplified Parameters Tab */
+    .range-container {
+      position: relative;
+      margin-bottom: 20px;
+    }
+
+    .range-value {
+      position: absolute;
+      right: 0;
+      top: 0;
+      font-size: 0.9rem;
+      color: #aaa;
+    }
+
+    /* Ensure submit button and clear thread are more visible */
+    #sendBtn, #clearThreadBtn {
+      background-color: #4a8cff;
+      color: white;
+      padding: 8px 15px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      font-weight: 500;
+      transition: background-color 0.2s;
+    }
+
+    #sendBtn:hover, #clearThreadBtn:hover {
+      background-color: #357abd;
+    }
+
+    #clearThreadBtn {
+      background-color: #dc3545;
+      width: 100%;
+      margin-top: 10px;
+    }
+
+    #clearThreadBtn:hover {
+      background-color: #bd2130;
+    }
   </style><style class="darkreader darkreader--sync" media="screen"></style>
 <meta name="darkreader" content="dbb61675415b4944b93830950218de1d"><style class="darkreader darkreader--override" media="screen">.vimvixen-hint {
     background-color: var(--darkreader-background-ffd76e, #684b00) !important;
@@ -1528,9 +1583,6 @@ body#tumblr {
     --d2l-dropdown-background-color: var(--darkreader-neutral-background) !important;
     --d2l-dropdown-border-color: var(--darkreader-border--d2l-color-mica) !important;
     --d2l-input-backgroud-color: var(--darkreader-neutral-background) !important;
-    --d2l-menu-border-color: var(--darkreader-bg--d2l-color-gypsum) !important;
-    --d2l-tooltip-background-color: var(--darkreader-neutral-background) !important;
-    --d2l-tooltip-border-color: var(--darkreader-bg--d2l-color-gypsum) !important;
 }
 :host([_floating]) .d2l-floating-buttons-container {
     background-color: var(--darkreader-neutral-background) !important;
@@ -1787,77 +1839,62 @@ html {-webkit-transition : -webkit-filter 300ms linear;}
         </div>
       </div>
 
-      <!-- Add this right after the Enhanced Reasoning Options section in your reasoningTab -->
+      <!-- Replace Self-Consistency Section with Self-Reflection -->
       <div class="advanced-options-header">
-        Self-Consistency Voting
+        Self-Reflection for Chain of Draft
         <label class="toggle-switch">
-          <input type="checkbox" id="selfConsistencyToggle">
+          <input type="checkbox" id="selfReflectionToggle" checked>
           <span class="toggle-slider"></span>
         </label>
       </div>
 
-      <div id="selfConsistencyOptions" class="self-consistency-options" style="display: none;">
+      <div id="selfReflectionInfo" class="enhanced-reasoning" style="display: block;">
         <div class="option-description">
-          Generates multiple reasoning paths and selects the most common answer, improving accuracy on complex problems.
+          Adds a reflection step after reasoning to help the model verify its own work and catch mistakes.
         </div>
         
-        <div class="range-container" style="margin-top: 15px;">
-          <label for="pathCount">Number of reasoning paths: <span id="pathCountValue">3</span></label>
-          <input type="range" id="pathCount" min="2" max="5" step="1" value="3">
-        </div>
-        
-        <div class="warning-message" style="margin-top: 10px; font-size: 0.8rem; color: rgb(232, 165, 106); --darkreader-inline-color: var(--darkreader-text-e8a56a, #e8a56b);" data-darkreader-inline-color="">
-          <span style="font-weight: bold;">⚠️ Note:</span> Each additional path increases processing time and API usage.
+        <div class="problem-analyzer">
+          <div class="analyzer-title">
+            <span class="analyzer-icon">🔍</span> How Self-Reflection Works
+          </div>
+          <div class="analyzer-help">
+            When using Chain of Draft with self-reflection:
+            <ul style="margin-top: 5px; padding-left: 20px; font-size: 0.85rem;">
+              <li>The model reasons step-by-step as usual</li>
+              <li>Before concluding, it adds a reflection step to check for errors</li>
+              <li>This helps identify calculation mistakes, misunderstandings, or logic errors</li>
+              <li>The reflection is highlighted in the UI for easy identification</li>
+            </ul>
+            This approach improves accuracy with a single API call, unlike self-consistency which required multiple calls.
+          </div>
         </div>
       </div>
     </div>
     
     <!-- Parameters Tab -->
-    <div id="parametersTab" class="tab-content active" style="display: block;">
+    <div id="parametersTab" class="tab-content active">
       <div class="settings-section-header">Generation Parameters</div>
       
-      <!-- Improved range sliders with visible values -->
       <label for="temp">Temperature</label>
       <div class="range-container">
         <input type="range" id="temp" min="0" max="1" step="0.01" value="0.5">
         <span id="tempValue" class="range-value">0.5</span>
       </div>
-      <p style="font-size: 0.8rem; color: rgb(170, 170, 170); margin-top: 0px; --darkreader-inline-color: var(--darkreader-text-aaaaaa, #b2aca2);" data-darkreader-inline-color="">Controls randomness: lower values make responses more focused and deterministic.</p>
+      <p style="font-size: 0.8rem; color: #aaa; margin-top: 0;">Controls randomness: lower values make responses more focused.</p>
 
       <label for="topP">Top P</label>
       <div class="range-container">
         <input type="range" id="topP" min="0" max="1" step="0.01" value="0.90">
         <span id="topPValue" class="range-value">0.9</span>
       </div>
-      <p style="font-size: 0.8rem; color: rgb(170, 170, 170); margin-top: 0px; --darkreader-inline-color: var(--darkreader-text-aaaaaa, #b2aca2);" data-darkreader-inline-color="">Controls diversity via nucleus sampling: lower values exclude less probable tokens.</p>
-
-      <label for="topK">Top K</label>
-      <div class="range-container">
-        <input type="range" id="topK" min="0" max="100" step="1" value="55">
-        <span id="topKValue" class="range-value">55</span>
-      </div>
-      <p style="font-size: 0.8rem; color: rgb(170, 170, 170); margin-top: 0px; --darkreader-inline-color: var(--darkreader-text-aaaaaa, #b2aca2);" data-darkreader-inline-color="">Limits sampling to the top K most likely tokens.</p>
+      <p style="font-size: 0.8rem; color: #aaa; margin-top: 0;">Controls diversity via nucleus sampling.</p>
 
       <label for="maxTokens">Max Tokens</label>
       <div class="range-container">
         <input type="range" id="maxTokens" min="256" max="4096" step="128" value="1112">
         <span id="maxTokensValue" class="range-value">1152</span>
       </div>
-      <p style="font-size: 0.8rem; color: rgb(170, 170, 170); margin-top: 0px; --darkreader-inline-color: var(--darkreader-text-aaaaaa, #b2aca2);" data-darkreader-inline-color="">Maximum number of tokens to generate in the response.</p>
-
-      <label for="presencePenalty">Presence Penalty</label>
-      <div class="range-container">
-        <input type="range" id="presencePenalty" min="-2" max="2" step="0.1" value="0">
-        <span id="presencePenaltyValue" class="range-value">0</span>
-      </div>
-      <p style="font-size: 0.8rem; color: rgb(170, 170, 170); margin-top: 0px; --darkreader-inline-color: var(--darkreader-text-aaaaaa, #b2aca2);" data-darkreader-inline-color="">Penalizes new tokens based on their presence in the input.</p>
-
-      <label for="frequencyPenalty">Frequency Penalty</label>
-      <div class="range-container">
-        <input type="range" id="frequencyPenalty" min="-2" max="2" step="0.1" value="0.4">
-        <span id="frequencyPenaltyValue" class="range-value">0.4</span>
-      </div>
-      <p style="font-size: 0.8rem; color: rgb(170, 170, 170); margin-top: 0px; --darkreader-inline-color: var(--darkreader-text-aaaaaa, #b2aca2);" data-darkreader-inline-color="">Penalizes tokens based on their frequency in the generated text.</p>
+      <p style="font-size: 0.8rem; color: #aaa; margin-top: 0;">Maximum length of the response.</p>
     </div>
     
     <div style="text-align: right; margin-top: 20px;">
@@ -1951,10 +1988,6 @@ html {-webkit-transition : -webkit-filter 300ms linear;}
     // NEW: Enhanced reasoning controls
     let ENHANCED_REASONING_ENABLED = true;
     let REASONING_ENHANCEMENT = "adaptive"; // Options: "adaptive", "standard"
-    
-    // NEW: Self-consistency voting
-    let SELF_CONSISTENCY_ENABLED = false;
-    let SELF_CONSISTENCY_PATHS = 3;  // Default number of reasoning paths to generate
     
     // NEW: Problem complexity detection
     let PROBLEM_COMPLEXITY = {
@@ -2058,110 +2091,9 @@ A: First segment: The car travels at 60 mph for 2 hours, so the distance covered
     // Default generation parameters
     let TEMPERATURE = 0.5;
     let TOP_P = 0.90;
-    let TOP_K = 55;
     let MAX_TOKENS = 1112;
-    let PRESENCE_PENALTY = 0;
-    let FREQUENCY_PENALTY = 0.4;
 
-    /***********************
-     * Self-Consistency Implementation
-     ***********************/
-    function initSelfConsistency() {
-      // Try to load saved settings
-      const savedEnabled = localStorage.getItem("selfConsistencyEnabled");
-      if (savedEnabled !== null) {
-        SELF_CONSISTENCY_ENABLED = savedEnabled === "true";
-      }
-      
-      const savedPaths = localStorage.getItem("selfConsistencyPaths");
-      if (savedPaths) {
-        SELF_CONSISTENCY_PATHS = parseInt(savedPaths);
-      }
-      
-      // Setup UI elements
-      const toggle = document.getElementById('selfConsistencyToggle');
-      const options = document.getElementById('selfConsistencyOptions');
-      const pathSlider = document.getElementById('pathCount');
-      const pathValue = document.getElementById('pathCountValue');
-      
-      if (toggle) {
-        toggle.checked = SELF_CONSISTENCY_ENABLED;
-        if (options) {
-          options.style.display = SELF_CONSISTENCY_ENABLED ? 'block' : 'none';
-        }
-        
-        toggle.addEventListener('change', () => {
-          SELF_CONSISTENCY_ENABLED = toggle.checked;
-          if (options) {
-            options.style.display = SELF_CONSISTENCY_ENABLED ? 'block' : 'none';
-          }
-          updateCurrentModelDisplay();
-        });
-      }
-      
-      if (pathSlider && pathValue) {
-        pathSlider.value = SELF_CONSISTENCY_PATHS;
-        pathValue.textContent = SELF_CONSISTENCY_PATHS;
-        
-        pathSlider.addEventListener('input', () => {
-          SELF_CONSISTENCY_PATHS = parseInt(pathSlider.value);
-          pathValue.textContent = SELF_CONSISTENCY_PATHS;
-        });
-      }
-    }
-
-    function saveSelfConsistencySettings() {
-      try {
-        localStorage.setItem("selfConsistencyEnabled", SELF_CONSISTENCY_ENABLED.toString());
-        localStorage.setItem("selfConsistencyPaths", SELF_CONSISTENCY_PATHS.toString());
-      } catch (err) {
-        console.error("Error saving self-consistency settings to localStorage:", err);
-      }
-    }
-
-    function getModelDisplayName(fullStr) {
-      if (!fullStr) return "Model not set";
-      
-      // Extract from path
-      const parts = fullStr.split("/");
-      const lastChunk = parts[parts.length - 1] || "";
-      const dashIndex = lastChunk.lastIndexOf("-");
-      if (dashIndex !== -1) {
-        return lastChunk.substring(0, dashIndex);
-      }
-      return lastChunk;
-    }
     
-    function updateCurrentModelDisplay() {
-      const element = document.getElementById("currentModelDisplay");
-      if (element) {
-        let displayText = getModelDisplayName(MODEL_NAME);
-        
-        // Add badge for reasoning method
-        let reasoningBadge = "";
-        switch (REASONING_METHOD) {
-          case "cot":
-            reasoningBadge = '<span class="reasoning-badge" style="background-color: #2c6b9c;">CoT</span>';
-            break;
-          case "cod":
-            reasoningBadge = `<span class="reasoning-badge" style="background-color: #2c6b9c;">CoD-${COD_WORD_LIMIT}</span>`;
-            break;
-        }
-        
-        // Add enhanced reasoning badge if enabled
-        if (ENHANCED_REASONING_ENABLED && REASONING_ENHANCEMENT === "adaptive") {
-          reasoningBadge += '<span class="reasoning-badge" style="background-color: #2d5038; margin-left: 3px;">Adaptive</span>';
-        }
-        
-        // Add self-consistency badge if enabled
-        if (SELF_CONSISTENCY_ENABLED && REASONING_METHOD === "cod") {
-          reasoningBadge += '<span class="reasoning-badge" style="background-color: #5c3d7a; margin-left: 3px;">SC-' + SELF_CONSISTENCY_PATHS + '</span>';
-        }
-        
-        element.innerHTML = displayText + reasoningBadge;
-      }
-    }
-
     /***********************
      * Thread Management
      ***********************/
@@ -2864,22 +2796,53 @@ A: First segment: The car travels at 60 mph for 2 hours, so the distance covered
         // Split by periods to separate steps for CoD
         let steps = cleanedThinking.split(/\.\s*/).filter(step => step.trim().length > 0);
         
-        // Create a more visually distinct format for CoD steps
-        return steps.map((step, index) => 
-          `<div class="step cod-step">
+        // Create formatted steps including reflection handling
+        return steps.map((step, index) => {
+          // Check if this is a reflection step
+          const isReflection = step.toLowerCase().includes('reflection:') || 
+                             step.toLowerCase().includes('checking work:') ||
+                             step.toLowerCase().includes('verifying:');
+          
+          const stepClass = isReflection ? 'step cod-step reflection-step' : 'step cod-step';
+          
+          return `<div class="${stepClass}">
             <span class="step-number">${index + 1}</span>
             <span class="step-content">${step.trim()}${!step.endsWith('.') ? '.' : ''}</span>
-          </div>`
-        ).join('');
+          </div>`;
+        }).join('');
       } else {
         // Original formatting for CoT
         let steps = cleanedThinking.split(/\.\s+/);
-        
         return steps.filter(step => step.trim())
           .map(step => 
             `<div class="step">${step.trim()}${!step.endsWith('.') ? '.' : ''}</div>`
           ).join('');
       }
+    }
+
+    // New initialization function for self-reflection
+    function initSelfReflection() {
+      const toggle = document.getElementById('selfReflectionToggle');
+      const infoPanel = document.getElementById('selfReflectionInfo');
+      
+      if (toggle) {
+        toggle.checked = true;
+        
+        toggle.addEventListener('change', () => {
+          if (infoPanel) {
+            infoPanel.style.display = toggle.checked ? 'block' : 'none';
+          }
+          updateCurrentModelDisplay();
+        });
+      }
+    }
+
+    // Cleanup function
+    function removeGlobalSelfConsistencyVars() {
+      window.SELF_CONSISTENCY_ENABLED = undefined;
+      window.SELF_CONSISTENCY_PATHS = undefined;
+      window.initSelfConsistency = undefined;
+      window.saveSelfConsistencySettings = undefined;
     }
 
     /***********************
@@ -3281,9 +3244,6 @@ A: First segment: The car travels at 60 mph for 2 hours, so the distance covered
           model: MODEL_NAME,
           max_tokens: MAX_TOKENS,
           top_p: TOP_P,
-          top_k: TOP_K,
-          presence_penalty: PRESENCE_PENALTY,
-          frequency_penalty: FREQUENCY_PENALTY,
           temperature: TEMPERATURE + 0.2, // Increase temperature slightly for diversity
           messages: messagesForApi
         };
@@ -3551,9 +3511,6 @@ A: First segment: The car travels at 60 mph for 2 hours, so the distance covered
           model: MODEL_NAME,
           max_tokens: MAX_TOKENS,
           top_p: TOP_P,
-          top_k: TOP_K,
-          presence_penalty: PRESENCE_PENALTY,
-          frequency_penalty: FREQUENCY_PENALTY,
           temperature: TEMPERATURE,
           messages: messagesForApi
         };
@@ -3562,7 +3519,7 @@ A: First segment: The car travels at 60 mph for 2 hours, so the distance covered
         if (wordCountRequest) {
           console.log(`Final answer word limit requested: ${wordCountRequest} words`);
         }
-        console.log(`Parameters: temp=${TEMPERATURE}, top_p=${TOP_P}, top_k=${TOP_K}`);
+        console.log(`Parameters: temp=${TEMPERATURE}, top_p=${TOP_P}`);
 
         try {
           // Add timestamp to URL to prevent caching
@@ -4126,10 +4083,7 @@ Separate your steps with periods. Write your final answer after the #### separat
         // Set parameter sliders
         setSliderAndValue("temp", TEMPERATURE);
         setSliderAndValue("topP", TOP_P);
-        setSliderAndValue("topK", TOP_K);
         setSliderAndValue("maxTokens", MAX_TOKENS);
-        setSliderAndValue("presencePenalty", PRESENCE_PENALTY);
-        setSliderAndValue("frequencyPenalty", FREQUENCY_PENALTY);
         
         // Show modal
         const modal = document.getElementById("settingsModal");
@@ -4245,10 +4199,7 @@ Separate your steps with periods. Write your final answer after the #### separat
         if (TEMPERATURE === 0) TEMPERATURE = 0.01; // Ensure minimum value for Qroq API
         
         TOP_P = getNumericValue("topP", 0.9, parseFloat);
-        TOP_K = getNumericValue("topK", 55, parseInt);
         MAX_TOKENS = getNumericValue("maxTokens", 1112, parseInt);
-        PRESENCE_PENALTY = getNumericValue("presencePenalty", 0, parseFloat);
-        FREQUENCY_PENALTY = getNumericValue("frequencyPenalty", 0.4, parseFloat);
         
         // Update model display
         updateCurrentModelDisplay();
@@ -4262,10 +4213,7 @@ Separate your steps with periods. Write your final answer after the #### separat
           localStorage.setItem("reasoningEnhancement", REASONING_ENHANCEMENT);
           localStorage.setItem("temperature", TEMPERATURE.toString());
           localStorage.setItem("topP", TOP_P.toString());
-          localStorage.setItem("topK", TOP_K.toString());
           localStorage.setItem("maxTokens", MAX_TOKENS.toString());
-          localStorage.setItem("presencePenalty", PRESENCE_PENALTY.toString());
-          localStorage.setItem("frequencyPenalty", FREQUENCY_PENALTY.toString());
           
           // Save custom prompts
           localStorage.setItem("customPrompts", JSON.stringify(PROMPTS));
@@ -4426,17 +4374,8 @@ Separate your steps with periods. Write your final answer after the #### separat
         const topP = localStorage.getItem("topP");
         if (topP) TOP_P = parseFloat(topP);
         
-        const topK = localStorage.getItem("topK");
-        if (topK) TOP_K = parseInt(topK);
-        
         const maxTokens = localStorage.getItem("maxTokens");
         if (maxTokens) MAX_TOKENS = parseInt(maxTokens);
-        
-        const presencePenalty = localStorage.getItem("presencePenalty");
-        if (presencePenalty) PRESENCE_PENALTY = parseFloat(presencePenalty);
-        
-        const frequencyPenalty = localStorage.getItem("frequencyPenalty");
-        if (frequencyPenalty) FREQUENCY_PENALTY = parseFloat(frequencyPenalty);
         
         // Load self-consistency settings
         const selfConsistencyEnabled = localStorage.getItem("selfConsistencyEnabled");
@@ -4457,6 +4396,7 @@ Separate your steps with periods. Write your final answer after the #### separat
       console.log("Initializing app...");
       
       try {
+        removeGlobalSelfConsistencyVars();
         loadPersistedSettings();
         console.log("Settings loaded");
         
