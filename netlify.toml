@@ -1,150 +1,37 @@
-// netlify/functions/api-proxy.js
-const fetch = require('node-fetch');
+# Netlify configuration file
+# This file should be in the root of your project
 
-exports.handler = async function(event, context) {
-  // Set CORS headers for preflight requests
-  if (event.httpMethod === 'OPTIONS') {
-    return {
-      statusCode: 200,
-      headers: {
-        'Access-Control-Allow-Origin': '*',
-        'Access-Control-Allow-Headers': 'Content-Type',
-        'Access-Control-Allow-Methods': 'POST, OPTIONS'
-      },
-      body: ''
-    };
-  }
+[build]
+  # Directory that contains the deploy-ready HTML files and assets
+  publish = "/"
+  
+  # Directory with the serverless functions
+  functions = "netlify/functions"
 
-  // Only allow POST requests
-  if (event.httpMethod !== 'POST') {
-    console.log('Method not allowed:', event.httpMethod);
-    return {
-      statusCode: 405,
-      body: JSON.stringify({ error: 'Method Not Allowed' }),
-      headers: { 
-        'Content-Type': 'application/json',
-        'Access-Control-Allow-Origin': '*'
-      }
-    };
-  }
+# Function settings
+[functions]
+  node_bundler = "esbuild"
+  external_node_modules = ["node-fetch"]
+  included_files = []
 
-  try {
-    // Check if API key is set
-    if (!process.env.GROQ_API_KEY) {
-      console.error('GROQ_API_KEY environment variable is not set');
-      return {
-        statusCode: 500,
-        body: JSON.stringify({ error: 'API key not configured' }),
-        headers: { 
-          'Content-Type': 'application/json',
-          'Access-Control-Allow-Origin': '*'
-        }
-      };
-    }
+# Set function timeout (must be in build.environment)  
+[build.environment]
+  AWS_LAMBDA_FUNCTION_TIMEOUT = "120"
+  # Note: You need to set GROQ_API_KEY in the Netlify UI environment variables
 
-    // Parse the request body
-    const requestBody = JSON.parse(event.body);
-    console.log('Request received for model:', requestBody.model);
-    
-    // Implement retry logic for Groq API
-    let retries = 3;
-    let response;
-    
-    while (retries > 0) {
-      try {
-        // Make a request to the Groq API
-        console.log(`Sending request to Groq API (attempts remaining: ${retries})`);
-        response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${process.env.GROQ_API_KEY}`
-          },
-          body: JSON.stringify(requestBody),
-          // Set a timeout to prevent hanging requests
-          timeout: 60000 // 60 seconds timeout
-        });
-        
-        // If we get a 502, retry; otherwise, break the loop
-        if (response.status === 502) {
-          console.log('Received 502 from Groq API, retrying...');
-          retries--;
-          // Wait before retrying (exponential backoff)
-          await new Promise(resolve => setTimeout(resolve, (3 - retries) * 2000));
-        } else {
-          // For any other status (success or other errors), break the retry loop
-          break;
-        }
-      } catch (fetchError) {
-        console.error('Fetch error:', fetchError);
-        retries--;
-        if (retries === 0) throw fetchError;
-        // Wait before retrying
-        await new Promise(resolve => setTimeout(resolve, (3 - retries) * 2000));
-      }
-    }
+# Set up chunked uploads for large request bodies
+[build.processing]
+  skip_processing = false
 
-    // If we exhausted retries and still don't have a response
-    if (!response) {
-      throw new Error('Failed to get response from Groq API after multiple attempts');
-    }
+# Increase client side timeouts for long-running functions
+[[headers]]
+  for = "/*"
+  [headers.values]
+    # Increase client-side timeout expectations
+    X-Function-Timeout = "120"
 
-    // If response is not OK, handle the error
-    if (!response.ok) {
-      const errorText = await response.text();
-      console.error('Groq API error:', response.status, errorText);
-      
-      let errorMessage;
-      try {
-        // Try to parse error as JSON
-        const errorData = JSON.parse(errorText);
-        errorMessage = errorData.error?.message || 'Unknown API error';
-      } catch (e) {
-        // If parsing fails, use the raw text
-        errorMessage = errorText || `Error ${response.status}`;
-      }
-      
-      return {
-        statusCode: response.status,
-        body: JSON.stringify({ 
-          error: `Groq API error: ${response.status}`,
-          message: errorMessage 
-        }),
-        headers: { 
-          'Content-Type': 'application/json',
-          'Access-Control-Allow-Origin': '*'
-        }
-      };
-    }
-
-    // Parse the response
-    const data = await response.json();
-    console.log('Received successful response from Groq API');
-
-    // Return the response
-    return {
-      statusCode: 200,
-      body: JSON.stringify(data),
-      headers: { 
-        'Content-Type': 'application/json',
-        'Access-Control-Allow-Origin': '*'
-      }
-    };
-  } catch (error) {
-    console.error('Function error:', error);
-    return {
-      statusCode: 500,
-      body: JSON.stringify({ 
-        error: error.message || 'Unknown error occurred',
-        details: {
-          name: error.name,
-          stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
-        }
-      }),
-      headers: { 
-        'Content-Type': 'application/json',
-        'Access-Control-Allow-Origin': '*'
-      }
-    };
-  }
-};
+# Properly configured redirect for single-page application
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
