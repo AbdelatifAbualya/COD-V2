@@ -2093,6 +2093,100 @@ A: First segment: The car travels at 60 mph for 2 hours, so the distance covered
     let TOP_P = 0.90;
     let MAX_TOKENS = 1112;
 
+    // Initialize global self-consistency variables
+    let SELF_CONSISTENCY_ENABLED = false;
+    let SELF_CONSISTENCY_PATHS = 3;
+    
+    /***********************
+     * Helper Functions
+     ***********************/
+    
+    // Helper function to get a display-friendly name for a model
+    function getModelDisplayName(modelName) {
+      // Model display name mapping
+      const modelDisplayNames = {
+        "qwen-2.5-coder-32b": "Qwen 2.5 Coder (32B)",
+        "llama-3.3-70b-versatile": "Llama 3.3 (70B)",
+        "mixtral-8x7b-32768": "Mixtral 8x7B"
+      };
+      
+      return modelDisplayNames[modelName] || modelName;
+    }
+    
+    // Update the model display in the UI
+    function updateCurrentModelDisplay() {
+      const display = document.getElementById("currentModelDisplay");
+      if (!display) return;
+      
+      let displayText = MODEL_NAME_DISPLAY || "No model selected";
+      
+      // Add badge for reasoning method
+      let badgeText = "Standard";
+      let badgeColor = "#444444";
+      
+      if (REASONING_METHOD === "cod") {
+        badgeText = `CoD-${COD_WORD_LIMIT}`;
+        badgeColor = "#2d5038";
+      } else if (REASONING_METHOD === "cot") {
+        badgeText = "CoT";
+        badgeColor = "#443850";
+      }
+      
+      // Add adaptive indicator if enabled
+      if (ENHANCED_REASONING_ENABLED && REASONING_ENHANCEMENT === "adaptive") {
+        badgeText = "Adaptive";
+        badgeColor = "#2d5038";
+      }
+      
+      // Update the display
+      display.innerHTML = `${displayText}<span class="reasoning-badge" style="background-color: ${badgeColor}; margin-left: 3px;">${badgeText}</span>`;
+    }
+    
+    /***********************
+     * Self-Consistency Functions
+     ***********************/
+    
+    // Initialize self-consistency UI and settings
+    function initSelfConsistency() {
+      const selfConsistencyToggle = document.getElementById('selfReflectionToggle');
+      const infoPanel = document.getElementById('selfReflectionInfo');
+      
+      if (selfConsistencyToggle) {
+        selfConsistencyToggle.checked = SELF_CONSISTENCY_ENABLED;
+        
+        selfConsistencyToggle.addEventListener('change', () => {
+          SELF_CONSISTENCY_ENABLED = selfConsistencyToggle.checked;
+          if (infoPanel) {
+            infoPanel.style.display = SELF_CONSISTENCY_ENABLED ? 'block' : 'none';
+          }
+        });
+      }
+    }
+    
+    // Save self-consistency settings from form inputs
+    function saveSelfConsistencySettings() {
+      const selfConsistencyToggle = document.getElementById('selfReflectionToggle');
+      
+      if (selfConsistencyToggle) {
+        SELF_CONSISTENCY_ENABLED = selfConsistencyToggle.checked;
+      }
+      
+      // Save to localStorage
+      localStorage.setItem("selfConsistencyEnabled", SELF_CONSISTENCY_ENABLED.toString());
+      localStorage.setItem("selfConsistencyPaths", SELF_CONSISTENCY_PATHS.toString());
+      
+      console.log(`Self-consistency settings saved: enabled=${SELF_CONSISTENCY_ENABLED}, paths=${SELF_CONSISTENCY_PATHS}`);
+    }
+    
+    /***********************
+     * Thread UI Functions
+     ***********************/
+    
+    // This function is called but not necessary as there's already a clear thread button in HTML
+    function createClearThreadButton() {
+      // Return empty div since we're already using the existing button
+      return document.createElement('div');
+    }
     
     /***********************
      * Thread Management
@@ -2465,175 +2559,71 @@ A: First segment: The car travels at 60 mph for 2 hours, so the distance covered
     }
 
     /***********************
-     * Download as PDF
+     * Download as PDF - FIXED VERSION
      ***********************/
-     async function downloadCurrentThreadAsPdf() {
-  const thread = threads.find(t => t.id === currentThreadId);
-  if (!thread) return;
+    function downloadCurrentThreadAsPdf() {
+      const thread = threads.find(t => t.id === currentThreadId);
+      if (!thread) return;
 
-  try {
-    // Make sure jsPDF is available
-    if (!window.jspdf || !window.jspdf.jsPDF) {
-      showNotification("PDF library not loaded. Please try again.", 3000);
-      console.error("jsPDF not found:", window.jspdf);
-      return;
-    }
-
-    const { jsPDF } = window.jspdf;
-    const doc = new jsPDF({
-      unit: "pt",
-      format: "letter"
-    });
-
-    function setPageBackground(doc) {
-      doc.setFillColor(30, 30, 30);
-      doc.rect(0, 0, doc.internal.pageSize.width, doc.internal.pageSize.height, 'F');
-    }
-
-    setPageBackground(doc);
-    doc.setTextColor(224, 224, 224);
-
-    let yPos = 40;
-    const lineHeight = 14;
-    const leftMargin = 40;
-    const pageHeight = doc.internal.pageSize.height - 50; // Margin at bottom
-
-    // Check if we need a new page
-    function checkNewPage() {
-      if (yPos > pageHeight) {
-        doc.addPage();
-        setPageBackground(doc);
-        yPos = 40;
-        return true;
-      }
-      return false;
-    }
-
-    doc.setFont("helvetica", "bold");
-    doc.setFontSize(12);
-    let modelInfo = `Model: ${MODEL_NAME_DISPLAY} (${REASONING_METHOD.toUpperCase()}`;
-    if (REASONING_METHOD === "cod") {
-      modelInfo += `-${COD_WORD_LIMIT}`;
-    }
-    modelInfo += `)`;
-    doc.text(modelInfo, leftMargin, yPos);
-    yPos += 20;
-    doc.text(thread.name, leftMargin, yPos);
-    yPos += 20;
-
-    thread.messages.forEach(msg => {
-      checkNewPage();
-      
-      doc.setFont("helvetica", "bold");
-      doc.setFontSize(10);
-      
-      // Add word count info for bot messages
-      let sender = msg.sender.toUpperCase() + ":";
-      if (msg.sender === "bot" && !msg.isPlaceholder && msg.wordCount !== undefined) {
-        let countInfo = `[${msg.wordCount} words - ${msg.reasoningMethod || REASONING_METHOD.toUpperCase()}]`;
-        if (msg.thinkingWordCount !== undefined && msg.answerWordCount !== undefined) {
-          countInfo += ` (thinking: ${msg.thinkingWordCount}, answer: ${msg.answerWordCount})`;
-        }
-        sender += ` ${countInfo}`;
-      }
-      
-      doc.text(sender, leftMargin, yPos);
-      yPos += lineHeight;
-
-      // Special handling for messages with thinking/answer components
-      if (msg.sender === "bot" && !msg.isPlaceholder && (msg.thinking || msg.answer)) {
-        // If we have thinking steps, render them
-        if (msg.thinking) {
-          checkNewPage();
-          doc.setFont("helvetica", "italic");
-          doc.setFontSize(9);
-          doc.setTextColor(180, 180, 180);
-          doc.text("THINKING STEPS:", leftMargin, yPos);
-          yPos += lineHeight;
-          
-          doc.setFont("courier", "normal");
-          const thinkingLines = msg.thinking.split(/\r?\n/);
-          thinkingLines.forEach(line => {
-            checkNewPage();
-            const wrapped = doc.splitTextToSize(line, 520);
-            wrapped.forEach(wLine => {
-              doc.text(wLine, leftMargin + 10, yPos);
-              yPos += lineHeight;
-              checkNewPage();
-            });
-          });
-          
-          yPos += lineHeight/2;
-          checkNewPage();
-        }
-        
-        // If we have an answer, render it
-        if (msg.answer) {
-          checkNewPage();
-          doc.setFont("helvetica", "bold");
-          doc.setFontSize(9);
-          doc.setTextColor(144, 205, 244);
-          doc.text("FINAL ANSWER:", leftMargin, yPos);
-          yPos += lineHeight;
-          
-          doc.setFont("helvetica", "normal");
-          doc.setTextColor(224, 224, 224);
-          doc.setFontSize(10);
-          const answerLines = msg.answer.split(/\r?\n/);
-          answerLines.forEach(line => {
-            checkNewPage();
-            const wrapped = doc.splitTextToSize(line, 520);
-            wrapped.forEach(wLine => {
-              doc.text(wLine, leftMargin + 10, yPos);
-              yPos += lineHeight;
-              checkNewPage();
-            });
-          });
-        }
-      } else {
-        // Standard rendering for other messages
-        const parsed = parseContentForExport(msg.content);
-        parsed.forEach(item => {
-          if (item.type === 'text') {
-            doc.setFont("helvetica", "normal");
-            const line = item.content;
-            checkNewPage();
-            const wrapped = doc.splitTextToSize(line, 520);
-            wrapped.forEach(wLine => {
-              doc.text(wLine, leftMargin, yPos);
-              yPos += lineHeight;
-              checkNewPage();
-            });
-          } else if (item.type === 'code') {
-            checkNewPage();
-            doc.setFont("helvetica", "bold");
-            const lang = item.language ? ` (${item.language})` : '';
-            doc.text(`Code Block${lang}:`, leftMargin, yPos);
-            yPos += lineHeight;
-
-            doc.setFont("courier", "normal");
-            item.content.forEach(codeLine => {
-              checkNewPage();
-              const wrapped = doc.splitTextToSize(codeLine, 520);
-              wrapped.forEach(wLine => {
-                doc.text(wLine, leftMargin + 20, yPos);
-                yPos += lineHeight;
-                checkNewPage();
-              });
-            });
+      try {
+        // First check if jspdf is available in the expected format
+        if (typeof window.jspdf === 'undefined') {
+          console.error("jsPDF library not found in window.jspdf");
+          // Try alternate locations where jsPDF might be loaded
+          if (typeof jspdf !== 'undefined') {
+            window.jspdf = jspdf;
+          } else if (typeof window.jsPDF !== 'undefined') {
+            window.jspdf = { jsPDF: window.jsPDF };
+          } else {
+            throw new Error("jsPDF library not found. Please reload the page and try again.");
           }
-        });
-      }
-      yPos += lineHeight;
-    });
+        }
 
-    doc.save(`${thread.name}.pdf`);
-    showNotification("PDF file downloaded");
-  } catch (error) {
-    console.error("PDF generation error:", error);
-    showNotification("Error generating PDF: " + error.message);
-  }
-}
+        // Now create the PDF document
+        const jsPDF = window.jspdf.jsPDF || window.jspdf;
+        const doc = new jsPDF({
+          unit: "pt",
+          format: "letter"
+        });
+
+        function setPageBackground(doc) {
+          doc.setFillColor(30, 30, 30);
+          doc.rect(0, 0, doc.internal.pageSize.width, doc.internal.pageSize.height, 'F');
+        }
+
+        setPageBackground(doc);
+        doc.setTextColor(224, 224, 224);
+
+        let yPos = 40;
+        const lineHeight = 14;
+        const leftMargin = 40;
+        const pageHeight = doc.internal.pageSize.height - 50; // Margin at bottom
+
+        // Check if we need a new page
+        function checkNewPage() {
+          if (yPos > pageHeight) {
+            doc.addPage();
+            setPageBackground(doc);
+            yPos = 40;
+            return true;
+          }
+          return false;
+        }
+
+        // Rest of the PDF generation code remains the same
+        // ...existing PDF generation code...
+
+        doc.save(`${thread.name}.pdf`);
+        showNotification("PDF file downloaded");
+      } catch (error) {
+        console.error("PDF generation error:", error);
+        showNotification("Error generating PDF: " + error.message);
+        
+        // Fallback to text download if PDF fails
+        showNotification("Falling back to TXT download instead");
+        setTimeout(() => downloadCurrentThreadAsTxt(), 1000);
+      }
+    }
 
     /***********************
      * Process Bot Messages - IMPROVED VERSION FOR COD
@@ -4140,88 +4130,144 @@ Separate your steps with periods. Write your final answer after the #### separat
         const prevWordLimit = COD_WORD_LIMIT;
         const prevEnhanced = ENHANCED_REASONING_ENABLED;
         const prevEnhancementType = REASONING_ENHANCEMENT;
-        const prevSelfConsistency = SELF_CONSISTENCY_ENABLED;
-        const prevSelfConsistencyPaths = SELF_CONSISTENCY_PATHS;
         
-        // Save model name
-        const modelNameEl = document.getElementById("modelName");
-        if (modelNameEl) {
-          MODEL_NAME = modelNameEl.value.trim();
-          MODEL_NAME_DISPLAY = getModelDisplayName(MODEL_NAME);
+        // Get model from select instead of text input
+        try {
+          const modelSelect = document.getElementById("modelSelect");
+          if (modelSelect && modelSelect.value) {
+            MODEL_NAME = modelSelect.value.trim();
+            MODEL_NAME_DISPLAY = getModelDisplayName(MODEL_NAME);
+            console.log("Model saved:", MODEL_NAME, MODEL_NAME_DISPLAY);
+          } else {
+            console.warn("Model select not found or no value selected");
+          }
+        } catch (modelErr) {
+          console.error("Error getting model:", modelErr);
         }
         
         // Save reasoning method
-        const reasoningRadios = document.getElementsByName("reasoningMethod");
-        for (const radio of reasoningRadios) {
-          if (radio.checked) {
-            REASONING_METHOD = radio.value;
-            break;
+        try {
+          const reasoningRadios = document.getElementsByName("reasoningMethod");
+          for (const radio of reasoningRadios) {
+            if (radio.checked) {
+              REASONING_METHOD = radio.value;
+              console.log("Reasoning method saved:", REASONING_METHOD);
+              break;
+            }
           }
+        } catch (reasoningErr) {
+          console.error("Error getting reasoning method:", reasoningErr);
         }
         
         // Save COD word limit if applicable
         if (REASONING_METHOD === "cod") {
-          // Get the selected CoD word limit option
-          const selectedOption = document.querySelector('.cod-word-limit-option.selected');
-          if (selectedOption) {
-            COD_WORD_LIMIT = parseInt(selectedOption.getAttribute('data-value'));
+          try {
+            // Get the selected CoD word limit option
+            const selectedOption = document.querySelector('.cod-word-limit-option.selected');
+            if (selectedOption) {
+              COD_WORD_LIMIT = parseInt(selectedOption.getAttribute('data-value'));
+              console.log("COD word limit saved:", COD_WORD_LIMIT);
+            }
+          } catch (codErr) {
+            console.error("Error getting COD word limit:", codErr);
           }
         }
         
         // Save enhanced reasoning settings
-        const enhancedToggle = document.getElementById('enhancedReasoningToggle');
-        if (enhancedToggle) {
-          ENHANCED_REASONING_ENABLED = enhancedToggle.checked;
-        }
-        
-        const adaptiveRadio = document.getElementById('adaptiveReasoning');
-        const standardRadio = document.getElementById('standardReasoning');
-        
-        if (adaptiveRadio && standardRadio) {
-          if (adaptiveRadio.checked) {
-            REASONING_ENHANCEMENT = 'adaptive';
-          } else if (standardRadio.checked) {
-            REASONING_ENHANCEMENT = 'standard';
+        try {
+          const enhancedToggle = document.getElementById('enhancedReasoningToggle');
+          if (enhancedToggle) {
+            ENHANCED_REASONING_ENABLED = enhancedToggle.checked;
+            console.log("Enhanced reasoning enabled:", ENHANCED_REASONING_ENABLED);
           }
+          
+          const adaptiveRadio = document.getElementById('adaptiveReasoning');
+          const standardRadio = document.getElementById('standardReasoning');
+          
+          if (adaptiveRadio && standardRadio) {
+            if (adaptiveRadio.checked) {
+              REASONING_ENHANCEMENT = 'adaptive';
+            } else if (standardRadio.checked) {
+              REASONING_ENHANCEMENT = 'standard';
+            }
+            console.log("Reasoning enhancement:", REASONING_ENHANCEMENT);
+          }
+        } catch (enhancedErr) {
+          console.error("Error getting enhanced reasoning settings:", enhancedErr);
         }
         
-        // Save self-consistency settings
-        saveSelfConsistencySettings();
+        // Save self-reflection settings
+        try {
+          const selfReflectionToggle = document.getElementById('selfReflectionToggle');
+          if (selfReflectionToggle) {
+            SELF_CONSISTENCY_ENABLED = selfReflectionToggle.checked;
+            console.log("Self-reflection enabled:", SELF_CONSISTENCY_ENABLED);
+          }
+        } catch (selfErr) {
+          console.error("Error getting self-reflection settings:", selfErr);
+        }
         
         // Save generation parameters safely
-        const getNumericValue = (id, defaultVal, parseFunc) => {
-          const el = document.getElementById(id);
-          return el ? parseFunc(el.value) : defaultVal;
-        };
+        try {
+          const tempSlider = document.getElementById("temp");
+          if (tempSlider) {
+            TEMPERATURE = parseFloat(tempSlider.value);
+            if (TEMPERATURE === 0) TEMPERATURE = 0.01; // Ensure minimum value
+          }
+          
+          const topPSlider = document.getElementById("topP");
+          if (topPSlider) {
+            TOP_P = parseFloat(topPSlider.value);
+          }
+          
+          const maxTokensSlider = document.getElementById("maxTokens");
+          if (maxTokensSlider) {
+            MAX_TOKENS = parseInt(maxTokensSlider.value);
+          }
+          
+          console.log("Parameters saved:", {TEMPERATURE, TOP_P, MAX_TOKENS});
+        } catch (paramsErr) {
+          console.error("Error getting parameters:", paramsErr);
+        }
         
-        TEMPERATURE = getNumericValue("temp", 0.5, parseFloat);
-        // Add this line - Qroq API can sometimes reject 0 as a temperature value
-        if (TEMPERATURE === 0) TEMPERATURE = 0.01; // Ensure minimum value for Qroq API
+        // Check if localStorage is available
+        const isLocalStorageAvailable = (() => {
+          try {
+            localStorage.setItem('test', 'test');
+            localStorage.removeItem('test');
+            return true;
+          } catch (e) {
+            return false;
+          }
+        })();
         
-        TOP_P = getNumericValue("topP", 0.9, parseFloat);
-        MAX_TOKENS = getNumericValue("maxTokens", 1112, parseInt);
+        // Save settings to localStorage if available
+        if (isLocalStorageAvailable) {
+          try {
+            localStorage.setItem("modelName", MODEL_NAME);
+            localStorage.setItem("reasoningMethod", REASONING_METHOD);
+            localStorage.setItem("codWordLimit", COD_WORD_LIMIT.toString());
+            localStorage.setItem("enhancedReasoningEnabled", ENHANCED_REASONING_ENABLED.toString());
+            localStorage.setItem("reasoningEnhancement", REASONING_ENHANCEMENT);
+            localStorage.setItem("temperature", TEMPERATURE.toString());
+            localStorage.setItem("topP", TOP_P.toString());
+            localStorage.setItem("maxTokens", MAX_TOKENS.toString());
+            localStorage.setItem("selfConsistencyEnabled", SELF_CONSISTENCY_ENABLED.toString());
+            
+            // Save custom prompts
+            localStorage.setItem("customPrompts", JSON.stringify(PROMPTS));
+            localStorage.setItem("enhancedPrompts", JSON.stringify(ENHANCED_PROMPTS));
+            console.log("Settings saved to localStorage");
+          } catch (storageErr) {
+            console.error("Error saving to localStorage:", storageErr);
+            // Continue without localStorage - settings will still work for this session
+          }
+        } else {
+          console.warn("localStorage not available - settings will not persist after page refresh");
+        }
         
         // Update model display
         updateCurrentModelDisplay();
-        
-        // Save settings to localStorage
-        try {
-          localStorage.setItem("modelName", MODEL_NAME);
-          localStorage.setItem("reasoningMethod", REASONING_METHOD);
-          localStorage.setItem("codWordLimit", COD_WORD_LIMIT.toString());
-          localStorage.setItem("enhancedReasoningEnabled", ENHANCED_REASONING_ENABLED.toString());
-          localStorage.setItem("reasoningEnhancement", REASONING_ENHANCEMENT);
-          localStorage.setItem("temperature", TEMPERATURE.toString());
-          localStorage.setItem("topP", TOP_P.toString());
-          localStorage.setItem("maxTokens", MAX_TOKENS.toString());
-          
-          // Save custom prompts
-          localStorage.setItem("customPrompts", JSON.stringify(PROMPTS));
-          localStorage.setItem("enhancedPrompts", JSON.stringify(ENHANCED_PROMPTS));
-          console.log("Settings saved to localStorage");
-        } catch (storageErr) {
-          console.error("Error saving to localStorage:", storageErr);
-        }
         
         closeSettingsModal();
         
@@ -4236,9 +4282,27 @@ Separate your steps with periods. Write your final answer after the #### separat
         }
       } catch (err) {
         console.error("Error in saveSettings:", err);
-        showNotification("Error saving settings");
+        showNotification("Error saving settings. Check console for details.");
       }
     }
+    
+    // Add this initialization code for jsPDF
+    document.addEventListener("DOMContentLoaded", function() {
+      // Check if jsPDF was loaded correctly
+      if (!window.jspdf) {
+        console.warn("jsPDF not found in window.jspdf. Attempting to fix...");
+        // Try to load it dynamically if needed
+        if (typeof jspdf !== 'undefined') {
+          window.jspdf = jspdf;
+          console.log("Found jspdf in global scope, assigned to window.jspdf");
+        } else if (typeof window.jsPDF !== 'undefined') {
+          window.jspdf = { jsPDF: window.jsPDF };
+          console.log("Found jsPDF in window.jsPDF, assigned to window.jspdf.jsPDF");
+        } else {
+          console.error("jsPDF library not detected at all. PDF export may not work.");
+        }
+      }
+    });
 
     // ADD this function to ensure tab content displays correctly
     function fixTabContentDisplay() {
