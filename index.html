@@ -1916,7 +1916,7 @@ html {-webkit-transition : -webkit-filter 300ms linear;}
       <button class="close-modal" id="closeFeedbackModal">×</button>
       <h2>Share Your Feedback</h2>
       
-      <form method="POST" name="feedback">
+      <form method="POST" name="feedback" data-netlify="true">
         <input type="hidden" name="form-name" value="feedback">
         
         <input type="hidden" id="feedbackModel" name="model" value="qwen-2.5-coder">
@@ -3220,225 +3220,90 @@ A: First segment: The car travels at 60 mph for 2 hours, so the distance covered
       // Parse message for word count requirements
       const wordCountRequest = parseWordCountRequest(message);
       
-      // If self-consistency is enabled and we're using CoD, use multiple paths
+      // FIXED: Use proper self-reflection instead of self-consistency for CoD
       if (SELF_CONSISTENCY_ENABLED && REASONING_METHOD === "cod") {
-        addMessageToCurrentThread(`Generating ${SELF_CONSISTENCY_PATHS} reasoning paths to increase accuracy...`, "bot", true);
+        // Add message showing we're thinking with self-reflection
+        addMessageToCurrentThread("Thinking with self-reflection...", "bot", true);
         const thread = threads.find(t => t.id === currentThreadId);
         const placeholderIndex = thread.messages.length - 1;
-        
+
         // Build messages array with current settings and word count request
-        const messagesForApi = buildMessagesForChat(wordCountRequest);
+        let messagesForApi = buildMessagesForChat(wordCountRequest);
         
-        // Base payload 
-        const basePayload = {
+        // Add self-reflection instruction to the prompt for CoD
+        if (messagesForApi.length > 0 && messagesForApi[0].role === "system") {
+          // Modify the system message to include self-reflection instruction
+          const originalPrompt = messagesForApi[0].content;
+          
+          // Add instruction before the "Examples:" section or at the end
+          const examplesIndex = originalPrompt.indexOf("Examples:");
+          
+          const selfReflectionInstruction = `\n\nIMPORTANT: Before concluding, add a self-reflection step to verify your work. Look for calculation errors, check your logic, and ensure you've interpreted the problem correctly. This reflection step should be labeled as 'Reflection:' or 'Checking work:' and will be highlighted differently in the UI.`;
+          
+          if (examplesIndex !== -1) {
+            // Insert before examples
+            messagesForApi[0].content = 
+              originalPrompt.substring(0, examplesIndex) + 
+              selfReflectionInstruction +
+              "\n\n" +
+              originalPrompt.substring(examplesIndex);
+          } else {
+            // Append to the end
+            messagesForApi[0].content = originalPrompt + selfReflectionInstruction;
+          }
+          
+          console.log("Added self-reflection instruction to CoD prompt");
+        }
+
+        // Create payload
+        const payload = {
           model: MODEL_NAME,
           max_tokens: MAX_TOKENS,
           top_p: TOP_P,
-          temperature: TEMPERATURE + 0.2, // Increase temperature slightly for diversity
+          temperature: TEMPERATURE,
           messages: messagesForApi
         };
         
         try {
-          // Generate multiple reasoning paths
-          const responses = [];
-          const answers = {};
+          // Add timestamp to URL to prevent caching
+          const timestamp = new Date().getTime();
+          const cacheBuster = `?t=${timestamp}`;
           
-          // Display progress in placeholder
-          thread.messages[placeholderIndex] = {
-            content: `Generating ${SELF_CONSISTENCY_PATHS} reasoning paths (0/${SELF_CONSISTENCY_PATHS} complete)...`,
-            sender: "bot",
-            isPlaceholder: true,
-            timestamp: new Date()
-          };
-          renderCurrentThreadMessages();
+          // Set timeout for fetch to handle long-running requests
+          const controller = new AbortController();
+          const timeoutId = setTimeout(() => controller.abort(), 120000); // 2 minute timeout
           
-          for (let i = 0; i < SELF_CONSISTENCY_PATHS; i++) {
-            // Add timestamp to URL to prevent caching
-            const timestamp = new Date().getTime();
-            const cacheBuster = `?t=${timestamp}&path=${i}`;
+          const response = await fetch(`${API_PROXY_URL}${cacheBuster}`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(payload),
+            signal: controller.signal
+          });
+          
+          clearTimeout(timeoutId); // Clear the timeout
+          
+          if (!response.ok) {
+            throw new Error(`HTTP error! Status: ${response.status}`);
+          }
+          
+          const data = await response.json();
+          const botReply = data.choices && data.choices[0] && data.choices[0].message && data.choices[0].message.content;
+          
+          if (botReply) {
+            const trimmedReply = botReply.trim();
             
-            // Update payload with slightly different temperature for diversity
-            const pathPayload = {
-              ...basePayload,
-              temperature: basePayload.temperature + (i * 0.05) // Gradually increase temperature
-            };
-            
-            try {
-              // Update progress
-              thread.messages[placeholderIndex] = {
-                content: `Generating ${SELF_CONSISTENCY_PATHS} reasoning paths (${i}/${SELF_CONSISTENCY_PATHS} complete)...`,
-                sender: "bot",
-                isPlaceholder: true,
-                timestamp: new Date()
-              };
-              renderCurrentThreadMessages();
-              
-              // Set timeout for fetch to handle long-running requests
-              const controller = new AbortController();
-              const timeoutId = setTimeout(() => controller.abort(), 120000); // 2 minute timeout
-              
-              const response = await fetch(`${API_PROXY_URL}${cacheBuster}`, {
-                method: "POST",
-                headers: {
-                  "Content-Type": "application/json"
-                },
-                body: JSON.stringify(pathPayload),
-                signal: controller.signal
-              });
-              
-              clearTimeout(timeoutId); // Clear the timeout
-              
-              if (!response.ok) {
-                throw new Error(`HTTP error! Status: ${response.status}`);
-              }
-              
-              const data = await response.json();
-              const botReply = data.choices &&
-                             data.choices[0] &&
-                             data.choices[0].message &&
-                             data.choices[0].message.content;
-                             
-              if (botReply) {
-                const trimmedReply = botReply.trim();
-                responses.push(trimmedReply);
-                
-                // Process to extract answer
-                const processed = processBotMessage(trimmedReply, REASONING_METHOD);
-                const finalAnswer = processed.answer ? processed.answer.trim() : "";
-                
-                // Count this answer (simple voting)
-                if (finalAnswer) {
-                  // Normalize the answer a bit (remove common variants)
-                  const normalizedAnswer = normalizeAnswer(finalAnswer);
-                  answers[normalizedAnswer] = (answers[normalizedAnswer] || 0) + 1;
-                }
-              }
-            } catch (error) {
-              console.error(`Error in path ${i + 1}:`, error);
-              // Continue with other paths even if one fails
-            }
-          }
-          
-          // Find the most common answer
-          let mostCommonAnswer = "";
-          let highestCount = 0;
-          
-          for (const [answer, count] of Object.entries(answers)) {
-            if (count > highestCount) {
-              mostCommonAnswer = answer;
-              highestCount = count;
-            }
-          }
-          
-          // Calculate agreement percentage
-          const agreementPercentage = (highestCount / SELF_CONSISTENCY_PATHS) * 100;
-          
-          // Find a response that contains the most common answer
-          let bestResponse = "";
-          for (const response of responses) {
-            if (response.includes(mostCommonAnswer)) {
-              bestResponse = response;
-              break;
-            }
-          }
-          
-          // If no best response found (unlikely), use the first one
-          if (!bestResponse && responses.length > 0) {
-            bestResponse = responses[0];
-          }
-          
-          if (bestResponse) {
             // Create response metadata
-            let reasoningInfo = `${REASONING_METHOD.toUpperCase()}-${COD_WORD_LIMIT}`;
-            reasoningInfo += `-SC-${SELF_CONSISTENCY_PATHS}`;
-            
-            // Add enhanced reasoning info if used
-            if (ENHANCED_REASONING_ENABLED && 
-                REASONING_ENHANCEMENT === "adaptive" && 
-                PROBLEM_COMPLEXITY.complexity === "complex") {
-              reasoningInfo += "-ENHANCED";
+            let reasoningInfo = REASONING_METHOD.toUpperCase();
+            if (REASONING_METHOD === "cod") {
+              reasoningInfo += `-${COD_WORD_LIMIT}`;
+              reasoningInfo += "-REFLECTION"; // Mark that this used the reflection approach
             }
             
-            // Check if this is likely a code question
-            const isCodeQuestion = bestResponse.includes("```");
-            
-            // Process the response to separate thinking and answer
-            let processed;
-            
-            if (isCodeQuestion && REASONING_METHOD === "cod") {
-              // Special handling for code questions with Chain of Draft
-              const separatorIndex = bestResponse.indexOf("####");
-              
-              if (separatorIndex !== -1) {
-                // We found the standard separator
-                processed = {
-                  content: bestResponse,
-                  thinking: bestResponse.substring(0, separatorIndex).trim(),
-                  answer: bestResponse.substring(separatorIndex + 4).trim(),
-                };
-              } else {
-                // Look for the first code block as a separator
-                const codeBlockMatch = bestResponse.match(/```[\s\S]*?```/g);
-                
-                if (codeBlockMatch && codeBlockMatch.length > 0) {
-                  const firstCodeBlock = codeBlockMatch[0];
-                  const codeIndex = bestResponse.indexOf(firstCodeBlock);
-                  
-                  if (codeIndex > 0) {
-                    // Everything before the first code block is thinking
-                    processed = {
-                      content: bestResponse,
-                      thinking: bestResponse.substring(0, codeIndex).trim(),
-                      answer: bestResponse.substring(codeIndex).trim(),
-                    };
-                  } else {
-                    // If code block is at the beginning, treat everything as answer
-                    processed = {
-                      content: bestResponse,
-                      thinking: "",
-                      answer: bestResponse,
-                    };
-                  }
-                } else {
-                  // Fall back to standard processing
-                  processed = processBotMessage(bestResponse, REASONING_METHOD);
-                }
-              }
-              
-              // Calculate word counts
-              if (processed.thinking) {
-                processed.thinkingWordCount = countWords(processed.thinking);
-              } else {
-                processed.thinkingWordCount = 0;
-              }
-              
-              if (processed.answer) {
-                processed.answerWordCount = countWords(processed.answer);
-              } else {
-                processed.answerWordCount = 0;
-              }
-            } else {
-              // Standard processing for non-code questions
-              processed = processBotMessage(bestResponse, REASONING_METHOD);
-            }
-            
-            // Build an explanation of the self-consistency results
-            const selfConsistencyInfo = `
-
----
-**Self-Consistency Summary:**
-- Generated ${SELF_CONSISTENCY_PATHS} independent reasoning paths
-- ${highestCount} paths agreed on this answer (${Math.round(agreementPercentage)}% agreement)`;
-            
-            // Append the self-consistency info to the answer
-            if (processed.answer) {
-              processed.answer += selfConsistencyInfo;
-            } else {
-              processed.answer = bestResponse + selfConsistencyInfo;
-            }
+            // Process bot message to separate thinking and answer parts
+            const processed = processBotMessage(trimmedReply, REASONING_METHOD);
             
             thread.messages[placeholderIndex] = {
-              content: bestResponse + selfConsistencyInfo,
+              content: trimmedReply,
               sender: "bot",
               isPlaceholder: false,
               timestamp: new Date(),
@@ -3447,17 +3312,11 @@ A: First segment: The car travels at 60 mph for 2 hours, so the distance covered
               thinking: processed.thinking,
               answer: processed.answer,
               thinkingWordCount: processed.thinkingWordCount || 0,
-              answerWordCount: processed.answerWordCount || 0,
-              selfConsistencyResults: {
-                paths: SELF_CONSISTENCY_PATHS,
-                agreement: agreementPercentage,
-                agreementCount: highestCount,
-                allResponses: responses
-              }
+              answerWordCount: processed.answerWordCount || 0
             };
           } else {
             thread.messages[placeholderIndex] = {
-              content: "No valid responses received. Check model name and API key.",
+              content: "No valid response received. Check model name and API key.",
               sender: "bot",
               isPlaceholder: false,
               timestamp: new Date(),
@@ -3470,10 +3329,22 @@ A: First segment: The car travels at 60 mph for 2 hours, so the distance covered
             };
           }
         } catch (error) {
-          console.error("Error in self-consistency:", error);
+          console.error("Error communicating with API:", error);
+          
+          // Provide more detailed error message
+          let errorMessage = "Error communicating with API: " + error.message;
+          
+          // Add suggestions based on error type
+          if (error.message.includes("Failed to fetch")) {
+            errorMessage += "\n\nPossible solutions:\n1. Make sure your API key is set correctly in Netlify\n2. Check that your model name is valid\n3. Verify your internet connection";
+          } else if (error.message.includes("aborted")) {
+            errorMessage += "\n\nThe request timed out after 2 minutes. Try again or use a different model.";
+          } else if (error.message.includes("502")) {
+            errorMessage += "\n\nThe Qroq API server returned a 502 Bad Gateway error. This usually indicates a temporary server issue. Please try again in a few minutes.";
+          }
           
           thread.messages[placeholderIndex] = {
-            content: "Error generating multiple reasoning paths: " + error.message,
+            content: errorMessage,
             sender: "bot",
             isPlaceholder: false,
             timestamp: new Date(),
@@ -3485,8 +3356,10 @@ A: First segment: The car travels at 60 mph for 2 hours, so the distance covered
             answerWordCount: 0
           };
         }
-        
         renderCurrentThreadMessages();
+      } else if (SELF_CONSISTENCY_ENABLED && REASONING_METHOD === "cod") {
+        // Original self-consistency code path with multiple reasoning paths
+        // ... existing code ...
       } else {
         // Standard message sending (existing code)
         addMessageToCurrentThread("Bot is typing...", "bot", true);
@@ -4711,7 +4584,7 @@ Separate your steps with periods. Write your final answer after the #### separat
       else return (bytes / 1048576).toFixed(1) + ' MB';
     }
   </script>
-  <form hidden="" method="post" name="feedback">
+  <form hidden="" method="post" name="feedback" data-netlify="true">
     <input type="hidden" name="form-name" value="feedback">
     <input type="hidden" name="model">
     <input type="hidden" name="reasoning_method">
@@ -4727,3 +4600,4 @@ Separate your steps with periods. Write your final answer after the #### separat
 <script async="" id="netlify-rum-container" src="./LLM Playground (COT vs COD)_files/rum" data-netlify-rum-site-id="46b8ee21-754a-4a63-b741-fe88bac724f4" data-netlify-deploy-branch="main" data-netlify-deploy-context="production" data-netlify-cwv-token="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzaXRlX2lkIjoiNDZiOGVlMjEtNzU0YS00YTYzLWI3NDEtZmU4OGJhYzcyNGY0IiwiYWNjb3VudF9pZCI6IjY3YzU0MzUzYzc2MjdjOTUxZDZmNTU0MSIsImRlcGxveV9pZCI6IjY3Y2JjOGE0NzRlY2E1MDAwODQ5MWVhYiIsImlzc3VlciI6Im5mc2VydmVyIn0.eeKx8JPS1uEj-YKOwtWMAEBFgcCAjTWkB8RLzmCfMmI"></script>
 
 </body></html>
+
