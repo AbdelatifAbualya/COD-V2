@@ -1,5 +1,4 @@
 <!DOCTYPE html>
-<!-- saved from url=(0067)file:///home/abid/Desktop/LLM%20Playground%20(COT%20vs%20COD)2.html -->
 <html lang="en" data-darkreader-mode="dynamic" data-darkreader-scheme="dark" data-darkreader-proxy-injected="true"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8"><style class="darkreader darkreader--fallback" media="screen"></style><style class="darkreader darkreader--text" media="screen"></style><style class="darkreader darkreader--invert" media="screen">.jfk-bubble.gtx-bubble, .captcheck_answer_label > input + img, span#closed_text > img[src^="https://www.gstatic.com/images/branding/googlelogo"], span[data-href^="https://www.hcaptcha.com/"] > #icon, img.Wirisformula, a[data-testid="headerMediumLogo"]>svg, .d2l-navigation-link-image-container, .d2l-iframe-loading-container {
     filter: invert(100%) hue-rotate(180deg) contrast(90%) !important;
 }</style><style class="darkreader darkreader--inline" media="screen">[data-darkreader-inline-bgcolor] {
@@ -3003,7 +3002,7 @@ A: First segment: The car travels at 60 mph for 2 hours, so the distance covered
       addCodeCopyButtons();
     }
 
-    function addMessageToCurrentThread(content, sender, isPlaceholder = false, files = []) {
+    function addMessageToCurrentThread(content, sender, isPlaceholder = false, files = [], processedFiles = []) {
       const thread = threads.find(t => t.id === currentThreadId);
       if (thread) {
         // Process bot messages to separate thinking from answer
@@ -3037,6 +3036,8 @@ A: First segment: The car travels at 60 mph for 2 hours, so the distance covered
           answerWordCount: sender === "bot" && !isPlaceholder ? answerWordCount : undefined,
           // Add files to the message
           files: files && files.length > 0 ? files : undefined,
+          // Add processed file content for API requests
+          processedFiles: processedFiles && processedFiles.length > 0 ? processedFiles : undefined,
           // NEW: Add complexity info for debugging
           complexityInfo: sender === "user" ? PROBLEM_COMPLEXITY : undefined
         });
@@ -3175,14 +3176,53 @@ A: First segment: The car travels at 60 mph for 2 hours, so the distance covered
       }
       
       // Add all user and assistant messages
-      thread.messages
-        .filter(msg => !msg.isPlaceholder)
-        .forEach(msg => {
+      for (const msg of thread.messages.filter(msg => !msg.isPlaceholder)) {
+        if (msg.sender === "user" && msg.processedFiles && msg.processedFiles.length > 0) {
+          // User message with processed files - create content array format
+          const content = [];
+          
+          // Add the text content if any
+          if (msg.content && msg.content.trim() !== '') {
+            content.push({
+              type: "text",
+              text: msg.content
+            });
+          }
+          
+          // Add processed files
+          for (const file of msg.processedFiles) {
+            if (file.type === "image") {
+              content.push({
+                type: "image_url",
+                image_url: {
+                  url: file.content
+                }
+              });
+            } else if (file.type === "text") {
+              content.push({
+                type: "text",
+                text: `[File: ${file.name}]\n\n${file.content}\n\n[End of file: ${file.name}]`
+              });
+            } else {
+              content.push({
+                type: "text",
+                text: `[File attached: ${file.name} (${file.fileType}, ${file.size})]`
+              });
+            }
+          }
+          
+          messages.push({
+            role: "user",
+            content: content
+          });
+        } else {
+          // Regular message without processed files
           messages.push({
             role: msg.sender === "user" ? "user" : "assistant",
             content: msg.content
           });
-        });
+        }
+      }
       
       return messages;
     }
@@ -3198,9 +3238,47 @@ A: First segment: The car travels at 60 mph for 2 hours, so the distance covered
       
       // Check if there are files to be included
       const filesToSend = [...attachedFiles]; // Make a copy of the current files
+      const processedFiles = [];
       
-      // Add message to thread with files
-      addMessageToCurrentThread(message, "user", false, filesToSend);
+      // Process the files
+      if (filesToSend.length > 0) {
+        for (const file of filesToSend) {
+          try {
+            if (file.type.startsWith('image/')) {
+              // For images, convert to base64
+              const base64Data = await readFileAsBase64(file);
+              processedFiles.push({
+                type: "image",
+                name: file.name,
+                content: `data:${file.type};base64,${base64Data}`
+              });
+            } else if (file.type.startsWith('text/') || file.type.includes('json') || 
+                       file.type.includes('javascript') || file.type.includes('html') || 
+                       file.type.includes('css') || file.type.includes('xml')) {
+              // For text files, read the content
+              const textContent = await readFileAsText(file);
+              processedFiles.push({
+                type: "text",
+                name: file.name,
+                content: textContent
+              });
+            } else {
+              // For other files, just note them
+              processedFiles.push({
+                type: "other",
+                name: file.name,
+                fileType: file.type,
+                size: formatFileSize(file.size)
+              });
+            }
+          } catch (err) {
+            console.error(`Error processing file ${file.name}:`, err);
+          }
+        }
+      }
+      
+      // Add message to thread with files and their processed content
+      addMessageToCurrentThread(message, "user", false, filesToSend, processedFiles);
       
       // Clear attached files after sending
       attachedFiles = [];
@@ -4583,6 +4661,35 @@ Separate your steps with periods. Write your final answer after the #### separat
       else if (bytes < 1048576) return (bytes / 1024).toFixed(1) + ' KB';
       else return (bytes / 1048576).toFixed(1) + ' MB';
     }
+
+    /***********************
+     * Helper Functions for File Processing
+     ***********************/
+    // Helper function to read file as base64
+    function readFileAsBase64(file) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => {
+          // Extract the base64 data part
+          const base64 = reader.result.split(',')[1];
+          resolve(base64);
+        };
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+      });
+    }
+    
+    // Helper function to read file as text
+    function readFileAsText(file) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => {
+          resolve(reader.result);
+        };
+        reader.onerror = reject;
+        reader.readAsText(file);
+      });
+    }
   </script>
   <form hidden="" method="post" name="feedback" data-netlify="true">
     <input type="hidden" name="form-name" value="feedback">
@@ -4600,4 +4707,6 @@ Separate your steps with periods. Write your final answer after the #### separat
 <script async="" id="netlify-rum-container" src="./LLM Playground (COT vs COD)_files/rum" data-netlify-rum-site-id="46b8ee21-754a-4a63-b741-fe88bac724f4" data-netlify-deploy-branch="main" data-netlify-deploy-context="production" data-netlify-cwv-token="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzaXRlX2lkIjoiNDZiOGVlMjEtNzU0YS00YTYzLWI3NDEtZmU4OGJhYzcyNGY0IiwiYWNjb3VudF9pZCI6IjY3YzU0MzUzYzc2MjdjOTUxZDZmNTU0MSIsImRlcGxveV9pZCI6IjY3Y2JjOGE0NzRlY2E1MDAwODQ5MWVhYiIsImlzc3VlciI6Im5mc2VydmVyIn0.eeKx8JPS1uEj-YKOwtWMAEBFgcCAjTWkB8RLzmCfMmI"></script>
 
 </body></html>
+
+
 
