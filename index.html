@@ -2092,9 +2092,8 @@ A: First segment: The car travels at 60 mph for 2 hours, so the distance covered
     let TOP_P = 0.90;
     let MAX_TOKENS = 1112;
 
-    // Initialize global self-consistency variables
-    let SELF_CONSISTENCY_ENABLED = false;
-    let SELF_CONSISTENCY_PATHS = 3;
+    // Initialize global self-reflection variables
+    let SELF_REFLECTION_ENABLED = true;
     
     /***********************
      * Helper Functions
@@ -2142,39 +2141,38 @@ A: First segment: The car travels at 60 mph for 2 hours, so the distance covered
     }
     
     /***********************
-     * Self-Consistency Functions
+     * Self-Reflection Functions
      ***********************/
     
-    // Initialize self-consistency UI and settings
-    function initSelfConsistency() {
-      const selfConsistencyToggle = document.getElementById('selfReflectionToggle');
+    // Initialize self-reflection UI and settings
+    function initSelfReflection() {
+      const selfReflectionToggle = document.getElementById('selfReflectionToggle');
       const infoPanel = document.getElementById('selfReflectionInfo');
       
-      if (selfConsistencyToggle) {
-        selfConsistencyToggle.checked = SELF_CONSISTENCY_ENABLED;
+      if (selfReflectionToggle) {
+        selfReflectionToggle.checked = SELF_REFLECTION_ENABLED;
         
-        selfConsistencyToggle.addEventListener('change', () => {
-          SELF_CONSISTENCY_ENABLED = selfConsistencyToggle.checked;
+        selfReflectionToggle.addEventListener('change', () => {
+          SELF_REFLECTION_ENABLED = selfReflectionToggle.checked;
           if (infoPanel) {
-            infoPanel.style.display = SELF_CONSISTENCY_ENABLED ? 'block' : 'none';
+            infoPanel.style.display = SELF_REFLECTION_ENABLED ? 'block' : 'none';
           }
         });
       }
     }
     
-    // Save self-consistency settings from form inputs
-    function saveSelfConsistencySettings() {
-      const selfConsistencyToggle = document.getElementById('selfReflectionToggle');
+    // Save self-reflection settings from form inputs
+    function saveSelfReflectionSettings() {
+      const selfReflectionToggle = document.getElementById('selfReflectionToggle');
       
-      if (selfConsistencyToggle) {
-        SELF_CONSISTENCY_ENABLED = selfConsistencyToggle.checked;
+      if (selfReflectionToggle) {
+        SELF_REFLECTION_ENABLED = selfReflectionToggle.checked;
       }
       
       // Save to localStorage
-      localStorage.setItem("selfConsistencyEnabled", SELF_CONSISTENCY_ENABLED.toString());
-      localStorage.setItem("selfConsistencyPaths", SELF_CONSISTENCY_PATHS.toString());
+      localStorage.setItem("selfReflectionEnabled", SELF_REFLECTION_ENABLED.toString());
       
-      console.log(`Self-consistency settings saved: enabled=${SELF_CONSISTENCY_ENABLED}, paths=${SELF_CONSISTENCY_PATHS}`);
+      console.log(`Self-reflection settings saved: enabled=${SELF_REFLECTION_ENABLED}`);
     }
     
     /***********************
@@ -3299,7 +3297,7 @@ A: First segment: The car travels at 60 mph for 2 hours, so the distance covered
       const wordCountRequest = parseWordCountRequest(message);
       
       // FIXED: Use proper self-reflection instead of self-consistency for CoD
-      if (SELF_CONSISTENCY_ENABLED && REASONING_METHOD === "cod") {
+      if (SELF_REFLECTION_ENABLED && REASONING_METHOD === "cod") {
         // Add message showing we're thinking with self-reflection
         addMessageToCurrentThread("Thinking with self-reflection...", "bot", true);
         const thread = threads.find(t => t.id === currentThreadId);
@@ -3435,9 +3433,6 @@ A: First segment: The car travels at 60 mph for 2 hours, so the distance covered
           };
         }
         renderCurrentThreadMessages();
-      } else if (SELF_CONSISTENCY_ENABLED && REASONING_METHOD === "cod") {
-        // Original self-consistency code path with multiple reasoning paths
-        // ... existing code ...
       } else {
         // Standard message sending (existing code)
         addMessageToCurrentThread("Bot is typing...", "bot", true);
@@ -4151,8 +4146,8 @@ Separate your steps with periods. Write your final answer after the #### separat
         try {
           const selfReflectionToggle = document.getElementById('selfReflectionToggle');
           if (selfReflectionToggle) {
-            SELF_CONSISTENCY_ENABLED = selfReflectionToggle.checked;
-            console.log("Self-reflection enabled:", SELF_CONSISTENCY_ENABLED);
+            SELF_REFLECTION_ENABLED = selfReflectionToggle.checked;
+            console.log("Self-reflection enabled:", SELF_REFLECTION_ENABLED);
           }
         } catch (selfErr) {
           console.error("Error getting self-reflection settings:", selfErr);
@@ -4203,7 +4198,7 @@ Separate your steps with periods. Write your final answer after the #### separat
             localStorage.setItem("temperature", TEMPERATURE.toString());
             localStorage.setItem("topP", TOP_P.toString());
             localStorage.setItem("maxTokens", MAX_TOKENS.toString());
-            localStorage.setItem("selfConsistencyEnabled", SELF_CONSISTENCY_ENABLED.toString());
+            localStorage.setItem("selfReflectionEnabled", SELF_REFLECTION_ENABLED.toString());
             
             // Save custom prompts
             localStorage.setItem("customPrompts", JSON.stringify(PROMPTS));
@@ -4332,7 +4327,7 @@ Separate your steps with periods. Write your final answer after the #### separat
             setupCODOptions();
             setupEnhancedReasoningOptions();
             setupSliders();
-            initSelfConsistency();
+            initSelfReflection();
             console.log("UI functionality setup complete");
           } catch (err) {
             console.error("Error setting up UI functionality:", err);
@@ -4392,15 +4387,10 @@ Separate your steps with periods. Write your final answer after the #### separat
         const maxTokens = localStorage.getItem("maxTokens");
         if (maxTokens) MAX_TOKENS = parseInt(maxTokens);
         
-        // Load self-consistency settings
-        const selfConsistencyEnabled = localStorage.getItem("selfConsistencyEnabled");
-        if (selfConsistencyEnabled !== null) {
-          SELF_CONSISTENCY_ENABLED = selfConsistencyEnabled === "true";
-        }
-        
-        const selfConsistencyPaths = localStorage.getItem("selfConsistencyPaths");
-        if (selfConsistencyPaths) {
-          SELF_CONSISTENCY_PATHS = parseInt(selfConsistencyPaths);
+        // Load self-reflection settings
+        const selfReflectionEnabled = localStorage.getItem("selfReflectionEnabled");
+        if (selfReflectionEnabled !== null) {
+          SELF_REFLECTION_ENABLED = selfReflectionEnabled === "true";
         }
       } catch (err) {
         console.error("Error loading settings:", err);
