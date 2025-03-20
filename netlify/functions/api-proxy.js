@@ -339,7 +339,7 @@ async function handleToolhouseWebSearch(groqApiKey, toolhouseApiKey, requestBody
           messages: messageHistory,
           temperature: requestBody.temperature || 0.7,
           top_p: requestBody.top_p || 0.9,
-          max_tokens: requestBody.max_tokens || 128000  // Increased to 128K tokens
+          max_tokens: requestBody.max_tokens || 12800  // Increased from 1024 to 12800
         })
       });
       
