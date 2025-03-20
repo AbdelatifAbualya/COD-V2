@@ -1,288 +1,182 @@
 <!DOCTYPE html>
-<html lang="en" data-darkreader-mode="dynamic" data-darkreader-scheme="dark" data-darkreader-proxy-injected="true"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8"><style class="darkreader darkreader--fallback" media="screen"></style><style class="darkreader darkreader--text" media="screen"></style><style class="darkreader darkreader--invert" media="screen">.jfk-bubble.gtx-bubble, .captcheck_answer_label > input + img, span#closed_text > img[src^="https://www.gstatic.com/images/branding/googlelogo"], span[data-href^="https://www.hcaptcha.com/"] > #icon, img.Wirisformula, a[data-testid="headerMediumLogo"]>svg, .d2l-navigation-link-image-container, .d2l-iframe-loading-container {
-    filter: invert(100%) hue-rotate(180deg) contrast(90%) !important;
-}</style><style class="darkreader darkreader--inline" media="screen">[data-darkreader-inline-bgcolor] {
-  background-color: var(--darkreader-inline-bgcolor) !important;
-}
-[data-darkreader-inline-bgimage] {
-  background-image: var(--darkreader-inline-bgimage) !important;
-}
-[data-darkreader-inline-border] {
-  border-color: var(--darkreader-inline-border) !important;
-}
-[data-darkreader-inline-border-bottom] {
-  border-bottom-color: var(--darkreader-inline-border-bottom) !important;
-}
-[data-darkreader-inline-border-left] {
-  border-left-color: var(--darkreader-inline-border-left) !important;
-}
-[data-darkreader-inline-border-right] {
-  border-right-color: var(--darkreader-inline-border-right) !important;
-}
-[data-darkreader-inline-border-top] {
-  border-top-color: var(--darkreader-inline-border-top) !important;
-}
-[data-darkreader-inline-boxshadow] {
-  box-shadow: var(--darkreader-inline-boxshadow) !important;
-}
-[data-darkreader-inline-color] {
-  color: var(--darkreader-inline-color) !important;
-}
-[data-darkreader-inline-fill] {
-  fill: var(--darkreader-inline-fill) !important;
-}
-[data-darkreader-inline-stroke] {
-  stroke: var(--darkreader-inline-stroke) !important;
-}
-[data-darkreader-inline-outline] {
-  outline-color: var(--darkreader-inline-outline) !important;
-}
-[data-darkreader-inline-stopcolor] {
-  stop-color: var(--darkreader-inline-stopcolor) !important;
-}
-[data-darkreader-inline-bg] {
-  background: var(--darkreader-inline-bg) !important;
-}
-[data-darkreader-inline-border-short] {
-  border: var(--darkreader-inline-border-short) !important;
-}
-[data-darkreader-inline-border-bottom-short] {
-  border-bottom: var(--darkreader-inline-border-bottom-short) !important;
-}
-[data-darkreader-inline-border-left-short] {
-  border-left: var(--darkreader-inline-border-left-short) !important;
-}
-[data-darkreader-inline-border-right-short] {
-  border-right: var(--darkreader-inline-border-right-short) !important;
-}
-[data-darkreader-inline-border-top-short] {
-  border-top: var(--darkreader-inline-border-top-short) !important;
-}
-[data-darkreader-inline-invert] {
-    filter: invert(100%) hue-rotate(180deg);
-}</style><style class="darkreader darkreader--variables" media="screen">:root {
-   --darkreader-neutral-background: var(--darkreader-background-ffffff, #181a1b);
-   --darkreader-neutral-text: var(--darkreader-text-000000, #e8e6e3);
-   --darkreader-selection-background: var(--darkreader-background-0060d4, #004daa);
-   --darkreader-selection-text: var (--darkreader-text-ffffff, #e8e6e3);
-}</style><style class="darkreader darkreader--root-vars" media="screen"></style><style class="darkreader darkreader--user-agent" media="screen">@layer {
-html {
-    background-color: var(--darkreader-background-ffffff, #181a1b) !important;
-}
-html {
-    color-scheme: dark !important;
-}
-iframe {
-    color-scheme: dark !important;
-}
-html, body {
-    background-color: var(--darkreader-background-ffffff, #181a1b);
-}
-html, body {
-    border-color: var(--darkreader-border-4c4c4c, #736b5e);
-    color: var(--darkreader-text-000000, #e8e6e3);
-}
-a {
-    color: var(--darkreader-text-0040ff, #3391ff);
-}
-table {
-    border-color: var(--darkreader-border-808080, #545b5e);
-}
-mark {
-    color: var(--darkreader-text-000000, #e8e6e3);
-}
-::placeholder {
-    color: var (--darkreader-text-a9a9a9, #b2aba1);
-}
-input:-webkit-autofill,
-textarea:-webkit-autofill,
-select:-webkit-autofill {
-    background-color: var(--darkreader-background-faffbd, #404400) !important;
-    color: var(--darkreader-text-000000, #e8e6e3) !important;
-}
-::selection {
-    background-color: var(--darkreader-background-0060d4, #004daa) !important;
-    color: var(--darkreader-text-ffffff, #e8e6e3) !important;
-}
-::-moz-selection {
-    background-color: var(--darkreader-background-0060d4, #004daa) !important;
-    color: var(--darkreader-text-ffffff, #e8e6e3) !important;
-}
-}</style>
-  
+<html lang="en" data-darkreader-mode="dynamic" data-darkreader-scheme="dark">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
   <title>LLM Playground (COT vs COD)</title>
   <!-- Google Fonts -->
-  <link href="./LLM Playground (COT vs COD)_files/css2" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Roboto+Mono:wght@400;500&display=swap" rel="stylesheet">
   <style>
     /* --------------------------------
        Global Styles
     -------------------------------- */
+    :root {
+      --bg-primary: #111215;
+      --bg-secondary: #16181d;
+      --bg-tertiary: #1e2028;
+      --bg-component: #262a36;
+      --bg-hover: #2d3341;
+      --text-primary: #e9ecf3;
+      --text-secondary: #a9b1c2;
+      --text-tertiary: #7a8499;
+      --accent-primary: #5686f5;
+      --accent-secondary: #4169e1;
+      --accent-tertiary: #3e4daa;
+      --success: #4ade80;
+      --warning: #f59e0b;
+      --error: #ef4444;
+      --border-light: rgba(255, 255, 255, 0.1);
+      --border-medium: rgba(255, 255, 255, 0.15);
+      --shadow-sm: 0 2px 5px rgba(0, 0, 0, 0.2);
+      --shadow-md: 0 4px 10px rgba(0, 0, 0, 0.25);
+      --shadow-lg: 0 10px 25px rgba(0, 0, 0, 0.35);
+      --radius-sm: 6px;
+      --radius-md: 10px;
+      --radius-lg: 16px;
+      --transition-fast: 0.15s ease;
+      --transition-normal: 0.25s ease;
+    }
+    
     * {
       box-sizing: border-box;
-    }
-    body {
       margin: 0;
       padding: 0;
-      font-family: 'Roboto', sans-serif;
-      background: linear-gradient(145deg, #0F0F0F 0%, #1F1F1F 100%);
-      color: #e0e0e0;
-      overflow: hidden;
     }
+    
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      line-height: 1.5;
+      overflow: hidden;
+      font-size: 15px;
+    }
+    
     .app-container {
       display: flex;
       height: 100vh;
       overflow: hidden;
     }
+    
+    h1, h2, h3, h4, h5, h6 {
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+    
     /* --------------------------------
        Sidebar Styles
     -------------------------------- */
     .sidebar {
-      width: 250px;
-      background-color: rgba(30, 30, 30, 0.95);
-      padding: 1rem;
-      border-right: 1px solid #333;
+      width: 280px;
+      background-color: var(--bg-secondary);
+      padding: 1.25rem;
+      border-right: 1px solid var(--border-light);
+      display: flex;
+      flex-direction: column;
       overflow-y: auto;
-      box-shadow: 2px 0 5px rgba(0,0,0,0.4);
+      box-shadow: var(--shadow-sm);
     }
+    
     .sidebar h2 {
       margin-top: 0;
-      margin-bottom: 1rem;
-      font-size: 1.2rem;
-      color: #fff;
+      margin-bottom: 1.25rem;
+      font-size: 1.25rem;
+      font-weight: 600;
+      color: var(--text-primary);
     }
+    
     .sidebar ul {
       list-style: none;
       padding: 0;
-      margin: 0;
+      margin: 0 0 1rem 0;
+      flex-grow: 1;
     }
+    
     .sidebar li {
-      padding: 0.5rem;
+      padding: 0.75rem 1rem;
       margin-bottom: 0.5rem;
-      border-radius: 8px;
+      border-radius: var(--radius-sm);
       cursor: pointer;
-      transition: background-color 0.3s ease;
+      transition: background-color var(--transition-fast), transform var(--transition-fast);
+      font-weight: 500;
     }
+    
     .sidebar li:hover {
-      background-color: #333;
+      background-color: var(--bg-hover);
+      transform: translateY(-1px);
     }
+    
     .sidebar li.active {
-      background-color: #444;
+      background-color: var(--bg-hover);
+      border-left: 3px solid var(--accent-primary);
+      color: var(--accent-primary);
     }
-      /* Enhanced Final Answer Styling */
-  .final-answer {
-    background-color: #2d3748;
-    border: 1px solid #4a5568;
-    border-radius: 8px;
-    padding: 15px;
-    margin-top: 10px;
-    color: #edf2f7;
-    font-family: 'Roboto', sans-serif;
-    line-height: 1.5;
-    position: relative;
-    clear: both;
-    overflow: hidden;
-  }
-
-  .final-answer-label {
-    font-size: 0.7rem;
-    color: #90cdf4;
-    margin-bottom: 12px;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    font-weight: bold;
-    border-bottom: 1px dotted #5a7299;
-    padding-bottom: 5px;
-    display: block;
-  }
-
-  .message {
-    position: relative !important;
-    overflow: visible !important;
-    padding-bottom: 20px; /* Add space for word count badge */
-  }
-
-  .word-count-badge {
-    position: absolute;
-    top: 4px;
-    right: 4px;
-    background-color: rgba(30, 30, 30, 0.9);
-    color: #ddd;
-    font-size: 0.7rem;
-    padding: 3px 8px;
-    border-radius: 12px;
-    border: 1px solid #555;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.3);
-    white-space: nowrap;
-    z-index: 5;
-    max-width: 200px;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
-
-  /* Add this to ensure proper CoD styling */
-  .cod-thinking {
-    background-color: #1e293b !important;
-    border-color: #3d4e63 !important;
-    font-family: 'Roboto Mono', monospace !important;
-  }
-
-  /* Improved CoD step styling */
-  .cod-step {
-    display: flex;
-    align-items: flex-start;
-    padding: 8px 10px;
-    margin-bottom: 12px !important;
-    border-left: none !important;
-    background-color: #2c3b4f;
-    border-radius: 6px;
-    box-shadow: 0 1px 2px rgba(0,0,0,0.2);
-  }
-  
-  /* Make thinking steps and final answer containers properly visible */
-  .thinking-steps, .final-answer {
-    width: 100% !important;
-    display: block !important;
-  }
-  
-  /* Improved word count breakdown display */
-  .word-count-breakdown {
-    font-size: 0.7rem;
-    color: #aaa;
-    margin-top: 3px;
-    display: flex;
-    gap: 8px;
-    flex-direction: column;
-  }
+    
+    .sidebar-buttons {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      margin-top: auto;
+    }
+    
     .sidebar button {
       width: 100%;
-      margin-top: 0.5rem;
-      padding: 0.5rem;
+      padding: 0.75rem;
       border: none;
-      border-radius: 8px;
+      border-radius: var(--radius-sm);
       cursor: pointer;
       font-size: 0.9rem;
-      transition: background-color 0.3s ease;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.4);
+      font-weight: 500;
+      transition: all var(--transition-fast);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      box-shadow: var(--shadow-sm);
+      background-color: var(--bg-component);
+      color: var(--text-primary);
     }
-    /* Normal button style */
-    .sidebar button:not(#downloadTxtBtn):not(#downloadPdfBtn) {
-      background-color: #3a3a3a;
-      color: #fff;
+    
+    .sidebar button:hover {
+      background-color: var(--bg-hover);
+      transform: translateY(-1px);
     }
-    .sidebar button:not(#downloadTxtBtn):not(#downloadPdfBtn):hover {
-      background-color: #4a4a4a;
+    
+    .sidebar button:active {
+      transform: translateY(0);
     }
-    /* Visual Studio–like style for PDF/TXT download buttons */
-    #downloadTxtBtn,
+    
+    .sidebar button svg {
+      width: 18px;
+      height: 18px;
+    }
+    
+    #downloadTxtBtn, 
     #downloadPdfBtn {
-      background-color: #1e1e1e;
-      color: #d4d4d4;
-      border: 1px solid #3c3c3c;
+      background-color: var(--bg-tertiary);
+      border: 1px solid var(--border-medium);
     }
-    #downloadTxtBtn:hover,
-    #downloadPdfBtn:hover {
-      background-color: #2d2d2d;
+    
+    #clearThreadBtn {
+      margin-top: 0.75rem;
+      background-color: rgba(239, 68, 68, 0.2);
+      color: var(--error);
+      font-weight: 500;
+      border: 1px solid rgba(239, 68, 68, 0.3);
     }
+    
+    #clearThreadBtn:hover {
+      background-color: rgba(239, 68, 68, 0.3);
+    }
+    
+    #newThreadBtn {
+      background-color: var(--accent-primary);
+      color: white;
+    }
+    
+    #newThreadBtn:hover {
+      background-color: var(--accent-secondary);
+    }
+    
     /* --------------------------------
        Chat Container Styles
     -------------------------------- */
@@ -291,293 +185,594 @@ select:-webkit-autofill {
       display: flex;
       flex-direction: column;
       overflow: hidden;
-      background: linear-gradient(145deg, #181818 0%, #202020 100%);
+      background: linear-gradient(160deg, var(--bg-primary) 0%, var(--bg-secondary) 100%);
       position: relative;
     }
+    
     .chat-header {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      padding: 1rem;
-      background-color: rgba(30,30,30,0.95);
-      border-bottom: 1px solid #333;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.5);
-      z-index: 1;
+      padding: 1rem 1.5rem;
+      background-color: var(--bg-secondary);
+      border-bottom: 1px solid var(--border-light);
+      box-shadow: var(--shadow-sm);
+      z-index: 10;
+      height: 64px;
     }
+    
     .chat-header h1#pageTitle {
       margin: 0;
-      font-size: 1.5rem;
-      color: #fff;
+      font-size: 1.25rem;
+      font-weight: 600;
+      color: var(--text-primary);
       user-select: none;
     }
+    
+    .chat-header-actions {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    
     .settings-btn {
       background: none;
       border: none;
-      color: #fff;
-      font-size: 1.2rem;
+      color: var(--text-primary);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.95rem;
       cursor: pointer;
-      margin-left: 0.5rem;
-      transition: color 0.3s ease;
+      padding: 6px 12px;
+      border-radius: var(--radius-sm);
+      transition: background-color var(--transition-fast);
     }
+    
     .settings-btn:hover {
-      color: #ccc;
+      background-color: var(--bg-hover);
     }
+    
+    .current-model-display {
+      display: inline-flex;
+      align-items: center;
+      padding: 6px 12px;
+      border-radius: var(--radius-sm);
+      background-color: var(--bg-tertiary);
+      font-size: 0.9rem;
+      font-weight: 500;
+      color: var(--text-primary);
+      border: 1px solid var(--border-light);
+    }
+    
+    .reasoning-badge {
+      display: inline-block;
+      padding: 3px 8px;
+      border-radius: 12px;
+      font-size: 0.7rem;
+      margin-left: 6px;
+      font-weight: 500;
+    }
+    
     .chat-messages {
       flex: 1;
-      padding: 1rem;
+      padding: 1.5rem;
       overflow-y: auto;
       scroll-behavior: smooth;
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
     }
+    
+    .chat-input-container {
+      border-top: 1px solid var(--border-light);
+      background-color: var(--bg-secondary);
+      padding: 1rem 1.5rem;
+      position: relative;
+    }
+    
     .chat-input {
       display: flex;
-      border-top: 1px solid #333;
-      background-color: rgba(30,30,30,0.95);
-      padding: 1rem;
-      box-shadow: 0 -2px 4px rgba(0,0,0,0.3);
+      gap: 12px;
+      position: relative;
     }
+    
     .chat-input textarea {
       flex: 1;
       resize: none;
-      border: none;
-      background-color: #2e2e2e;
-      color: #fff;
-      padding: 0.5rem;
-      border-radius: 8px;
-      font-size: 1rem;
+      border: 1px solid var(--border-medium);
+      background-color: var(--bg-component);
+      color: var(--text-primary);
+      padding: 0.75rem 1rem;
+      border-radius: var(--radius-sm);
+      font-family: 'Inter', sans-serif;
+      font-size: 0.95rem;
+      line-height: 1.5;
       outline: none;
-      box-shadow: inset 0 1px 3px rgba(0,0,0,0.4);
+      box-shadow: inset 0 1px 3px rgba(0,0,0,0.1);
+      transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+      min-height: 56px;
+      max-height: 200px;
     }
+    
+    .chat-input textarea:focus {
+      border-color: var(--accent-primary);
+      box-shadow: 0 0 0 2px rgba(86, 134, 245, 0.25);
+    }
+    
     .chat-input button {
-      margin-left: 1rem;
-      padding: 0.5rem 1rem;
-      background-color: #3a3a3a;
+      padding: 0 1.25rem;
+      background-color: var(--accent-primary);
       border: none;
-      color: #fff;
-      border-radius: 8px;
+      color: white;
+      border-radius: var(--radius-sm);
       cursor: pointer;
-      font-size: 1rem;
-      transition: background-color 0.3s ease;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.4);
+      font-size: 0.95rem;
+      font-weight: 500;
+      transition: background-color var(--transition-fast), transform var(--transition-fast);
+      height: 56px;
+      box-shadow: var(--shadow-sm);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
     }
+    
     .chat-input button:hover {
-      background-color: #4a4a4a;
+      background-color: var(--accent-secondary);
+      transform: translateY(-1px);
     }
-    /* Model Selection Styles */
-.model-select-container {
-  position: relative;
-  margin-bottom: 15px;
-}
+    
+    .chat-input button:active {
+      transform: translateY(0);
+    }
 
-.model-dropdown {
-  width: 100%;
-  padding: 10px 15px;
-  border: 1px solid #444;
-  border-radius: 8px;
-  background-color: #2a2a2a;
-  color: #fff;
-  font-size: 0.95rem;
-  appearance: none;
-  cursor: pointer;
-  outline: none;
-  box-shadow: inset 0 1px 2px rgba(0,0,0,0.2);
-}
-
-.dropdown-arrow {
-  position: absolute;
-  right: 15px;
-  top: 50%;
-  transform: translateY(-50%);
-  color: #aaa;
-  pointer-events: none;
-  font-size: 0.7rem;
-}
-
-.model-dropdown:hover {
-  border-color: #666;
-  background-color: #333;
-}
-
-.model-dropdown:focus {
-  border-color: #4a8cff;
-  box-shadow: 0 0 0 2px rgba(74, 140, 255, 0.25);
-}
-
-.model-info-card {
-  background-color: #2a2a2a;
-  border: 1px solid #444;
-  border-radius: 8px;
-  margin-bottom: 20px;
-  overflow: hidden;
-}
-
-.model-info-header {
-  background-color: #333;
-  padding: 10px 15px;
-  font-weight: 500;
-  border-bottom: 1px solid #444;
-}
-
-.model-info-body {
-  padding: 15px;
-}
-
-.model-tags {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  margin-bottom: 12px;
-}
-
-.model-tag {
-  background-color: #3a4a5c;
-  color: #90cdf4;
-  padding: 3px 8px;
-  border-radius: 12px;
-  font-size: 0.75rem;
-}
-
-.model-description {
-  color: #ddd;
-  font-size: 0.9rem;
-  line-height: 1.4;
-}
+    /* File Upload Button */
+    .file-upload-button {
+      height: 56px;
+      background-color: var(--bg-component);
+      color: var(--text-secondary);
+      border: 1px solid var(--border-medium);
+      border-radius: var(--radius-sm);
+      padding: 0 1rem;
+      cursor: pointer;
+      font-size: 0.95rem;
+      display: inline-flex;
+      align-items: center;
+      transition: all var(--transition-fast);
+      box-shadow: var(--shadow-sm);
+    }
+    
+    .file-upload-button:hover {
+      background-color: var(--bg-hover);
+      color: var(--text-primary);
+    }
+    
+    .file-upload-icon {
+      margin-right: 6px;
+      font-size: 1.1rem;
+    }
+    
+    .file-input {
+      display: none;
+    }
+    
+    /* Attached Files */
+    .attached-files {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      padding: 12px;
+      margin-top: 12px;
+      border-top: 1px solid var(--border-light);
+      background-color: var(--bg-secondary);
+    }
+    
+    .file-preview {
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      background-color: var(--bg-tertiary);
+      border-radius: var(--radius-sm);
+      padding: 10px;
+      max-width: 100px;
+      transition: transform var(--transition-fast);
+      border: 1px solid var(--border-light);
+    }
+    
+    .file-preview:hover {
+      transform: translateY(-2px);
+    }
+    
+    .file-preview-image {
+      width: 80px;
+      height: 80px;
+      object-fit: cover;
+      border-radius: 4px;
+    }
+    
+    .file-preview-icon {
+      width: 80px;
+      height: 80px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2rem;
+      color: var(--text-secondary);
+      background-color: var(--bg-component);
+      border-radius: 4px;
+    }
+    
+    .file-preview-name {
+      margin-top: 8px;
+      font-size: 0.75rem;
+      text-align: center;
+      width: 100%;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      color: var(--text-secondary);
+    }
+    
+    .file-preview-remove {
+      position: absolute;
+      top: -6px;
+      right: -6px;
+      background-color: var(--bg-secondary);
+      color: var(--text-secondary);
+      border: 1px solid var(--border-light);
+      border-radius: 50%;
+      width: 22px;
+      height: 22px;
+      font-size: 0.8rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all var(--transition-fast);
+    }
+    
+    .file-preview-remove:hover {
+      background-color: var(--error);
+      color: white;
+    }
+    
     /* --------------------------------
        Message Styles
     -------------------------------- */
     .message {
-      clear: both;
-      margin-bottom: 1.5rem;
-      max-width: 80%;
-      padding: 0.75rem 1rem;
-      border-radius: 12px;
-      line-height: 1.4;
-      word-wrap: break-word;
-      background-color: #2e2e2e;
-      border: 1px solid #444;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.3);
       position: relative;
-      overflow: hidden;
+      max-width: 80%;
+      padding: 1rem;
+      border-radius: var(--radius-md);
+      line-height: 1.5;
+      word-wrap: break-word;
+      animation: fadeIn var(--transition-normal);
+      box-shadow: var(--shadow-sm);
     }
+    
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    
     .message.user {
       float: right;
-      background-color: #3a3a3a;
+      background-color: var(--accent-tertiary);
       margin-left: 20%;
+      border-top-right-radius: 4px;
     }
+    
     .message.bot {
       float: left;
-      background-color: #2e2e2e;
+      background-color: var(--bg-component);
       margin-right: 20%;
+      border-top-left-radius: 4px;
     }
+    
     .message.bot.placeholder {
       font-style: italic;
-      color: #888;
+      color: var(--text-tertiary);
+      background-color: var(--bg-tertiary);
+      animation: pulse 1.5s infinite alternate;
     }
-    /* IMPROVED: Thinking steps and final answer styling */
+    
+    @keyframes pulse {
+      from { opacity: 0.8; }
+      to { opacity: 1; }
+    }
+    
+    .message-timestamp {
+      color: var(--text-tertiary);
+      font-size: 0.8rem;
+      margin-bottom: 0.5rem;
+      display: block;
+    }
+    
     .message-container {
       width: 100%;
       overflow: hidden;
     }
+    
+    /* Enhanced Thinking Steps */
     .thinking-steps {
-      background-color: #252525;
-      border: 1px solid #333;
-      border-radius: 8px;
+      background-color: var(--bg-tertiary);
+      border: 1px solid var(--border-medium);
+      border-radius: var(--radius-sm);
       padding: 15px;
       margin-bottom: 15px;
       font-family: 'Roboto Mono', monospace;
       font-size: 0.85rem;
-      color: #aaa;
+      color: var(--text-secondary);
       white-space: pre-wrap;
       overflow-x: auto;
     }
+    
     .thinking-label {
       font-size: 0.7rem;
-      font-family: 'Roboto', sans-serif;
-      color: #777;
-      margin-bottom: 8px;
+      font-family: 'Inter', sans-serif;
+      color: var(--text-tertiary);
+      margin-bottom: 10px;
       text-transform: uppercase;
       letter-spacing: 1px;
+      font-weight: 600;
+      border-bottom: 1px solid var(--border-light);
+      padding-bottom: 6px;
+    }
+    
+    .cod-thinking {
+      background-color: rgba(30, 41, 59, 0.5) !important;
+      border-color: rgba(61, 78, 99, 0.5) !important;
+    }
+    
+    /* Chain of Draft Step Styling */
+    .step {
+      border-left: 2px solid var(--accent-tertiary);
+      padding-left: 12px;
+      margin-bottom: 10px;
+      color: var(--text-secondary);
+    }
+    
+    .cod-step {
+      display: flex;
+      align-items: flex-start;
+      padding: 10px 12px;
+      margin-bottom: 12px !important;
+      border-left: none !important;
+      background-color: rgba(44, 59, 79, 0.5);
+      border-radius: 6px;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.2);
+      transition: transform var(--transition-fast), background-color var(--transition-fast);
+    }
+    
+    .cod-step:hover {
+      background-color: rgba(44, 59, 79, 0.8);
+      transform: translateY(-1px);
+    }
+    
+    .step-number {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 24px;
+      height: 24px;
+      background-color: rgba(61, 79, 105, 0.8);
+      border-radius: 12px;
+      margin-right: 10px;
+      color: var(--accent-primary);
+      font-size: 0.75rem;
       font-weight: bold;
-      border-bottom: 1px dotted #555;
-      padding-bottom: 5px;
     }
+    
+    .step-content {
+      flex: 1;
+      padding-right: 8px;
+      font-family: 'Roboto Mono', monospace;
+      color: var(--text-primary);
+      line-height: 1.6;
+    }
+    
+    /* Reflection Step Styling */
+    .reflection-step {
+      background-color: rgba(61, 70, 97, 0.6) !important;
+      border-left: 3px solid #8a5cf7 !important;
+    }
+    
+    .reflection-step .step-number {
+      background-color: rgba(93, 77, 138, 0.8) !important;
+      color: #d4c5ff !important;
+    }
+    
+    .reflection-step .step-content {
+      color: #d4c5ff !important;
+      font-style: italic;
+    }
+    
+    /* Final Answer Styling */
     .final-answer {
-      background-color: #2d3748;
-      border: 1px solid #4a5568;
-      border-radius: 8px;
+      background-color: rgba(45, 55, 72, 0.7);
+      border: 1px solid rgba(74, 85, 104, 0.5);
+      border-radius: var(--radius-sm);
       padding: 15px;
-      margin-top: 5px;
-      color: #edf2f7;
+      margin-top: 15px;
+      color: var(--text-primary);
+      position: relative;
+      clear: both;
+      overflow: hidden;
     }
+    
     .final-answer-label {
       font-size: 0.7rem;
-      color: #90cdf4;
-      margin-bottom: 8px;
+      color: var(--accent-primary);
+      margin-bottom: 12px;
       text-transform: uppercase;
       letter-spacing: 1px;
       font-weight: bold;
-      border-bottom: 1px dotted #5a7299;
-      padding-bottom: 5px;
+      border-bottom: 1px dotted rgba(90, 114, 153, 0.5);
+      padding-bottom: 6px;
+      display: block;
     }
-    .step {
-      border-left: 2px solid #3a4a5c;
-      padding-left: 10px;
-      margin-bottom: 8px;
-    }
+    
+    /* Word Count Badge */
     .word-count-badge {
       position: absolute;
-      top: 10px;
-      right: 10px;
-      background-color: rgba(30, 30, 30, 0.9);
-      color: #ddd;
+      top: 8px;
+      right: 8px;
+      background-color: rgba(30, 30, 30, 0.8);
+      color: var(--text-secondary);
       font-size: 0.7rem;
-      padding: 3px 8px;
+      padding: 4px 10px;
       border-radius: 12px;
-      border: 1px solid #555;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+      border: 1px solid var(--border-light);
       white-space: nowrap;
       z-index: 5;
+      max-width: 200px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      transition: opacity var(--transition-fast), transform var(--transition-fast);
     }
+    
+    .message:hover .word-count-badge {
+      opacity: 1;
+      transform: translateY(0);
+    }
+    
+    .word-count-breakdown {
+      font-size: 0.7rem;
+      color: var(--text-tertiary);
+      margin-top: 4px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    
+    .count-item {
+      display: flex;
+      align-items: center;
+    }
+    
+    .count-thinking {
+      color: #b7c9db;
+    }
+    
+    .count-answer {
+      color: #90cdf4;
+    }
+    
+    .token-savings {
+      font-size: 0.7rem;
+      color: var(--success);
+      margin-left: 5px;
+    }
+    
+    /* Message Attachments */
+    .message-file-attachment {
+      margin-top: 12px;
+      padding: 10px;
+      background-color: rgba(42, 42, 42, 0.5);
+      border-radius: var(--radius-sm);
+      display: flex;
+      align-items: center;
+      transition: background-color var(--transition-fast);
+    }
+    
+    .message-file-attachment:hover {
+      background-color: rgba(42, 42, 42, 0.8);
+    }
+    
+    .message-file-icon {
+      margin-right: 10px;
+      font-size: 1.2rem;
+      color: var(--text-tertiary);
+    }
+    
+    .message-file-info {
+      display: flex;
+      flex-direction: column;
+    }
+    
+    .message-file-name {
+      font-size: 0.85rem;
+      font-weight: 500;
+      color: var(--text-primary);
+    }
+    
+    .message-file-size {
+      font-size: 0.7rem;
+      color: var(--text-tertiary);
+    }
+    
+    .message-image {
+      max-width: 100%;
+      border-radius: 6px;
+      margin-top: 12px;
+      cursor: pointer;
+      transition: transform var(--transition-fast);
+      box-shadow: var(--shadow-sm);
+    }
+    
+    .message-image:hover {
+      transform: scale(1.02);
+    }
+    
     /* --------------------------------
        Code Block Styles
     -------------------------------- */
     pre {
-      background-color: #1f1f1f;
+      background-color: rgba(31, 31, 31, 0.7);
       padding: 0.75rem;
-      border-radius: 8px;
+      border-radius: var(--radius-sm);
       overflow-x: auto;
-      margin: 0.5rem 0;
+      margin: 0.75rem 0;
       position: relative;
+      border: 1px solid var(--border-light);
     }
+    
     code {
-      font-family: Consolas, monospace;
-      color: #dcdcdc;
+      font-family: 'Roboto Mono', monospace;
+      color: #e2e8f0;
+      font-size: 0.9rem;
     }
+    
     .code-block-container {
       position: relative;
-      margin: 0.5rem 0;
-      background-color: #1f1f1f;
-      border-radius: 8px;
-      box-shadow: inset 0 1px 3px rgba(0,0,0,0.3);
-      padding: 0.75rem;
+      margin: 0.75rem 0;
+      background-color: rgba(31, 31, 31, 0.7);
+      border-radius: var(--radius-sm);
+      box-shadow: var(--shadow-sm);
+      padding: 0;
+      border: 1px solid var(--border-light);
     }
+    
+    .code-block-container pre {
+      margin: 0;
+      border: none;
+      background: transparent;
+    }
+    
     .copy-btn {
       position: absolute;
       top: 8px;
       right: 8px;
-      background-color: #333;
+      background-color: rgba(51, 51, 51, 0.8);
       border: none;
-      color: #fff;
+      color: var(--text-secondary);
       border-radius: 4px;
-      padding: 4px 8px;
+      padding: 4px 10px;
       font-size: 0.8rem;
       cursor: pointer;
-      transition: background-color 0.2s ease;
+      transition: all var(--transition-fast);
+      z-index: 2;
     }
+    
     .copy-btn:hover {
-      background-color: #444;
+      background-color: var(--accent-primary);
+      color: white;
     }
+
     /* --------------------------------
-       Modal Styles - IMPROVED - FIX FOR TAB CONTENT DISPLAY
+       Modal Styles
     -------------------------------- */
     .modal {
       display: none;
@@ -587,146 +782,216 @@ select:-webkit-autofill {
       top: 0;
       width: 100%;
       height: 100%;
-      overflow-y: auto; /* Changed from auto to allow scrolling */
-      background-color: rgba(0, 0, 0, 0.7);
-      backdrop-filter: blur(3px);
-    }
-    .modal-content {
-      background-color: #1e1e1e;
-      margin: 5% auto;
-      padding: 20px;
-      border: 1px solid #333;
-      width: 600px; /* Wider to accommodate settings */
-      max-width: 90%; /* Ensure it works on mobile */
-      border-radius: 10px;
-      color: #fff;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.5);
-      position: relative;
-      max-height: 85vh; /* Limit height and enable scrolling */
       overflow-y: auto;
+      background-color: rgba(0, 0, 0, 0.7);
+      backdrop-filter: blur(4px);
+      animation: fadeIn 0.2s ease;
     }
+    
+    .modal-content {
+      background-color: var(--bg-secondary);
+      margin: 4% auto;
+      padding: 20px 25px;
+      border: 1px solid var(--border-medium);
+      width: 650px;
+      max-width: 90%;
+      border-radius: var(--radius-md);
+      color: var(--text-primary);
+      box-shadow: var(--shadow-lg);
+      position: relative;
+      max-height: 85vh;
+      overflow-y: auto;
+      animation: modalSlideIn 0.3s ease;
+    }
+    
+    @keyframes modalSlideIn {
+      from { opacity: 0; transform: translateY(-20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+      padding-bottom: 15px;
+      border-bottom: 1px solid var(--border-light);
+    }
+    
+    .modal-header h2 {
+      margin: 0;
+      font-size: 1.4rem;
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+    
     .modal-content label {
       display: block;
-      margin-bottom: 5px;
+      margin-bottom: 6px;
       font-size: 0.9rem;
+      font-weight: 500;
+      color: var(--text-secondary);
     }
-    .modal-content input, .modal-content select {
+    
+    .modal-content input, 
+    .modal-content select, 
+    .modal-content textarea {
       width: 100%;
-      padding: 0.4rem;
-      margin-bottom: 1rem;
-      border: 1px solid #333;
-      border-radius: 5px;
-      background-color: #2e2e2e;
-      color: #fff;
-      font-size: 0.9rem;
+      padding: 10px 12px;
+      margin-bottom: 15px;
+      border: 1px solid var(--border-medium);
+      border-radius: var(--radius-sm);
+      background-color: var(--bg-component);
+      color: var(--text-primary);
+      font-size: 0.95rem;
+      font-family: 'Inter', sans-serif;
       outline: none;
-      box-shadow: inset 0 1px 3px rgba(0,0,0,0.4);
+      transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
     }
-    .modal-content select {
-      appearance: none;
-      background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%23FFFFFF%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E");
-      background-repeat: no-repeat;
-      background-position: right 0.7em top 50%;
-      background-size: 0.65em auto;
-      padding-right: 20px;
+    
+    .modal-content input:focus, 
+    .modal-content select:focus,
+    .modal-content textarea:focus {
+      border-color: var(--accent-primary);
+      box-shadow: 0 0 0 2px rgba(86, 134, 245, 0.25);
     }
+    
     .modal-content button {
-      padding: 0.5rem 1rem;
-      background-color: #3a3a3a;
+      padding: 10px 16px;
       border: none;
-      color: #fff;
-      border-radius: 5px;
+      border-radius: var(--radius-sm);
       cursor: pointer;
-      font-size: 1rem;
-      margin-right: 0.5rem;
-      transition: background-color 0.3s ease;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.4);
+      font-size: 0.95rem;
+      font-weight: 500;
+      transition: all var(--transition-fast);
     }
-    .modal-content button:hover {
-      background-color: #4a4a4a;
+    
+    .modal-content button.primary {
+      background-color: var(--accent-primary);
+      color: white;
     }
+    
+    .modal-content button.primary:hover {
+      background-color: var(--accent-secondary);
+    }
+    
+    .modal-content button.secondary {
+      background-color: var(--bg-component);
+      color: var(--text-primary);
+      border: 1px solid var(--border-medium);
+    }
+    
+    .modal-content button.secondary:hover {
+      background-color: var(--bg-hover);
+    }
+    
+    .close-modal {
+      position: absolute;
+      top: 15px;
+      right: 15px;
+      background: none;
+      border: none;
+      color: var(--text-secondary);
+      font-size: 20px;
+      cursor: pointer;
+      padding: 0;
+      margin: 0;
+      transition: color var(--transition-fast);
+    }
+    
+    .close-modal:hover {
+      color: var(--text-primary);
+    }
+    
     .settings-tabs {
       display: flex;
       gap: 5px;
       margin-bottom: 15px;
     }
+    
     .tab-btn {
       flex: 1;
-      background-color: #2a2a2a;
-      border: 1px solid #444;
-      color: #aaa;
-      padding: 8px 0;
-      border-radius: 5px 5px 0 0;
+      background-color: var(--bg-component);
+      border: 1px solid var(--border-medium);
+      color: var(--text-secondary);
+      padding: 10px 0;
+      border-radius: var(--radius-sm) var(--radius-sm) 0 0;
       cursor: pointer;
-      transition: all 0.3s ease;
+      transition: all var(--transition-fast);
+      text-align: center;
+      font-weight: 500;
     }
+    
     .tab-btn.active {
-      background-color: #3a3a3a;
-      color: #fff;
-      border-bottom: 2px solid #4a8cff;
+      background-color: var(--bg-hover);
+      color: var(--text-primary);
+      border-bottom: 2px solid var(--accent-primary);
     }
+    
     .tab-content {
       display: none;
       padding: 15px;
-      background-color: #2a2a2a;
-      border-radius: 0 0 5px 5px;
+      background-color: var(--bg-component);
+      border-radius: 0 0 var(--radius-sm) var(--radius-sm);
       margin-bottom: 20px;
-      /* Fix for tab content display issues */
       position: relative;
       width: 100%;
       box-sizing: border-box;
     }
+    
     .tab-content.active {
       display: block;
     }
+    
     .checkbox-container {
       display: flex;
       align-items: center;
       margin-bottom: 10px;
     }
+    
     .checkbox-container input[type="checkbox"] {
       width: auto;
       margin-right: 10px;
       margin-bottom: 0;
     }
+    
     .tooltip {
       position: relative;
       display: inline-block;
       margin-left: 5px;
       cursor: help;
     }
+    
     .tooltip .tooltiptext {
       visibility: hidden;
       width: 300px;
-      background-color: #2e2e2e;
-      color: #fff;
+      background-color: var(--bg-component);
+      color: var(--text-primary);
       text-align: left;
-      border-radius: 6px;
+      border-radius: var(--radius-sm);
       padding: 8px;
       position: absolute;
       z-index: 1;
       top: -5px;
       left: 105%;
       opacity: 0;
-      transition: opacity 0.3s;
-      box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+      transition: opacity var(--transition-fast);
+      box-shadow: var(--shadow-sm);
       font-size: 0.8rem;
       line-height: 1.4;
     }
+    
     .tooltip:hover .tooltiptext {
       visibility: visible;
       opacity: 1;
     }
     
-    /* --------------------------------
-       Reasoning Method UI Improvements
-    -------------------------------- */
     .feature-section {
-      border: 1px solid #444;
-      border-radius: 8px;
+      border: 1px solid var(--border-medium);
+      border-radius: var(--radius-sm);
       padding: 12px;
       margin-bottom: 16px;
-      background-color: #2a2a2a;
+      background-color: var(--bg-component);
     }
     
     .feature-header {
@@ -742,17 +1007,18 @@ select:-webkit-autofill {
     .feature-header label {
       font-weight: 500;
       font-size: 1rem;
+      color: var(--text-primary);
     }
     
     .feature-options {
       margin-left: 24px;
       padding-top: 8px;
-      border-top: 1px solid #444;
+      border-top: 1px solid var(--border-light);
     }
     
     .option-label {
       margin-bottom: 8px;
-      color: #bbb;
+      color: var(--text-secondary);
       font-size: 0.9rem;
     }
     
@@ -779,7 +1045,6 @@ select:-webkit-autofill {
       margin-bottom: 0;
     }
     
-    /* Make radio buttons more visible and clickable */
     input[type="radio"] {
       -webkit-appearance: none;
       -moz-appearance: none;
@@ -787,7 +1052,7 @@ select:-webkit-autofill {
       border-radius: 50%;
       width: 16px;
       height: 16px;
-      border: 2px solid #555;
+      border: 2px solid var(--border-medium);
       outline: none;
       margin-right: 8px;
       position: relative;
@@ -795,7 +1060,7 @@ select:-webkit-autofill {
     }
     
     input[type="radio"]:checked {
-      border-color: #4a8cff;
+      border-color: var(--accent-primary);
     }
     
     input[type="radio"]:checked:before {
@@ -806,17 +1071,16 @@ select:-webkit-autofill {
       width: 6px;
       height: 6px;
       border-radius: 50%;
-      background: #4a8cff;
+      background: var(--accent-primary);
     }
     
-    /* Make checkboxes more visible and clickable */
     input[type="checkbox"] {
       -webkit-appearance: none;
       -moz-appearance: none;
       appearance: none;
       width: 16px;
       height: 16px;
-      border: 2px solid #555;
+      border: 2px solid var(--border-medium);
       border-radius: 3px;
       outline: none;
       cursor: pointer;
@@ -824,8 +1088,8 @@ select:-webkit-autofill {
     }
     
     input[type="checkbox"]:checked {
-      border-color: #4a8cff;
-      background-color: #4a8cff;
+      border-color: var(--accent-primary);
+      background-color: var(--accent-primary);
     }
     
     input[type="checkbox"]:checked:before {
@@ -844,26 +1108,25 @@ select:-webkit-autofill {
       justify-content: center;
       width: 16px;
       height: 16px;
-      background-color: #555;
+      background-color: var(--border-medium);
       border-radius: 50%;
       font-size: 12px;
       cursor: help;
     }
-
-    /* Status notification */
+    
     .status-notification {
       position: fixed;
       bottom: 20px;
       right: 20px;
-      background-color: #2a2a2a;
-      color: white;
+      background-color: var(--bg-component);
+      color: var(--text-primary);
       padding: 10px 15px;
-      border-radius: 4px;
-      box-shadow: 0 3px 6px rgba(0,0,0,0.3);
+      border-radius: var(--radius-sm);
+      box-shadow: var(--shadow-md);
       z-index: 1001;
       display: none;
       opacity: 0;
-      transition: opacity 0.3s ease;
+      transition: opacity var(--transition-fast);
     }
     
     .status-notification.show {
@@ -871,32 +1134,30 @@ select:-webkit-autofill {
       opacity: 1;
     }
     
-    /* Better modal close button */
     .close-modal {
       position: absolute;
       top: 15px;
       right: 15px;
       background: none;
       border: none;
-      color: #aaa;
+      color: var(--text-secondary);
       font-size: 20px;
       cursor: pointer;
       padding: 0;
       margin: 0;
-      transition: color 0.2s ease;
+      transition: color var(--transition-fast);
     }
     
     .close-modal:hover {
-      color: #eee;
+      color: var(--text-primary);
     }
     
-    /* Current model display */
     .current-model-display {
       display: inline-block;
       padding: 4px 8px;
       border-radius: 4px;
-      background-color: #253245;
-      color: #fff;
+      background-color: var(--bg-tertiary);
+      color: var(--text-primary);
       font-size: 0.9rem;
       margin-left: 10px;
     }
@@ -907,10 +1168,9 @@ select:-webkit-autofill {
       border-radius: 4px;
       font-size: 0.7rem;
       margin-left: 5px;
-      background-color: #444;
+      background-color: var(--border-medium);
     }
     
-    /* Two column layout for some settings */
     .settings-row {
       display: flex;
       gap: 20px;
@@ -921,7 +1181,6 @@ select:-webkit-autofill {
       flex: 1;
     }
     
-    /* Prompt editing styles */
     .prompt-editor {
       margin-top: 15px;
     }
@@ -929,10 +1188,10 @@ select:-webkit-autofill {
     .prompt-editor textarea {
       width: 100%;
       min-height: 150px;
-      background-color: #252525;
-      color: #ddd;
-      border: 1px solid #444;
-      border-radius: 5px;
+      background-color: var(--bg-tertiary);
+      color: var(--text-primary);
+      border: 1px solid var(--border-medium);
+      border-radius: var(--radius-sm);
       padding: 10px;
       font-family: monospace;
       font-size: 0.9rem;
@@ -943,169 +1202,163 @@ select:-webkit-autofill {
     .prompt-reset {
       margin-top: 5px;
       font-size: 0.8rem;
-      color: #aaa;
+      color: var(--text-secondary);
       cursor: pointer;
       text-decoration: underline;
     }
     
     .prompt-reset:hover {
-      color: #4a8cff;
+      color: var(--accent-primary);
     }
-
-    /* Enhanced styles for Chain of Draft */
+    
     .cod-thinking {
-      background-color: #1e293b !important;
-      border-color: #3d4e63 !important;
+      background-color: rgba(30, 41, 59, 0.5) !important;
+      border-color: rgba(61, 78, 99, 0.5) !important;
     }
-
+    
     .cod-step {
       display: flex;
       align-items: flex-start;
       padding: 6px 8px;
       margin-bottom: 10px !important;
       border-left: none !important;
-      background-color: #2c3b4f;
+      background-color: rgba(44, 59, 79, 0.5);
       border-radius: 6px;
       box-shadow: 0 1px 2px rgba(0,0,0,0.2);
     }
-
+    
     .step-number {
       display: flex;
       align-items: center;
       justify-content: center;
       min-width: 24px;
       height: 24px;
-      background-color: #3d4f69;
+      background-color: rgba(61, 79, 105, 0.8);
       border-radius: 12px;
       margin-right: 10px;
-      color: #a3c5e9;
+      color: var(--accent-primary);
       font-size: 0.75rem;
       font-weight: bold;
     }
-
+    
     .step-content {
       flex: 1;
       padding-right: 8px;
       font-family: 'Roboto Mono', monospace;
-      color: #c5d5e8;
+      color: var(--text-primary);
     }
-
-    /* Enhanced token display */
+    
     .token-savings {
       font-size: 0.7rem;
-      color: #4ade80;
+      color: var(--success);
       margin-left: 5px;
     }
-
-    /* COD Word Limit options */
+    
     .cod-options {
       margin-top: 15px;
       display: none;
     }
-
+    
     .cod-word-limit-options {
       display: flex;
       flex-direction: column;
       gap: 8px;
       margin-bottom: 15px;
     }
-
+    
     .cod-word-limit-option {
       display: flex;
       align-items: center;
       padding: 8px 12px;
       margin-bottom: 8px;
-      background-color: #2a2a2a;
+      background-color: var(--bg-component);
       border-radius: 6px;
       cursor: pointer;
-      transition: background-color 0.2s ease;
+      transition: background-color var(--transition-fast);
     }
-
+    
     .cod-word-limit-option:hover {
-      background-color: #333;
+      background-color: var(--bg-hover);
     }
-
+    
     .cod-word-limit-option.selected {
-      background-color: #3a4a5c;
-      border-left: 3px solid #4a8cff;
+      background-color: var(--bg-hover);
+      border-left: 3px solid var(--accent-primary);
     }
-
+    
     .cod-word-limit-value {
       font-weight: bold;
       margin-right: 5px;
     }
-
+    
     .cod-word-limit-desc {
       font-size: 0.85rem;
-      color: #aaa;
+      color: var(--text-secondary);
     }
-
-    /* CoD examples section */
+    
     .cod-examples {
       margin-top: 15px;
       padding: 15px;
-      background-color: #2a2a2a;
-      border-radius: 8px;
-      border: 1px solid #444;
+      background-color: var(--bg-component);
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border-medium);
     }
-
+    
     .cod-examples-header {
       font-size: 0.9rem;
       font-weight: bold;
       margin-bottom: 10px;
-      color: #ddd;
-      border-bottom: 1px solid #444;
+      color: var(--text-primary);
+      border-bottom: 1px solid var(--border-light);
       padding-bottom: 5px;
     }
-
+    
     .cod-example-item {
       margin-bottom: 12px;
       font-family: 'Roboto Mono', monospace;
       font-size: 0.85rem;
       padding: 8px;
-      background-color: #333;
+      background-color: var(--bg-hover);
       border-radius: 5px;
-      color: #bbb;
-    }
-
-    .cod-example-question {
-      color: #aaa;
-      margin-bottom: 5px;
-    }
-
-    .cod-example-answer {
-      color: #4a8cff;
+      color: var(--text-secondary);
     }
     
-    /* Word count breakdown */
+    .cod-example-question {
+      color: var(--text-tertiary);
+      margin-bottom: 5px;
+    }
+    
+    .cod-example-answer {
+      color: var(--accent-primary);
+    }
+    
     .word-count-breakdown {
       font-size: 0.7rem;
-      color: #aaa;
+      color: var(--text-tertiary);
       margin-top: 3px;
       display: flex;
       gap: 8px;
     }
-
+    
     .count-item {
       display: flex;
       align-items: center;
     }
-
+    
     .count-thinking {
       color: #b7c9db;
     }
-
+    
     .count-answer {
       color: #90cdf4;
     }
     
-    /* NEW STYLING: Enhanced reasoning features */
     .advanced-options-header {
       font-size: 0.95rem;
       font-weight: 500;
       margin: 15px 0 8px 0;
-      color: #ddd;
-      border-bottom: 1px solid #444;
+      color: var(--text-primary);
+      border-bottom: 1px solid var(--border-light);
       padding-bottom: 5px;
       display: flex;
       align-items: center;
@@ -1132,7 +1385,7 @@ select:-webkit-autofill {
       left: 0;
       right: 0;
       bottom: 0;
-      background-color: #555;
+      background-color: var(--border-medium);
       transition: .4s;
       border-radius: 22px;
     }
@@ -1150,7 +1403,7 @@ select:-webkit-autofill {
     }
     
     input:checked + .toggle-slider {
-      background-color: #4a8cff;
+      background-color: var(--accent-primary);
     }
     
     input:checked + .toggle-slider:before {
@@ -1158,9 +1411,9 @@ select:-webkit-autofill {
     }
     
     .enhanced-reasoning {
-      background-color: #2a3746;
-      border: 1px solid #3d4e63;
-      border-radius: 8px;
+      background-color: var(--bg-tertiary);
+      border: 1px solid var(--border-medium);
+      border-radius: var(--radius-sm);
       padding: 12px;
       margin-top: 10px;
     }
@@ -1178,7 +1431,7 @@ select:-webkit-autofill {
     .option-description {
       margin-left: 25px;
       font-size: 0.8rem;
-      color: #aaa;
+      color: var(--text-secondary);
       margin-bottom: 10px;
     }
     
@@ -1197,7 +1450,7 @@ select:-webkit-autofill {
     
     .complexity-bar {
       height: 5px;
-      background-color: #3d4e63;
+      background-color: var(--border-medium);
       margin-top: 5px;
       border-radius: 2px;
       width: 100%;
@@ -1205,25 +1458,24 @@ select:-webkit-autofill {
     
     .complexity-label {
       font-size: 0.75rem;
-      color: #90cdf4;
+      color: var(--accent-primary);
     }
     
     .preset-type {
       display: inline-block;
       padding: 3px 8px;
-      background-color: #2c3a4f;
-      color: #90cdf4;
+      background-color: var(--bg-hover);
+      color: var(--accent-primary);
       border-radius: 12px;
       font-size: 0.7rem;
       margin-left: 8px;
     }
     
-    /* Auto-detection indicator */
     .auto-detection-badge {
       display: inline-flex;
       align-items: center;
-      background-color: #394e6a;
-      color: #a3c5e9;
+      background-color: var(--bg-hover);
+      color: var(--accent-primary);
       padding: 2px 6px;
       border-radius: 4px;
       font-size: 0.7rem;
@@ -1234,23 +1486,22 @@ select:-webkit-autofill {
       display: inline-block;
       width: 8px;
       height: 8px;
-      background-color: #68d391;
+      background-color: var(--success);
       border-radius: 50%;
       margin-right: 4px;
     }
     
-    /* Help panel for complex problems */
     .problem-analyzer {
       margin-top: 15px;
-      background-color: #2a3746;
-      border: 1px solid #3d4e63;
-      border-radius: 8px;
+      background-color: var(--bg-tertiary);
+      border: 1px solid var(--border-medium);
+      border-radius: var(--radius-sm);
       padding: 12px;
     }
     
     .analyzer-title {
       font-weight: 500;
-      color: #90cdf4;
+      color: var(--accent-primary);
       margin-bottom: 10px;
       display: flex;
       align-items: center;
@@ -1258,17 +1509,16 @@ select:-webkit-autofill {
     
     .analyzer-icon {
       margin-right: 6px;
-      color: #68d391;
+      color: var(--success);
     }
     
     .analyzer-help {
       font-size: 0.85rem;
-      color: #bbb;
+      color: var(--text-secondary);
       margin-bottom: 10px;
       line-height: 1.4;
     }
-
-    /* Responsive adjustments */
+    
     @media (max-width: 768px) {
       .app-container {
         flex-direction: column;
@@ -1288,62 +1538,61 @@ select:-webkit-autofill {
         gap: 10px;
       }
     }
-
-    /* File Upload Styles */
+    
     .file-upload-button {
-      background-color: #3a3a3a;
-      color: #fff;
+      background-color: var(--bg-component);
+      color: var(--text-primary);
       border: none;
-      border-radius: 8px;
+      border-radius: var(--radius-sm);
       padding: 0.3rem 0.6rem;
       margin-right: 0.5rem;
       cursor: pointer;
       font-size: 0.9rem;
       display: inline-flex;
       align-items: center;
-      transition: background-color 0.3s ease;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.4);
+      transition: background-color var(--transition-fast);
+      box-shadow: var(--shadow-sm);
     }
-
+    
     .file-upload-button:hover {
-      background-color: #4a4a4a;
+      background-color: var(--bg-hover);
     }
-
+    
     .file-upload-icon {
       margin-right: 5px;
     }
-
+    
     .file-input {
       display: none;
     }
-
+    
     .attached-files {
       display: flex;
       flex-wrap: wrap;
       gap: 8px;
       padding: 8px;
-      border-top: 1px solid #333;
-      background-color: rgba(30,30,30,0.95);
+      border-top: 1px solid var(--border-light);
+      background-color: var(--bg-secondary);
     }
-
+    
     .file-preview {
       position: relative;
       display: flex;
       flex-direction: column;
       align-items: center;
-      background-color: #2e2e2e;
-      border-radius: 8px;
+      background-color: var(--bg-tertiary);
+      border-radius: var(--radius-sm);
       padding: 8px;
       max-width: 100px;
     }
-
+    
     .file-preview-image {
       width: 80px;
       height: 80px;
       object-fit: cover;
       border-radius: 6px;
     }
-
+    
     .file-preview-icon {
       width: 80px;
       height: 80px;
@@ -1351,11 +1600,11 @@ select:-webkit-autofill {
       align-items: center;
       justify-content: center;
       font-size: 2rem;
-      color: #aaa;
-      background-color: #222;
+      color: var(--text-secondary);
+      background-color: var(--bg-component);
       border-radius: 6px;
     }
-
+    
     .file-preview-name {
       margin-top: 5px;
       font-size: 0.7rem;
@@ -1364,15 +1613,15 @@ select:-webkit-autofill {
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
-      color: #ddd;
+      color: var(--text-secondary);
     }
-
+    
     .file-preview-remove {
       position: absolute;
       top: 0;
       right: 0;
       background-color: rgba(0, 0, 0, 0.6);
-      color: #fff;
+      color: var(--text-primary);
       border: none;
       border-radius: 50%;
       width: 20px;
@@ -1383,270 +1632,406 @@ select:-webkit-autofill {
       align-items: center;
       justify-content: center;
     }
-
+    
     .message-file-attachment {
       margin-top: 10px;
       padding: 10px;
-      background-color: #2a2a2a;
-      border-radius: 6px;
+      background-color: var(--bg-tertiary);
+      border-radius: var(--radius-sm);
       display: flex;
       align-items: center;
     }
-
+    
     .message-file-icon {
       margin-right: 10px;
       font-size: 1.2rem;
-      color: #aaa;
+      color: var(--text-secondary);
     }
-
+    
     .message-file-info {
       display: flex;
       flex-direction: column;
     }
-
+    
     .message-file-name {
       font-size: 0.85rem;
       font-weight: 500;
+      color: var(--text-primary);
     }
-
+    
     .message-file-size {
       font-size: 0.7rem;
-      color: #aaa;
+      color: var(--text-secondary);
     }
-
+    
     .message-image {
       max-width: 100%;
       border-radius: 6px;
       margin-top: 10px;
       cursor: pointer;
-      transition: transform 0.2s ease;
+      transition: transform var(--transition-fast);
     }
-
+    
     .message-image:hover {
       transform: scale(1.01);
     }
-
-    /* Add new self-reflection CSS */
+    
     .reflection-step {
-      background-color: #3d4661 !important;
+      background-color: rgba(61, 70, 97, 0.6) !important;
       border-left: 3px solid #8a5cf7 !important;
     }
-
+    
     .reflection-step .step-number {
-      background-color: #5d4d8a !important;
+      background-color: rgba(93, 77, 138, 0.8) !important;
       color: #d4c5ff !important;
     }
-
+    
     .reflection-step .step-content {
       color: #d4c5ff !important;
       font-style: italic;
     }
-
-    /* Simplified Parameters Tab */
+    
     .range-container {
       position: relative;
       margin-bottom: 20px;
     }
-
+    
     .range-value {
       position: absolute;
       right: 0;
       top: 0;
       font-size: 0.9rem;
-      color: #aaa;
+      color: var(--text-secondary);
     }
-
-    /* Ensure submit button and clear thread are more visible */
+    
     #sendBtn, #clearThreadBtn {
-      background-color: #4a8cff;
+      background-color: var(--accent-primary);
       color: white;
       padding: 8px 15px;
       border: none;
-      border-radius: 5px;
+      border-radius: var(--radius-sm);
       cursor: pointer;
       font-weight: 500;
-      transition: background-color 0.2s;
+      transition: background-color var(--transition-fast);
     }
-
+    
     #sendBtn:hover, #clearThreadBtn:hover {
-      background-color: #357abd;
+      background-color: var(--accent-secondary);
     }
-
+    
     #clearThreadBtn {
-      background-color: #dc3545;
+      background-color: var(--error);
       width: 100%;
       margin-top: 10px;
     }
-
+    
     #clearThreadBtn:hover {
       background-color: #bd2130;
     }
-  </style><style class="darkreader darkreader--sync" media="screen"></style>
-<meta name="darkreader" content="dbb61675415b4944b93830950218de1d"><style class="darkreader darkreader--override" media="screen">.vimvixen-hint {
-    background-color: var(--darkreader-background-ffd76e, #684b00) !important;
-    border-color: var(--darkreader-background-c59d00, #9e7e00) !important;
-    color: var(--darkreader-text-302505, #d7d4cf) !important;
-}
-#vimvixen-console-frame {
-    color-scheme: light !important;
-}
-::placeholder {
-    opacity: 0.5 !important;
-}
-#edge-translate-panel-body,
-.MuiTypography-body1,
-.nfe-quote-text {
-    color: var(--darkreader-neutral-text) !important;
-}
-gr-main-header {
-    background-color: var(--darkreader-background-add8e6, #1b4958) !important;
-}
-.tou-z65h9k,
-.tou-mignzq,
-.tou-1b6i2ox,
-.tou-lnqlqk {
-    background-color: var(--darkreader-neutral-background) !important;
-}
-.tou-75mvi {
-    background-color: var(--darkreader-background-cfecf5, #0f3a47) !important;
-}
-.tou-ta9e87,
-.tou-1w3fhi0,
-.tou-1b8t2us,
-.tou-py7lfi,
-.tou-1lpmd9d,
-.tou-1frrtv8,
-.tou-17ezmgn {
-    background-color: var(--darkreader-background-f5f5f5, #1e2021) !important;
-}
-.tou-uknfeu {
-    background-color: var(--darkreader-background-faedda, #432c09) !important;
-}
-.tou-6i3zyv {
-    background-color: var(--darkreader-background-85c3d8, #245d70) !important;
-}
-div.mermaid-viewer-control-panel .btn {
-    background-color: var(--darkreader-neutral-background);
-    fill: var(--darkreader-neutral-text);
-}
-svg g rect.er {
-    fill: var(--darkreader-neutral-background) !important;
-}
-svg g rect.er.entityBox {
-    fill: var(--darkreader-neutral-background) !important;
-}
-svg g rect.er.attributeBoxOdd {
-    fill: var(--darkreader-neutral-background) !important;
-}
-svg g rect.er.attributeBoxEven {
-    fill: var(--darkreader-selection-background);
-    fill-opacity: 0.8 !important;
-}
-svg rect.er.relationshipLabelBox {
-    fill: var(--darkreader-neutral-background) !important;
-}
-svg g g.nodes rect,
-svg g g.nodes polygon {
-    fill: var(--darkreader-neutral-background) !important;
-}
-svg g rect.task {
-    fill: var(--darkreader-selection-background) !important;
-}
-svg line.messageLine0,
-svg line.messageLine1 {
-    stroke: var(--darkreader-neutral-text) !important;
-}
-div.mermaid .actor {
-    fill: var(--darkreader-neutral-background) !important;
-}
-mitid-authenticators-code-app > .code-app-container {
-    background-color: white !important;
-    padding-top: 1rem;
-}
-iframe#unpaywall[src$="unpaywall.html"] {
-    color-scheme: light !important;
-}
-select option {
-    background-color: var(--darkreader-neutral-background) !important;
-}
-body#tumblr {
-    --darkreader-bg--secondary-accent: 31, 32, 34 !important;
-    --darkreader-bg--white: 23, 23, 23 !important;
-    --darkreader-text--black: 228, 224, 218 !important;
-}
-:host {
-    --d2l-border-color: var(--darkreader-bg--d2l-color-gypsum) !important;
-    --d2l-button-icon-background-color-hover: var(--darkreader-bg--d2l-color-gypsum) !important;
-    --d2l-color-ferrite: var(--darkreader-neutral-text) !important;
-    --d2l-color-sylvite: var(--darkreader-bg--d2l-color-sylvite) !important;
-    --d2l-dropdown-background-color: var(--darkreader-neutral-background) !important;
-    --d2l-dropdown-border-color: var(--darkreader-border--d2l-color-mica) !important;
-    --d2l-input-backgroud-color: var(--darkreader-neutral-background) !important;
-}
-:host([_floating]) .d2l-floating-buttons-container {
-    background-color: var(--darkreader-neutral-background) !important;
-    border-top-color: var(--darkreader-border--d2l-color-mica) !important;
-    opacity: 0.88 !important;
-}
-d2l-card {
-    background: var(--darkreader-neutral-background) !important;
-    border-color: var(--darkreader-border--d2l-color-gypsum) !important;
-}
-d2l-dropdown-content > div,
-d2l-menu-item {
-    background-color: var(--darkreader-neutral-background) !important;
-    border-radius: 10px !important;
-}
-d2l-empty-state-simple {
-    border-color: var(--darkreader-bg--d2l-color-gypsum) !important;
-}
-.d2l-button-filter > ul > li > a.vui-button {
-    border-color: var(--darkreader-border--d2l-color-mica) !important;
-}
-.d2l-label-text:has(.d2l-button-subtle-content):hover,
-.d2l-label-text:has(.d2l-button-subtle-content):focus,
-.d2l-label-text:has(.d2l-button-subtle-content):active {
-    background-color: var(--darkreader-bg--d2l-color-gypsum) !important;
-}
-.d2l-navigation-centerer {
-    color: inherit !important;
-}
-.d2l-tabs-layout {
-    border-color: var(--darkreader-border--d2l-color-gypsum) !important;
-}
-.d2l-input,
-.d2l-calendar-date,
-.d2l-htmleditor-container {
-    background-color: var(--darkreader-neutral-background) !important;
-}
-.d2l-collapsible-panel {
-    border: 1px solid var(--darkreader-border--d2l-color-mica) !important;
-    border-radius: 0.4rem !important;
-}
-.d2l-collapsible-panel-divider {
-    border-bottom: 1px solid var(--darkreader-border--d2l-color-mica) !important;
-}
-.d2l-w2d-flex {
-    border-bottom: 2px solid var(--darkreader-border--d2l-color-mica) !important;
-}
-.d2l-collapsible-panel scrolled,
-.d2l-collapsible-panel-header,
-.d2l-w2d-collection-fixed {
-    background-color: var(--darkreader-neutral-background) !important;
-}
-.d2l-loading-spinner-bg {
-    fill: var(--darkreader-bg--d2l-color-gypsum) !important;
-}
-.d2l-loading-spinner-bg-stroke {
-    stroke: var(--darkreader-border--d2l-color-mica) !important;
-}
-.d2l-loading-spinner-wrapper svg path,
-.d2l-loading-spinner-wrapper svg circle {
-    fill: var(--darkreader-neutral-background) !important;
-}
-embed[type="application/pdf"][src="about:blank"] { filter: invert(100%) contrast(90%); }</style><style id="dark-reader-style" type="text/css">@media screen {
-html {-webkit-transition : -webkit-filter 300ms linear;}
-}</style><style class="darkreader darkreader--sync" media="screen"></style></head>
+
+    /* Feedback Button Styling */
+    #openFeedbackBtn {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;  /* Changed from left to right */
+      background-color: var(--accent-primary);
+      color: white;
+      border: none;
+      padding: 12px 20px;
+      border-radius: 25px;
+      cursor: pointer;
+      font-weight: 500;
+      font-size: 0.95rem;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      box-shadow: var(--shadow-md);
+      transition: all var(--transition-fast);
+      z-index: 1000;
+    }
+
+    #openFeedbackBtn:hover {
+      transform: translateY(-2px);
+      background-color: var(--accent-secondary);
+      box-shadow: var(--shadow-lg);
+    }
+
+    /* Enhanced Model Dropdown Styling */
+    .model-select-container {
+      position: relative;
+      width: 100%;
+      margin-bottom: 20px;
+    }
+
+    #modelSelect {
+      width: 100%;
+      padding: 12px 15px;
+      font-size: 0.95rem;
+      background-color: var(--bg-component);
+      color: var(--text-primary);
+      border: 1px solid var(--border-medium);
+      border-radius: var(--radius-sm);
+      appearance: none;
+      cursor: pointer;
+      transition: all var(--transition-fast);
+      box-shadow: var(--shadow-sm);
+    }
+
+    #modelSelect:hover {
+      background-color: var(--bg-hover);
+      border-color: var(--accent-primary);
+    }
+
+    #modelSelect:focus {
+      outline: none;
+      border-color: var(--accent-primary);
+      box-shadow: 0 0 0 2px rgba(86, 134, 245, 0.25);
+    }
+
+    .model-select-container::after {
+      content: '▼';
+      position: absolute;
+      right: 15px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--text-secondary);
+      pointer-events: none;
+      font-size: 0.8rem;
+      transition: transform var(--transition-fast);
+    }
+
+    .model-select-container:hover::after {
+      color: var(--text-primary);
+    }
+
+    /* Model Info Card Enhancement */
+    .model-info-card {
+      background-color: var(--bg-tertiary);
+      border: 1px solid var(--border-medium);
+      border-radius: var(--radius-sm);
+      padding: 15px;
+      margin-top: 15px;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .model-info-header {
+      font-weight: 600;
+      color: var(--text-primary);
+      margin-bottom: 10px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid var(--border-light);
+    }
+
+    .model-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+
+    .model-tag {
+      background-color: var(--bg-hover);
+      color: var(--accent-primary);
+      padding: 4px 10px;
+      border-radius: 12px;
+      font-size: 0.8rem;
+      font-weight: 500;
+    }
+
+    .model-description {
+      color: var(--text-secondary);
+      font-size: 0.9rem;
+      line-height: 1.5;
+    }
+
+    /* Settings Modal Enhancement */
+    .modal-content {
+      background-color: var(--bg-secondary);
+      margin: 2% auto;
+      padding: 25px 30px;
+      border: 1px solid var(--border-medium);
+      width: 700px;
+      max-width: 95%;
+      border-radius: var(--radius-lg);
+      color: var(--text-primary);
+      box-shadow: var(--shadow-lg);
+      position: relative;
+      max-height: 90vh;
+      overflow-y: auto;
+    }
+
+    .settings-tabs {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 25px;
+      background: var(--bg-tertiary);
+      padding: 8px;
+      border-radius: var(--radius-md);
+    }
+
+    .tab-btn {
+      flex: 1;
+      background-color: transparent;
+      border: none;
+      color: var(--text-secondary);
+      padding: 12px 20px;
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      transition: all var(--transition-fast);
+      font-weight: 500;
+      font-size: 0.95rem;
+    }
+
+    .tab-btn:hover {
+      background-color: var(--bg-hover);
+      color: var(--text-primary);
+    }
+
+    .tab-btn.active {
+      background-color: var(--accent-primary);
+      color: white;
+    }
+
+    .settings-section-header {
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: var(--text-primary);
+      margin-bottom: 20px;
+      padding-bottom: 10px;
+      border-bottom: 2px solid var(--border-medium);
+    }
+
+    /* Model Selection Enhancement */
+    .model-select-container {
+      background: var(--bg-tertiary);
+      padding: 20px;
+      border-radius: var(--radius-md);
+      margin-bottom: 25px;
+    }
+
+    #modelSelect {
+      width: 100%;
+      padding: 15px;
+      font-size: 1rem;
+      background-color: var(--bg-component);
+      color: var(--text-primary);
+      border: 1px solid var(--border-medium);
+      border-radius: var(--radius-sm);
+      appearance: none;
+      cursor: pointer;
+      transition: all var(--transition-fast);
+      box-shadow: var(--shadow-sm);
+      margin-bottom: 15px;
+    }
+
+    #modelSelect:hover {
+      background-color: var(--bg-hover);
+      border-color: var(--accent-primary);
+    }
+
+    #modelSelect:focus {
+      outline: none;
+      border-color: var(--accent-primary);
+      box-shadow: 0 0 0 2px rgba(86, 134, 245, 0.25);
+    }
+
+    .model-info-card {
+      background-color: var(--bg-component);
+      border: 1px solid var(--border-medium);
+      border-radius: var(--radius-md);
+      padding: 20px;
+      margin-top: 20px;
+    }
+
+    .model-info-header {
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: var(--text-primary);
+      margin-bottom: 15px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid var(--border-light);
+    }
+
+    .model-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 15px;
+    }
+
+    .model-tag {
+      background-color: var(--bg-hover);
+      color: var(--accent-primary);
+      padding: 6px 12px;
+      border-radius: 15px;
+      font-size: 0.85rem;
+      font-weight: 500;
+    }
+
+    #setModelBtn {
+      background-color: var(--accent-primary);
+      color: white;
+      padding: 12px 24px;
+      border: none;
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      font-weight: 500;
+      font-size: 0.95rem;
+      margin-top: 20px;
+      transition: all var(--transition-fast);
+    }
+
+    #setModelBtn:hover {
+      background-color: var(--accent-secondary);
+      transform: translateY(-1px);
+    }
+
+    #setModelBtn.success {
+      background-color: var(--success);
+    }
+
+    /* Save/Cancel Buttons Enhancement */
+    .settings-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 12px;
+      margin-top: 30px;
+      padding-top: 20px;
+      border-top: 1px solid var(--border-light);
+    }
+
+    #saveSettings, #closeSettings {
+      padding: 12px 24px;
+      border-radius: var(--radius-sm);
+      font-weight: 500;
+      font-size: 0.95rem;
+      cursor: pointer;
+      transition: all var(--transition-fast);
+    }
+
+    #saveSettings {
+      background-color: var(--accent-primary);
+      color: white;
+      border: none;
+    }
+
+    #saveSettings:hover {
+      background-color: var(--accent-secondary);
+      transform: translateY(-1px);
+    }
+
+    #closeSettings {
+      background-color: var(--bg-component);
+      color: var(--text-primary);
+      border: 1px solid var(--border-medium);
+    }
+
+    #closeSettings:hover {
+      background-color: var(--bg-hover);
+      transform: translateY(-1px);
+    }
+  </style>
+</head>
 <body>
   <div id="blue-light-blocker-overlay" style="position: fixed; top: 0px; left: 0px; width: 100%; height: 100%; z-index: 2147483647; pointer-events: none; transition: opacity 0.3s; mix-blend-mode: multiply; background-color: rgb(255, 175, 50); opacity: 0; --darkreader-inline-bgcolor: var(--darkreader-background-ffaf32, #ae6a00);" data-darkreader-inline-bgcolor=""></div><!-- Include jsPDF for PDF generation -->
   <script src="./LLM Playground (COT vs COD)_files/jspdf.umd.min.js"></script>
@@ -1656,32 +2041,37 @@ html {-webkit-transition : -webkit-filter 300ms linear;}
     <div class="sidebar">
       <h2>Threads</h2>
       <ul id="threadList"><li class="active">Thread 1</li></ul>
-      <button id="newThreadBtn">New Thread</button>
-      <button id="deleteThreadBtn">Delete Thread</button>
-      <button id="downloadTxtBtn">Download TXT</button>
-      <button id="downloadPdfBtn">Download PDF</button>
-    <button id="clearThreadBtn" style="margin-top: 0.5rem; background-color: rgb(85, 51, 51); --darkreader-inline-bgcolor: var(--darkreader-background-553333, #442929);" data-darkreader-inline-bgcolor="">Clear Thread</button></div>
+      <div class="sidebar-buttons">
+        <button id="newThreadBtn">New Thread</button>
+        <button id="deleteThreadBtn">Delete Thread</button>
+        <button id="downloadTxtBtn">Download TXT</button>
+        <button id="downloadPdfBtn">Download PDF</button>
+        <button id="clearThreadBtn">Clear Thread</button>
+      </div>
+    </div>
 
     <!-- Chat Area -->
     <div class="chat-container">
       <div class="chat-header">
         <h1 id="pageTitle">LLM Playground (COT vs COD)</h1>
-        <div>
+        <div class="chat-header-actions">
           <span id="currentModelDisplay" class="current-model-display">llama-3.3-70b<span class="reasoning-badge" style="background-color: #2d5038; margin-left: 3px;">Adaptive</span></span>
           <button class="settings-btn" id="openSettings">Settings ⚙️</button>
         </div>
       </div>
       <div class="chat-messages" id="chatMessages"></div>
-      <div class="chat-input">
-        <textarea id="userInput" rows="2" placeholder="Type your message..."></textarea>
-        <button id="sendBtn">Send</button>
-        <label for="fileInput" class="file-upload-button">
-          <span class="file-upload-icon">📎</span>
-          Attach
-        </label>
-        <input type="file" id="fileInput" class="file-input" multiple="">
+      <div class="chat-input-container">
+        <div class="chat-input">
+          <textarea id="userInput" rows="2" placeholder="Type your message..."></textarea>
+          <button id="sendBtn">Send</button>
+          <label for="fileInput" class="file-upload-button">
+            <span class="file-upload-icon">📎</span>
+            Attach
+          </label>
+          <input type="file" id="fileInput" class="file-input" multiple="">
+        </div>
+        <div id="attachedFiles" class="attached-files" style="display: none;"></div>
       </div>
-      <div id="attachedFiles" class="attached-files" style="display: none;"></div>
     </div>
   </div>
 
@@ -1711,7 +2101,7 @@ html {-webkit-transition : -webkit-filter 300ms linear;}
           
           
           
-       <option value="qwen-2.5-coder-32b">Qwen 2.5 Coder (32B)</option><option value="qwen-qwq-32b">Qwen QwQ (32B)</option><option value="llama-3.3-70b-versatile">Llama 3.3 (70B)</option><option value="mixtral-8x7b-32768">Mixtral 8x7B</option><option value="llama-3.2-90b-vision-preview">Llama 3.2 Vision (90B)</option></select>
+       <option value="qwen-2.5-coder-32b">Qwen 2.5 Coder (32B)</option><option value="llama-3.3-70b-versatile">Llama 3.3 (70B)</option><option value="mixtral-8x7b-32768">Mixtral 8x7B</option><option value="qwen-qwq-32b">Qwen QWQ (32B)</option><option value="llama-3.2-90b-vision-preview">Llama 3.2 Vision (90B)</option></select>
         <div class="dropdown-arrow">▼</div>
       </div>
 
@@ -1890,10 +2280,10 @@ html {-webkit-transition : -webkit-filter 300ms linear;}
 
       <label for="maxTokens">Max Tokens</label>
       <div class="range-container">
-        <input type="range" id="maxTokens" min="256" max="128000" step="128" value="16384">
-        <span id="maxTokensValue" class="range-value">16384</span>
+        <input type="range" id="maxTokens" min="256" max="128000" step="128" value="4096">
+        <span id="maxTokensValue" class="range-value">4096</span>
       </div>
-      <p style="font-size: 0.8rem; color: #aaa; margin-top: 0;">Maximum length of the response.</p>
+      <p style="font-size: 0.8rem; color: #aaa; margin-top: 0;">Maximum length of the response (up to 128k tokens).</p>
     </div>
     
     <div style="text-align: right; margin-top: 20px;">
@@ -1904,9 +2294,10 @@ html {-webkit-transition : -webkit-filter 300ms linear;}
 </div>
 
   <!-- Feedback Button and Modal -->
-  <div style="position: fixed; bottom: 20px; left: 20px; z-index: 1000;">
-    <button id="openFeedbackBtn" style="background-color: rgb(74, 140, 255); color: white; border: none; padding: 10px 15px; border-radius: 20px; cursor: pointer; box-shadow: rgba(0, 0, 0, 0.3) 0px 2px 5px; --darkreader-inline-bgcolor: var(--darkreader-background-4a8cff, #003aa0); --darkreader-inline-color: var(--darkreader-text-ffffff, #e8e6e3); --darkreader-inline-border-top: none; --darkreader-inline-border-right: none; --darkreader-inline-border-bottom: none; --darkreader-inline-border-left: none; --darkreader-inline-boxshadow: var(--darkreader-background-0000004d, rgba(0, 0, 0, 0.3)) 0px 2px 5px;" data-darkreader-inline-bgcolor="" data-darkreader-inline-color="" data-darkreader-inline-border-top="" data-darkreader-inline-border-right="" data-darkreader-inline-border-bottom="" data-darkreader-inline-border-left="" data-darkreader-inline-boxshadow="">
-      <span style="margin-right: 5px;">💬</span> Feedback
+  <div id="feedbackBtnContainer">
+    <button id="openFeedbackBtn">
+      <span>💬</span>
+      Feedback
     </button>
   </div>
 
@@ -1988,13 +2379,113 @@ html {-webkit-transition : -webkit-filter 300ms linear;}
     let ENHANCED_REASONING_ENABLED = true;
     let REASONING_ENHANCEMENT = "adaptive"; // Options: "adaptive", "standard"
     
-    // Default generation parameters - Updated default
+    // NEW: Problem complexity detection
+    let PROBLEM_COMPLEXITY = {
+      hasMath: false,
+      hasLogic: false,
+      multiStep: false,
+      complexity: "normal" // Options: "simple", "normal", "complex"
+    };
+    
+    // Prompts for different reasoning methods
+    let PROMPTS = {
+      standard: "",
+      
+      cot: `Think step by step to solve this problem. Explain your reasoning at each step, then provide your final answer.`,
+      
+      cod: `Think step by step, but produce only minimal notes for each step (${COD_WORD_LIMIT} words maximum per step). Use mathematical notation where possible. Keep only essential information needed to solve the problem. Focus on key calculations and intermediate results without narrative explanation.
+  
+Separate your steps with periods. Write your final answer after the #### separator.
+
+Examples:
+Q: Jason had 20 lollipops. He gave Denny some lollipops. Now Jason has 12 lollipops. How many lollipops did Jason give to Denny?
+A: 20 initial. 12 remaining. 20 - 12 = 8. #### 8 lollipops
+
+Q: Roger has $125. He spends $55 on a video game and then receives $25 for his birthday. How much money does Roger have now?
+A: Start: $125. Spent: $55. 125 - 55 = $70. Received: $25. 70 + 25 = $95. #### $95
+
+Q: A square has a perimeter of 20 cm. What is its area?
+A: Perimeter = 20 cm. Side length = 20/4 = 5 cm. Area = 5² = 25 cm². #### 25 square centimeters
+
+Q: If a fabric store received 45 yards of cotton material and used 2/9 of it for a bulk order, how many yards of cotton material does the fabric store have left?
+A: Total: 45 yards. Used: 2/9 × 45 = 10 yards. Remaining: 45 - 10 = 35 yards. #### 35 yards
+
+Q: The temperature on Monday was -3°C. On Tuesday, it was 14°C. What was the change in temperature from Monday to Tuesday?
+A: Monday: -3°C. Tuesday: 14°C. Change: 14 - (-3) = 17°C. #### 17°C`
+    };
+    
+    // NEW: Enhanced prompts for complex problems with different word limits
+    let ENHANCED_PROMPTS = {
+      cot: `Think step by step to solve this problem. This appears to be a complex problem that requires careful reasoning. Break down your thinking into clear steps, making sure to consider all relevant information and constraints. 
+
+For complex problems, use as many steps as needed to work through the solution thoroughly. It's better to use more steps with clear reasoning than to skip steps.
+
+Check your calculations and logic at each step. After you've completed your reasoning process, provide your final answer.`,
+      
+      cod5: `Think step by step to solve this complex problem. For each step, use at most 5 words to capture the essential reasoning, but use AS MANY STEPS as needed to thoroughly work through the problem. Use mathematical notation where efficient. Show ALL intermediate calculations and logical inferences.
+
+IMPORTANT: Instead of trying to fit complex reasoning into fewer steps, break your reasoning into more numerous simple steps. For example, instead of one step with "Calculate area using length×width=50×30=1500", use multiple steps:
+1. Length = 50.
+2. Width = 30.
+3. Area = length × width.
+4. Area = 50 × 30.
+5. Area = 1500.
+
+Separate your steps with periods. Write your final answer after the #### separator.
+
+Example of solving a complex problem with sufficient steps:
+Q: A car travels at 60 mph. After 2 hours, it increases speed to 75 mph for 1 hour. It then decreases to 50 mph for the final 30 minutes. What is the total distance traveled?
+A: First segment: speed 60 mph. First segment: time 2h. First segment: distance = 60 × 2. First segment: distance = 120 miles. Second segment: speed 75 mph. Second segment: time 1h. Second segment: distance = 75 × 1. Second segment: distance = 75 miles. Third segment: speed 50 mph. Third segment: time 0.5h. Third segment: distance = 50 × 0.5. Third segment: distance = 25 miles. Total distance: 120 + 75 + 25. Total distance = 220 miles. #### 220 miles`,
+
+      cod10: `Think step by step to solve this complex problem. For each step, use up to 10 words to capture the essential reasoning. Use AS MANY STEPS as needed to fully solve the problem. Include ALL intermediate calculations and logical inferences.
+
+IMPORTANT: For complex problems, it's better to use more steps with clear reasoning than to try cramming too much into each step. Break complex calculations into multiple steps.
+
+When thinking through difficult parts of a problem:
+1. Identify what information you need
+2. Think about how to derive that information
+3. Perform calculations systematically
+4. Check your work at key points
+
+Separate your steps with periods. Write your final answer after the #### separator.
+
+Example of solving a complex problem:
+Q: A car travels at 60 mph. After 2 hours, it increases speed to 75 mph for 1 hour. It then decreases to 50 mph for the final 30 minutes. What is the total distance traveled?
+A: First segment: speed 60 mph for 2 hours. First segment distance calculation: 60 mph × 2h. First segment distance = 120 miles. Second segment: speed 75 mph for 1 hour. Second segment distance calculation: 75 mph × 1h. Second segment distance = 75 miles. Third segment: speed 50 mph for 0.5 hours. Third segment distance calculation: 50 mph × 0.5h. Third segment distance = 25 miles. Need to sum all segment distances. Total distance calculation: 120 + 75 + 25. Total distance traveled = 220 miles. #### 220 miles`,
+      
+      cod15: `Think step by step to solve this complex problem. For each step, use up to 15 words to capture the essential reasoning, providing more detail for critical steps. Use mathematical notation where helpful but include explanations of your approach at key points.
+
+Separate your steps with periods. Write your final answer after the #### separator.
+
+Example of solving a complex problem:
+Q: A car travels at 60 mph. After 2 hours, it increases speed to 75 mph for 1 hour. It then decreases to 50 mph for the final 30 minutes. What is the total distance traveled?
+A: First segment: The car travels at 60 mph for 2 hours, so distance = 60 × 2 = 120 miles. Second segment: The car increases to 75 mph for 1 hour, so distance = 75 × 1 = 75 miles. Third segment: The car decreases to 50 mph for 0.5 hours, so distance = 50 × 0.5 = 25 miles. Total distance traveled = 120 + 75 + 25 = 220 miles. #### 220 miles`,
+      
+      cod17: `Think step by step to solve this complex problem. For each step, use up to 17 words to provide clear reasoning, especially for difficult parts. Balance precision and concision, using math notation to save words.
+
+Separate your steps with periods. Write your final answer after the #### separator.
+
+Example of solving a complex problem:
+Q: A car travels at 60 mph. After 2 hours, it increases speed to 75 mph for 1 hour. It then decreases to 50 mph for the final 30 minutes. What is the total distance traveled?
+A: First segment: The car travels at 60 mph for 2 hours, giving distance = 60 × 2 = 120 miles. Second segment: Speed increases to 75 mph for 1 hour, so this segment's distance = 75 miles. Third segment: Speed is 50 mph for 0.5 hours, contributing 50 × 0.5 = 25 miles. Total journey distance = 120 + 75 + 25 = 220 miles. #### 220 miles`,
+      
+      cod20: `Think step by step to solve this complex problem. For each step, use up to 20 words to provide clear reasoning, explaining your approach more thoroughly for the difficult parts of the problem.
+
+Separate your steps with periods. Write your final answer after the #### separator.
+
+Example of solving a complex problem:
+Q: A car travels at 60 mph. After 2 hours, it increases speed to 75 mph for 1 hour. It then decreases to 50 mph for the final 30 minutes. What is the total distance traveled?
+A: First segment: The car travels at 60 mph for 2 hours, so the distance covered in this segment is 60 × 2 = 120 miles. Second segment: The car then increases speed to 75 mph and maintains this for 1 hour, covering 75 × 1 = 75 miles. Third segment: Finally, the car decreases speed to 50 mph for 30 minutes (0.5 hours), covering 50 × 0.5 = 25 miles. Total distance traveled over the entire journey = 120 + 75 + 25 = 220 miles. #### 220 miles`
+    };
+    
+    // Default generation parameters
     let TEMPERATURE = 0.5;
     let TOP_P = 0.90;
-    let MAX_TOKENS = 16384;
+    let MAX_TOKENS = 4096;
 
-    // Initialize global self-reflection variables
-    let SELF_REFLECTION_ENABLED = true;
+    // Initialize global self-consistency variables
+    let SELF_CONSISTENCY_ENABLED = false;
+    let SELF_CONSISTENCY_PATHS = 3;
     
     /***********************
      * Helper Functions
@@ -2005,9 +2496,9 @@ html {-webkit-transition : -webkit-filter 300ms linear;}
       // Model display name mapping
       const modelDisplayNames = {
         "qwen-2.5-coder-32b": "Qwen 2.5 Coder (32B)",
-        "qwen-qwq-32b": "Qwen QwQ (32B)",
         "llama-3.3-70b-versatile": "Llama 3.3 (70B)",
         "mixtral-8x7b-32768": "Mixtral 8x7B",
+        "qwen-qwq-32b": "Qwen QWQ (32B)",
         "llama-3.2-90b-vision-preview": "Llama 3.2 Vision (90B)"
       };
       
@@ -2044,38 +2535,39 @@ html {-webkit-transition : -webkit-filter 300ms linear;}
     }
     
     /***********************
-     * Self-Reflection Functions
+     * Self-Consistency Functions
      ***********************/
     
-    // Initialize self-reflection UI and settings
-    function initSelfReflection() {
-      const selfReflectionToggle = document.getElementById('selfReflectionToggle');
+    // Initialize self-consistency UI and settings
+    function initSelfConsistency() {
+      const selfConsistencyToggle = document.getElementById('selfReflectionToggle');
       const infoPanel = document.getElementById('selfReflectionInfo');
       
-      if (selfReflectionToggle) {
-        selfReflectionToggle.checked = SELF_REFLECTION_ENABLED;
+      if (selfConsistencyToggle) {
+        selfConsistencyToggle.checked = SELF_CONSISTENCY_ENABLED;
         
-        selfReflectionToggle.addEventListener('change', () => {
-          SELF_REFLECTION_ENABLED = selfReflectionToggle.checked;
+        selfConsistencyToggle.addEventListener('change', () => {
+          SELF_CONSISTENCY_ENABLED = selfConsistencyToggle.checked;
           if (infoPanel) {
-            infoPanel.style.display = SELF_REFLECTION_ENABLED ? 'block' : 'none';
+            infoPanel.style.display = SELF_CONSISTENCY_ENABLED ? 'block' : 'none';
           }
         });
       }
     }
     
-    // Save self-reflection settings from form inputs
-    function saveSelfReflectionSettings() {
-      const selfReflectionToggle = document.getElementById('selfReflectionToggle');
+    // Save self-consistency settings from form inputs
+    function saveSelfConsistencySettings() {
+      const selfConsistencyToggle = document.getElementById('selfReflectionToggle');
       
-      if (selfReflectionToggle) {
-        SELF_REFLECTION_ENABLED = selfReflectionToggle.checked;
+      if (selfConsistencyToggle) {
+        SELF_CONSISTENCY_ENABLED = selfConsistencyToggle.checked;
       }
       
       // Save to localStorage
-      localStorage.setItem("selfReflectionEnabled", SELF_REFLECTION_ENABLED.toString());
+      localStorage.setItem("selfConsistencyEnabled", SELF_CONSISTENCY_ENABLED.toString());
+      localStorage.setItem("selfConsistencyPaths", SELF_CONSISTENCY_PATHS.toString());
       
-      console.log(`Self-reflection settings saved: enabled=${SELF_REFLECTION_ENABLED}`);
+      console.log(`Self-consistency settings saved: enabled=${SELF_CONSISTENCY_ENABLED}, paths=${SELF_CONSISTENCY_PATHS}`);
     }
     
     /***********************
@@ -2903,7 +3395,7 @@ html {-webkit-transition : -webkit-filter 300ms linear;}
       addCodeCopyButtons();
     }
 
-    function addMessageToCurrentThread(content, sender, isPlaceholder = false, files = [], processedFiles = []) {
+    function addMessageToCurrentThread(content, sender, isPlaceholder = false, files = []) {
       const thread = threads.find(t => t.id === currentThreadId);
       if (thread) {
         // Process bot messages to separate thinking from answer
@@ -2937,8 +3429,6 @@ html {-webkit-transition : -webkit-filter 300ms linear;}
           answerWordCount: sender === "bot" && !isPlaceholder ? answerWordCount : undefined,
           // Add files to the message
           files: files && files.length > 0 ? files : undefined,
-          // Add processed file content for API requests
-          processedFiles: processedFiles && processedFiles.length > 0 ? processedFiles : undefined,
           // NEW: Add complexity info for debugging
           complexityInfo: sender === "user" ? PROBLEM_COMPLEXITY : undefined
         });
@@ -3025,25 +3515,6 @@ html {-webkit-transition : -webkit-filter 300ms linear;}
           }
         }
         
-        // If word count limit was requested, modify the prompt to clarify it applies to final answer only
-        if (wordCountRequest && wordCountRequest > 0) {
-          if (REASONING_METHOD === "cod") {
-            // For CoD, add the instruction right before the examples section
-            const examplesIndex = systemPrompt.indexOf("Examples:");
-            if (examplesIndex !== -1) {
-              const beforeExamples = systemPrompt.substring(0, examplesIndex);
-              const afterExamples = systemPrompt.substring(examplesIndex);
-              
-              systemPrompt = `${beforeExamples}\nIMPORTANT: Your final answer after the #### separator should be ${wordCountRequest} words maximum. The word limit applies ONLY to your final answer, not your thinking steps.\n\n${afterExamples}`;
-            } else {
-              systemPrompt += `\n\nIMPORTANT: Your final answer after the #### separator should be ${wordCountRequest} words maximum. The word limit applies ONLY to your final answer, not your thinking steps.`;
-            }
-          } else if (REASONING_METHOD === "cot") {
-            // For CoT, add to the end of the prompt
-            systemPrompt += `\n\nIMPORTANT: Your final answer should be ${wordCountRequest} words maximum. This word limit applies ONLY to your final answer, not your thinking process.`;
-          }
-        }
-        
         let reasoningInfo = `${REASONING_METHOD.toUpperCase()}`;
         if (REASONING_METHOD === "cod") {
           reasoningInfo += `-${COD_WORD_LIMIT}`;
@@ -3077,53 +3548,14 @@ html {-webkit-transition : -webkit-filter 300ms linear;}
       }
       
       // Add all user and assistant messages
-      for (const msg of thread.messages.filter(msg => !msg.isPlaceholder)) {
-        if (msg.sender === "user" && msg.processedFiles && msg.processedFiles.length > 0) {
-          // User message with processed files - create content array format
-          const content = [];
-          
-          // Add the text content if any
-          if (msg.content && msg.content.trim() !== '') {
-            content.push({
-              type: "text",
-              text: msg.content
-            });
-          }
-          
-          // Add processed files
-          for (const file of msg.processedFiles) {
-            if (file.type === "image") {
-              content.push({
-                type: "image_url",
-                image_url: {
-                  url: file.content
-                }
-              });
-            } else if (file.type === "text") {
-              content.push({
-                type: "text",
-                text: `[File: ${file.name}]\n\n${file.content}\n\n[End of file: ${file.name}]`
-              });
-            } else {
-              content.push({
-                type: "text",
-                text: `[File attached: ${file.name} (${file.fileType}, ${file.size})]`
-              });
-            }
-          }
-          
-          messages.push({
-            role: "user",
-            content: content
-          });
-        } else {
-          // Regular message without processed files
+      thread.messages
+        .filter(msg => !msg.isPlaceholder)
+        .forEach(msg => {
           messages.push({
             role: msg.sender === "user" ? "user" : "assistant",
             content: msg.content
           });
-        }
-      }
+        });
       
       return messages;
     }
@@ -3139,47 +3571,9 @@ html {-webkit-transition : -webkit-filter 300ms linear;}
       
       // Check if there are files to be included
       const filesToSend = [...attachedFiles]; // Make a copy of the current files
-      const processedFiles = [];
       
-      // Process the files
-      if (filesToSend.length > 0) {
-        for (const file of filesToSend) {
-          try {
-            if (file.type.startsWith('image/')) {
-              // For images, convert to base64
-              const base64Data = await readFileAsBase64(file);
-              processedFiles.push({
-                type: "image",
-                name: file.name,
-                content: `data:${file.type};base64,${base64Data}`
-              });
-            } else if (file.type.startsWith('text/') || file.type.includes('json') || 
-                       file.type.includes('javascript') || file.type.includes('html') || 
-                       file.type.includes('css') || file.type.includes('xml')) {
-              // For text files, read the content
-              const textContent = await readFileAsText(file);
-              processedFiles.push({
-                type: "text",
-                name: file.name,
-                content: textContent
-              });
-            } else {
-              // For other files, just note them
-              processedFiles.push({
-                type: "other",
-                name: file.name,
-                fileType: file.type,
-                size: formatFileSize(file.size)
-              });
-            }
-          } catch (err) {
-            console.error(`Error processing file ${file.name}:`, err);
-          }
-        }
-      }
-      
-      // Add message to thread with files and their processed content
-      addMessageToCurrentThread(message, "user", false, filesToSend, processedFiles);
+      // Add message to thread with files
+      addMessageToCurrentThread(message, "user", false, filesToSend);
       
       // Clear attached files after sending
       attachedFiles = [];
@@ -3200,7 +3594,7 @@ html {-webkit-transition : -webkit-filter 300ms linear;}
       const wordCountRequest = parseWordCountRequest(message);
       
       // FIXED: Use proper self-reflection instead of self-consistency for CoD
-      if (SELF_REFLECTION_ENABLED && REASONING_METHOD === "cod") {
+      if (SELF_CONSISTENCY_ENABLED && REASONING_METHOD === "cod") {
         // Add message showing we're thinking with self-reflection
         addMessageToCurrentThread("Thinking with self-reflection...", "bot", true);
         const thread = threads.find(t => t.id === currentThreadId);
@@ -3336,6 +3730,9 @@ html {-webkit-transition : -webkit-filter 300ms linear;}
           };
         }
         renderCurrentThreadMessages();
+      } else if (SELF_CONSISTENCY_ENABLED && REASONING_METHOD === "cod") {
+        // Original self-consistency code path with multiple reasoning paths
+        // ... existing code ...
       } else {
         // Standard message sending (existing code)
         addMessageToCurrentThread("Bot is typing...", "bot", true);
@@ -3622,17 +4019,12 @@ html {-webkit-transition : -webkit-filter 300ms linear;}
       const modelTags = document.getElementById('modelTags');
       const modelDescription = document.getElementById('modelDescription');
       
-      // Model information database for Qroq models
+      // Model information database
       const modelInfo = {
         "qwen-2.5-coder-32b": {
           name: "Qwen 2.5 Coder (32B)",
           tags: ["32B", "Coding", "Reasoning"],
           description: "Alibaba's Qwen 2.5 Coder model specialized for programming tasks with strong reasoning capabilities."
-        },
-        "qwen-qwq-32b": {
-          name: "Qwen QwQ (32B)",
-          tags: ["32B", "Reasoning", "SOTA"],
-          description: "A breakthrough 32B parameter reasoning model delivering performance comparable to state-of-the-art models 20x larger like DeepSeek-R1 (671B) on complex reasoning and coding tasks."
         },
         "llama-3.3-70b-versatile": {
           name: "Llama 3.3 (70B)",
@@ -3642,27 +4034,35 @@ html {-webkit-transition : -webkit-filter 300ms linear;}
         "mixtral-8x7b-32768": {
           name: "Mixtral 8x7B",
           tags: ["MoE", "General", "Balanced"],
-          description: "Mixture of Experts model offering strong performance across diverse tasks."
+          description: "Mixture of Experts model offering strong performance across diverse tasks with extended context window."
+        },
+        "qwen-qwq-32b": {
+          name: "Qwen QWQ (32B)",
+          tags: ["32B", "Fast", "Efficient"],
+          description: "Optimized version of Qwen model focused on quick responses while maintaining high quality output."
         },
         "llama-3.2-90b-vision-preview": {
           name: "Llama 3.2 Vision (90B)",
           tags: ["90B", "Vision", "Multimodal"],
-          description: "Meta's Llama 3.2 Vision model with 90B parameters capable of processing both text and images with advanced visual understanding."
+          description: "Meta's vision-enabled Llama model capable of understanding both text and images with enhanced reasoning capabilities."
         }
       };
       
-      // Clear existing options except the default one
-      while (modelSelect.options.length > 1) {
-        modelSelect.remove(1);
-      }
+      // Clear existing options
+      modelSelect.innerHTML = '<option value="" disabled selected>Choose a model...</option>';
+      
+      // Sort models by name
+      const sortedModels = Object.entries(modelInfo).sort((a, b) => 
+        a[1].name.localeCompare(b[1].name)
+      );
       
       // Add models from the modelInfo object
-      for (const [id, info] of Object.entries(modelInfo)) {
+      sortedModels.forEach(([id, info]) => {
         const option = document.createElement('option');
         option.value = id;
         option.textContent = info.name;
         modelSelect.appendChild(option);
-      }
+      });
       
       // Initialize with current model if set
       if (MODEL_NAME && modelInfo[MODEL_NAME]) {
@@ -3674,58 +4074,81 @@ html {-webkit-transition : -webkit-filter 300ms linear;}
       modelSelect.addEventListener('change', () => {
         const selectedModel = modelSelect.value;
         updateModelInfo(selectedModel);
+        
+        // Show visual feedback on change
+        modelSelect.style.borderColor = 'var(--accent-primary)';
+        setTimeout(() => {
+          modelSelect.style.borderColor = '';
+        }, 500);
       });
       
       function updateModelInfo(modelId) {
+        if (!modelInfoCard) return;
+        
         if (modelInfo[modelId]) {
           const info = modelInfo[modelId];
           
           // Update header
-          selectedModelName.textContent = info.name;
+          if (selectedModelName) {
+            selectedModelName.textContent = info.name;
+          }
           
-          // Update tags
-          modelTags.innerHTML = '';
-          info.tags.forEach(tag => {
-            const tagElement = document.createElement('span');
-            tagElement.className = 'model-tag';
-            tagElement.textContent = tag;
-            modelTags.appendChild(tagElement);
-          });
+          // Update tags with animation
+          if (modelTags) {
+            modelTags.style.opacity = '0';
+            setTimeout(() => {
+              modelTags.innerHTML = info.tags
+                .map(tag => `<span class="model-tag">${tag}</span>`)
+                .join('');
+              modelTags.style.opacity = '1';
+            }, 150);
+          }
           
-          // Update description
-          modelDescription.textContent = info.description;
+          // Update description with animation
+          if (modelDescription) {
+            modelDescription.style.opacity = '0';
+            setTimeout(() => {
+              modelDescription.textContent = info.description;
+              modelDescription.style.opacity = '1';
+            }, 150);
+          }
           
           // Show the card with animation
           modelInfoCard.style.display = 'block';
           modelInfoCard.style.opacity = '0';
           modelInfoCard.style.transform = 'translateY(10px)';
           
-          // Animate in
-          setTimeout(() => {
+          requestAnimationFrame(() => {
             modelInfoCard.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
             modelInfoCard.style.opacity = '1';
             modelInfoCard.style.transform = 'translateY(0)';
-          }, 10);
+          });
         } else {
           // Hide or reset the card if no valid model
-          selectedModelName.textContent = 'No model selected';
-          modelTags.innerHTML = '';
-          modelDescription.textContent = 'Select a model to see details';
+          modelInfoCard.style.display = 'none';
         }
       }
       
-      // Set model button
-      setModelBtn.addEventListener('click', () => {
-        const modelName = modelSelect.value;
-        if (modelName) {
-          MODEL_NAME = modelName;
-          MODEL_NAME_DISPLAY = modelInfo[modelName] ? modelInfo[modelName].name : getModelDisplayName(modelName);
-          updateCurrentModelDisplay();
-          showNotification('Model set: ' + MODEL_NAME_DISPLAY);
-        } else {
-          showNotification('Please select a valid model');
-        }
-      });
+      // Set model button enhancement
+      if (setModelBtn) {
+        setModelBtn.addEventListener('click', () => {
+          const modelName = modelSelect.value;
+          if (modelName) {
+            MODEL_NAME = modelName;
+            MODEL_NAME_DISPLAY = modelInfo[modelName] ? modelInfo[modelName].name : getModelDisplayName(modelName);
+            updateCurrentModelDisplay();
+            showNotification('Model set: ' + MODEL_NAME_DISPLAY);
+            
+            // Add visual feedback
+            setModelBtn.classList.add('success');
+            setTimeout(() => {
+              setModelBtn.classList.remove('success');
+            }, 1000);
+          } else {
+            showNotification('Please select a valid model');
+          }
+        });
+      }
     }
     
     // Improved Chain of Draft word limit options UI
@@ -3884,23 +4307,15 @@ Separate your steps with periods. Write your final answer after the #### separat
       });
     }
     
-    // Settings slider handling - Updated for proper event handling
+    // Settings slider handling
     function setupSliders() {
       // Connect all sliders to their value displays
       document.querySelectorAll('input[type="range"]').forEach(slider => {
         const valueDisplay = document.getElementById(`${slider.id}Value`);
         if (valueDisplay) {
-          // Initial value set
-          valueDisplay.textContent = slider.value;
-          
-          // Update on input
           slider.addEventListener('input', () => {
             valueDisplay.textContent = slider.value;
           });
-          
-          // Force initial update
-          const event = new Event('input');
-          slider.dispatchEvent(event);
         }
       });
     }
@@ -3937,7 +4352,7 @@ Separate your steps with periods. Write your final answer after the #### separat
           }
         }
         
-        // Set parameter sliders - Make sure to properly set the maxTokens slider
+        // Set parameter sliders
         setSliderAndValue("temp", TEMPERATURE);
         setSliderAndValue("topP", TOP_P);
         setSliderAndValue("maxTokens", MAX_TOKENS);
@@ -3959,25 +4374,14 @@ Separate your steps with periods. Write your final answer after the #### separat
         // Deactivate all tab buttons
         tabButtons.forEach(btn => btn.classList.remove('active'));
         
-        // Find the parameters tab by default (usually more useful)
-        const parametersTab = document.querySelector('.tab-btn[data-tab="parametersTab"]');
-        if (parametersTab) {
-          parametersTab.classList.add('active');
-          const tabContent = document.getElementById('parametersTab');
-          if (tabContent) {
-            tabContent.classList.add('active');
-            tabContent.style.display = 'block';
-          }
-        } else {
-          // Fallback to first tab if parameters tab not found
-          if (tabButtons.length > 0) {
-            tabButtons[0].classList.add('active');
-            const firstTabId = tabButtons[0].getAttribute('data-tab');
-            const firstTabContent = document.getElementById(firstTabId);
-            if (firstTabContent) {
-              firstTabContent.classList.add('active');
-              firstTabContent.style.display = 'block';
-            }
+        // Activate only the first tab
+        if (tabButtons.length > 0) {
+          tabButtons[0].classList.add('active');
+          const firstTabId = tabButtons[0].getAttribute('data-tab');
+          const firstTabContent = document.getElementById(firstTabId);
+          if (firstTabContent) {
+            firstTabContent.classList.add('active');
+            firstTabContent.style.display = 'block';
           }
         }
         
@@ -3991,13 +4395,7 @@ Separate your steps with periods. Write your final answer after the #### separat
       const slider = document.getElementById(id);
       const valueDisplay = document.getElementById(`${id}Value`);
       
-      if (slider) {
-        slider.value = value;
-        // Make sure to trigger any input handlers
-        const event = new Event('input', { bubbles: true });
-        slider.dispatchEvent(event);
-      }
-      
+      if (slider) slider.value = value;
       if (valueDisplay) valueDisplay.textContent = value;
     }
 
@@ -4084,14 +4482,14 @@ Separate your steps with periods. Write your final answer after the #### separat
         try {
           const selfReflectionToggle = document.getElementById('selfReflectionToggle');
           if (selfReflectionToggle) {
-            SELF_REFLECTION_ENABLED = selfReflectionToggle.checked;
-            console.log("Self-reflection enabled:", SELF_REFLECTION_ENABLED);
+            SELF_CONSISTENCY_ENABLED = selfReflectionToggle.checked;
+            console.log("Self-reflection enabled:", SELF_CONSISTENCY_ENABLED);
           }
         } catch (selfErr) {
           console.error("Error getting self-reflection settings:", selfErr);
         }
         
-        // Save generation parameters safely - Improved error handling
+        // Save generation parameters safely
         try {
           const tempSlider = document.getElementById("temp");
           if (tempSlider) {
@@ -4106,15 +4504,7 @@ Separate your steps with periods. Write your final answer after the #### separat
           
           const maxTokensSlider = document.getElementById("maxTokens");
           if (maxTokensSlider) {
-            const newValue = parseInt(maxTokensSlider.value);
-            if (!isNaN(newValue) && newValue > 0) {
-              MAX_TOKENS = newValue;
-              console.log("Max tokens updated to:", MAX_TOKENS);
-            } else {
-              console.warn("Invalid max tokens value:", maxTokensSlider.value);
-            }
-          } else {
-            console.warn("Max tokens slider not found");
+            MAX_TOKENS = parseInt(maxTokensSlider.value);
           }
           
           console.log("Parameters saved:", {TEMPERATURE, TOP_P, MAX_TOKENS});
@@ -4144,7 +4534,7 @@ Separate your steps with periods. Write your final answer after the #### separat
             localStorage.setItem("temperature", TEMPERATURE.toString());
             localStorage.setItem("topP", TOP_P.toString());
             localStorage.setItem("maxTokens", MAX_TOKENS.toString());
-            localStorage.setItem("selfReflectionEnabled", SELF_REFLECTION_ENABLED.toString());
+            localStorage.setItem("selfConsistencyEnabled", SELF_CONSISTENCY_ENABLED.toString());
             
             // Save custom prompts
             localStorage.setItem("customPrompts", JSON.stringify(PROMPTS));
@@ -4273,7 +4663,7 @@ Separate your steps with periods. Write your final answer after the #### separat
             setupCODOptions();
             setupEnhancedReasoningOptions();
             setupSliders();
-            initSelfReflection();
+            initSelfConsistency();
             console.log("UI functionality setup complete");
           } catch (err) {
             console.error("Error setting up UI functionality:", err);
@@ -4311,25 +4701,17 @@ Separate your steps with periods. Write your final answer after the #### separat
         // Load custom prompts if available
         const storedPrompts = localStorage.getItem("customPrompts");
         if (storedPrompts) {
-          try {
-            const parsedPrompts = JSON.parse(storedPrompts);
-            // Merge with default prompts to ensure all properties exist
-            PROMPTS = { ...PROMPTS, ...parsedPrompts };
-          } catch (e) {
-            console.error("Error parsing stored prompts:", e);
-          }
+          const parsedPrompts = JSON.parse(storedPrompts);
+          // Merge with default prompts to ensure all properties exist
+          PROMPTS = { ...PROMPTS, ...parsedPrompts };
         }
         
         // Load enhanced prompts if available
         const storedEnhancedPrompts = localStorage.getItem("enhancedPrompts");
         if (storedEnhancedPrompts) {
-          try {
-            const parsedEnhancedPrompts = JSON.parse(storedEnhancedPrompts);
-            // Merge with default prompts to ensure all properties exist
-            ENHANCED_PROMPTS = { ...ENHANCED_PROMPTS, ...parsedEnhancedPrompts };
-          } catch (e) {
-            console.error("Error parsing enhanced prompts:", e);
-          }
+          const parsedEnhancedPrompts = JSON.parse(storedEnhancedPrompts);
+          // Merge with default prompts to ensure all properties exist
+          ENHANCED_PROMPTS = { ...ENHANCED_PROMPTS, ...parsedEnhancedPrompts };
         }
         
         const temp = localStorage.getItem("temperature");
@@ -4339,18 +4721,17 @@ Separate your steps with periods. Write your final answer after the #### separat
         if (topP) TOP_P = parseFloat(topP);
         
         const maxTokens = localStorage.getItem("maxTokens");
-        if (maxTokens) {
-          const parsedMaxTokens = parseInt(maxTokens);
-          if (!isNaN(parsedMaxTokens) && parsedMaxTokens > 0) {
-            MAX_TOKENS = parsedMaxTokens;
-            console.log("Loaded max tokens:", MAX_TOKENS);
-          }
+        if (maxTokens) MAX_TOKENS = parseInt(maxTokens);
+        
+        // Load self-consistency settings
+        const selfConsistencyEnabled = localStorage.getItem("selfConsistencyEnabled");
+        if (selfConsistencyEnabled !== null) {
+          SELF_CONSISTENCY_ENABLED = selfConsistencyEnabled === "true";
         }
         
-        // Load self-reflection settings
-        const selfReflectionEnabled = localStorage.getItem("selfReflectionEnabled");
-        if (selfReflectionEnabled !== null) {
-          SELF_REFLECTION_ENABLED = selfReflectionEnabled === "true";
+        const selfConsistencyPaths = localStorage.getItem("selfConsistencyPaths");
+        if (selfConsistencyPaths) {
+          SELF_CONSISTENCY_PATHS = parseInt(selfConsistencyPaths);
         }
       } catch (err) {
         console.error("Error loading settings:", err);
@@ -4611,35 +4992,6 @@ Separate your steps with periods. Write your final answer after the #### separat
       else if (bytes < 1048576) return (bytes / 1024).toFixed(1) + ' KB';
       else return (bytes / 1048576).toFixed(1) + ' MB';
     }
-
-    /***********************
-     * Helper Functions for File Processing
-     ***********************/
-    // Helper function to read file as base64
-    function readFileAsBase64(file) {
-      return new Promise((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onload = () => {
-          // Extract the base64 data part
-          const base64 = reader.result.split(',')[1];
-          resolve(base64);
-        };
-        reader.onerror = reject;
-        reader.readAsDataURL(file);
-      });
-    }
-    
-    // Helper function to read file as text
-    function readFileAsText(file) {
-      return new Promise((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onload = () => {
-          resolve(reader.result);
-        };
-        reader.onerror = reject;
-        reader.readAsText(file);
-      });
-    }
   </script>
   <form hidden="" method="post" name="feedback" data-netlify="true">
     <input type="hidden" name="form-name" value="feedback">
@@ -4656,4 +5008,5 @@ Separate your steps with periods. Write your final answer after the #### separat
 
 <script async="" id="netlify-rum-container" src="./LLM Playground (COT vs COD)_files/rum" data-netlify-rum-site-id="46b8ee21-754a-4a63-b741-fe88bac724f4" data-netlify-deploy-branch="main" data-netlify-deploy-context="production" data-netlify-cwv-token="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzaXRlX2lkIjoiNDZiOGVlMjEtNzU0YS00YTYzLWI3NDEtZmU4OGJhYzcyNGY0IiwiYWNjb3VudF9pZCI6IjY3YzU0MzUzYzc2MjdjOTUxZDZmNTU0MSIsImRlcGxveV9pZCI6IjY3Y2JjOGE0NzRlY2E1MDAwODQ5MWVhYiIsImlzc3VlciI6Im5mc2VydmVyIn0.eeKx8JPS1uEj-YKOwtWMAEBFgcCAjTWkB8RLzmCfMmI"></script>
 
-</body></html>
+</body>
+</html>
