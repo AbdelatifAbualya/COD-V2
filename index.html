@@ -1733,18 +1733,18 @@
     #openFeedbackBtn {
       position: fixed;
       bottom: 20px;
-      right: 20px;  /* Changed from left to right */
+      left: 300px; /* Position it just to the right of the sidebar */
       background-color: var(--accent-primary);
       color: white;
       border: none;
-      padding: 12px 20px;
-      border-radius: 25px;
+      padding: 10px 16px;
+      border-radius: 8px;
       cursor: pointer;
       font-weight: 500;
-      font-size: 0.95rem;
+      font-size: 0.9rem;
       display: flex;
       align-items: center;
-      gap: 8px;
+      gap: 6px;
       box-shadow: var(--shadow-md);
       transition: all var(--transition-fast);
       z-index: 1000;
@@ -2030,6 +2030,177 @@
       background-color: var(--bg-hover);
       transform: translateY(-1px);
     }
+
+    /* Enhanced Reasoning Settings */
+    .reasoning-method-container {
+      background: var(--bg-tertiary);
+      border-radius: var(--radius-md);
+      padding: 20px;
+      margin-bottom: 25px;
+    }
+
+    .reasoning-option {
+      background: var(--bg-component);
+      border: 1px solid var(--border-medium);
+      border-radius: var(--radius-sm);
+      padding: 16px;
+      margin-bottom: 12px;
+      cursor: pointer;
+      transition: all var(--transition-fast);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .reasoning-option:hover {
+      background: var(--bg-hover);
+      transform: translateY(-1px);
+      border-color: var(--accent-primary);
+    }
+
+    .reasoning-option.selected {
+      background: rgba(86, 134, 245, 0.1);
+      border-color: var(--accent-primary);
+    }
+
+    .reasoning-option input[type="radio"] {
+      width: 18px;
+      height: 18px;
+      margin: 0;
+    }
+
+    .reasoning-option-content {
+      flex: 1;
+    }
+
+    .reasoning-option-title {
+      font-weight: 500;
+      color: var(--text-primary);
+      margin-bottom: 4px;
+      font-size: 0.95rem;
+    }
+
+    .reasoning-option-description {
+      color: var(--text-secondary);
+      font-size: 0.85rem;
+    }
+
+    .reasoning-help-icon {
+      color: var(--text-tertiary);
+      font-size: 1.1rem;
+      padding: 4px;
+      border-radius: 50%;
+      transition: all var(--transition-fast);
+    }
+
+    .reasoning-help-icon:hover {
+      color: var(--accent-primary);
+      background: var(--bg-hover);
+    }
+
+    /* Advanced Options Enhancement */
+    .advanced-options-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin: 25px 0 15px;
+      padding-bottom: 10px;
+      border-bottom: 2px solid var(--border-medium);
+    }
+
+    .advanced-options-title {
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: var(--text-primary);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .toggle-switch {
+      position: relative;
+      width: 46px;
+      height: 24px;
+    }
+
+    .toggle-switch input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+
+    .toggle-slider {
+      position: absolute;
+      cursor: pointer;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: var(--bg-component);
+      transition: .4s;
+      border-radius: 24px;
+      border: 1px solid var(--border-medium);
+    }
+
+    .toggle-slider:before {
+      position: absolute;
+      content: "";
+      height: 18px;
+      width: 18px;
+      left: 3px;
+      bottom: 2px;
+      background-color: var(--text-secondary);
+      transition: .4s;
+      border-radius: 50%;
+    }
+
+    input:checked + .toggle-slider {
+      background-color: var(--accent-primary);
+    }
+
+    input:checked + .toggle-slider:before {
+      transform: translateX(21px);
+      background-color: white;
+    }
+
+    /* Problem Analyzer Enhancement */
+    .problem-analyzer {
+      background: var(--bg-component);
+      border-radius: var(--radius-md);
+      padding: 20px;
+      margin-top: 15px;
+    }
+
+    .analyzer-title {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--accent-primary);
+      font-weight: 500;
+      margin-bottom: 12px;
+    }
+
+    .analyzer-icon {
+      background: rgba(86, 134, 245, 0.1);
+      padding: 6px;
+      border-radius: 8px;
+    }
+
+    .analyzer-help {
+      color: var(--text-secondary);
+      font-size: 0.9rem;
+      line-height: 1.5;
+    }
+
+    .analyzer-help ul {
+      margin-top: 10px;
+      padding-left: 20px;
+    }
+
+    .analyzer-help li {
+      margin-bottom: 6px;
+      color: var(--text-secondary);
+    }
   </style>
 </head>
 <body>
@@ -2119,142 +2290,87 @@
     </div>
     
     <!-- Reasoning Tab -->
-    <div id="reasoningTab" class="tab-content" style="display: none;">
+    <div id="reasoningTab" class="tab-content">
       <div class="settings-section-header">Reasoning Method</div>
-      <div class="feature-section">
-        <div class="radio-options">
-          <div class="radio-option">
-            <input type="radio" id="standardReasoning" name="reasoningMethod" value="standard">
-            <label for="standardReasoning">Standard (No special prompt)</label>
-            <div class="tooltip">?
-              <span class="tooltiptext">Default model behavior with no special reasoning instructions.</span>
-            </div>
-          </div>
-          
-          <div class="radio-option">
-            <input type="radio" id="cotReasoning" name="reasoningMethod" value="cot">
-            <label for="cotReasoning">Chain of Thought (CoT)</label>
-            <div class="tooltip">?
-              <span class="tooltiptext">Instructs the model to think step-by-step to solve problems. Improves reasoning but uses more tokens.</span>
-            </div>
-          </div>
-          
-          <div class="radio-option">
-            <input type="radio" id="codReasoning" name="reasoningMethod" value="cod" checked="">
-            <label for="codReasoning">Chain of Draft (CoD)</label>
-            <div class="tooltip">?
-              <span class="tooltiptext">Uses minimal words per step (research paper approach) to reduce token usage while maintaining reasoning quality.</span>
-            </div>
-          </div>
-        </div>
-        
-        <!-- COD Word Limit options -->
-        <div id="codOptions" class="cod-options" style="display: none;">
-        <div class="option-label">Word limit per step:</div>
-        <div class="cod-word-limit-options">
-          <div class="cod-word-limit-option " data-value="5">
-            <span class="cod-word-limit-value">5 words</span>
-            <span class="cod-word-limit-desc">Original paper recommendation</span>
-          </div>
-          <div class="cod-word-limit-option " data-value="10">
-            <span class="cod-word-limit-value">10 words</span>
-            <span class="cod-word-limit-desc">Balanced brevity and clarity</span>
-          </div>
-          <div class="cod-word-limit-option " data-value="15">
-            <span class="cod-word-limit-value">15 words</span>
-            <span class="cod-word-limit-desc">More descriptive steps</span>
-          </div>
-          <div class="cod-word-limit-option " data-value="17">
-            <span class="cod-word-limit-value">17 words</span>
-            <span class="cod-word-limit-desc">Better for complex reasoning</span>
-          </div>
-          <div class="cod-word-limit-option selected" data-value="20">
-            <span class="cod-word-limit-value">20 words</span>
-            <span class="cod-word-limit-desc">Detailed steps for math &amp; logic</span>
-          </div>
-        </div>
-        
-        <div class="cod-examples">
-          <div class="cod-examples-header">Chain of Draft Example</div>
-          <div class="cod-example-item">
-            <div class="cod-example-question">Q: If a fabric store received 45 yards of cotton and used 2/9 of it, how many yards remain?</div>
-            <div class="cod-example-answer">A: Total: 45 yards. Used: 2/9 × 45 = 10 yards. Remaining: 45 - 10 = 35 yards. #### 35 yards</div>
-          </div>
-        </div>
-      </div>
-      </div>
       
-      <!-- NEW: Enhanced Reasoning Controls -->
+      <div class="reasoning-method-container">
+        <div class="reasoning-option" onclick="document.getElementById('standardReasoning').click()">
+          <input type="radio" id="standardReasoning" name="reasoningMethod" value="standard">
+          <div class="reasoning-option-content">
+            <div class="reasoning-option-title">Standard (No special prompt)</div>
+            <div class="reasoning-option-description">Default model behavior with no special reasoning instructions.</div>
+          </div>
+          <span class="reasoning-help-icon" title="Default model behavior with no special reasoning instructions.">ⓘ</span>
+        </div>
+        
+        <div class="reasoning-option" onclick="document.getElementById('cotReasoning').click()">
+          <input type="radio" id="cotReasoning" name="reasoningMethod" value="cot">
+          <div class="reasoning-option-content">
+            <div class="reasoning-option-title">Chain of Thought (CoT)</div>
+            <div class="reasoning-option-description">Step-by-step reasoning with detailed explanations. Best for complex problems.</div>
+          </div>
+          <span class="reasoning-help-icon" title="Instructs the model to think step-by-step to solve problems. Improves reasoning but uses more tokens.">ⓘ</span>
+        </div>
+        
+        <div class="reasoning-option" onclick="document.getElementById('codReasoning').click()">
+          <input type="radio" id="codReasoning" name="reasoningMethod" value="cod" checked>
+          <div class="reasoning-option-content">
+            <div class="reasoning-option-title">Chain of Draft (CoD)</div>
+            <div class="reasoning-option-description">Concise step-by-step reasoning with minimal words. Efficient token usage.</div>
+          </div>
+          <span class="reasoning-help-icon" title="Uses minimal words per step to reduce token usage while maintaining reasoning quality.">ⓘ</span>
+        </div>
+      </div>
+
       <div class="advanced-options-header">
-        Advanced Reasoning Options
+        <div class="advanced-options-title">
+          <span>Advanced Reasoning Options</span>
+          <span class="reasoning-help-icon" title="Configure additional reasoning capabilities">ⓘ</span>
+        </div>
         <label class="toggle-switch">
-          <input type="checkbox" id="enhancedReasoningToggle" checked="">
+          <input type="checkbox" id="enhancedReasoningToggle" checked>
           <span class="toggle-slider"></span>
         </label>
       </div>
-      
-      <div id="enhancedReasoningOptions" class="enhanced-reasoning" style="display: block;">
-        <div class="enhanced-reasoning-option">
-          <input type="radio" id="adaptiveReasoning" name="reasoningEnhancement" value="adaptive" checked="">
-          <label for="adaptiveReasoning">Adaptive Reasoning</label>
-          <span class="auto-detection-badge"><span class="indicator"></span>Auto</span>
+
+      <div id="enhancedReasoningOptions" class="enhanced-reasoning">
+        <div class="reasoning-option" onclick="document.getElementById('adaptiveReasoning').click()">
+          <input type="radio" id="adaptiveReasoning" name="reasoningEnhancement" value="adaptive" checked>
+          <div class="reasoning-option-content">
+            <div class="reasoning-option-title">
+              Adaptive Reasoning
+              <span class="auto-detection-badge"><span class="indicator"></span>Auto</span>
+            </div>
+            <div class="reasoning-option-description">
+              Automatically adjusts reasoning depth based on problem complexity.
+            </div>
+          </div>
         </div>
-        <div class="option-description">
-          Automatically increases reasoning depth for complex problems (math, logic, multi-step reasoning).
+
+        <div class="reasoning-option" onclick="document.getElementById('standardReasoning').click()">
+          <input type="radio" id="fixedReasoning" name="reasoningEnhancement" value="standard">
+          <div class="reasoning-option-content">
+            <div class="reasoning-option-title">Fixed Reasoning Depth</div>
+            <div class="reasoning-option-description">
+              Uses the same reasoning approach regardless of complexity.
+            </div>
+          </div>
         </div>
-        
-        <div class="enhanced-reasoning-option">
-          <input type="radio" id="standardReasoning" name="reasoningEnhancement" value="standard">
-          <label for="standardReasoning">Fixed Reasoning Depth</label>
-        </div>
-        <div class="option-description">
-          Uses the same reasoning approach for all problems regardless of complexity.
-        </div>
-        
+
         <div class="problem-analyzer">
           <div class="analyzer-title">
-            <span class="analyzer-icon">🔍</span> Problem Complexity Detection
+            <span class="analyzer-icon">🔍</span>
+            Problem Complexity Detection
           </div>
           <div class="analyzer-help">
-            When adaptive reasoning is enabled, the system will automatically analyze your questions to detect:
-            <ul style="margin-top: 5px; padding-left: 20px; font-size: 0.85rem;">
+            When adaptive reasoning is enabled, the system automatically analyzes:
+            <ul>
               <li>Mathematical expressions and calculations</li>
               <li>Multi-step reasoning requirements</li>
               <li>Logical dependencies and constraints</li>
               <li>Complex or abstract concepts</li>
             </ul>
             For complex problems, the model will use more detailed reasoning steps even with CoD.
-          </div>
-        </div>
-      </div>
-
-      <!-- Replace Self-Consistency Section with Self-Reflection -->
-      <div class="advanced-options-header">
-        Self-Reflection for Chain of Draft
-        <label class="toggle-switch">
-          <input type="checkbox" id="selfReflectionToggle" checked>
-          <span class="toggle-slider"></span>
-        </label>
-      </div>
-
-      <div id="selfReflectionInfo" class="enhanced-reasoning" style="display: block;">
-        <div class="option-description">
-          Adds a reflection step after reasoning to help the model verify its own work and catch mistakes.
-        </div>
-        
-        <div class="problem-analyzer">
-          <div class="analyzer-title">
-            <span class="analyzer-icon">🔍</span> How Self-Reflection Works
-          </div>
-          <div class="analyzer-help">
-            When using Chain of Draft with self-reflection:
-            <ul style="margin-top: 5px; padding-left: 20px; font-size: 0.85rem;">
-              <li>The model reasons step-by-step as usual</li>
-              <li>Before concluding, it adds a reflection step to check for errors</li>
-              <li>This helps identify calculation mistakes, misunderstandings, or logic errors</li>
-              <li>The reflection is highlighted in the UI for easy identification</li>
-            </ul>
-            This approach improves accuracy with a single API call, unlike self-consistency which required multiple calls.
           </div>
         </div>
       </div>
