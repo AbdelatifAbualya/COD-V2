@@ -3,6 +3,13 @@ const fetch = require('node-fetch');
 const { AbortController } = require('abort-controller');
 
 exports.handler = async function(event, context) {
+  // Log the incoming request details
+  console.log('Incoming request:', {
+    method: event.httpMethod,
+    headers: event.headers,
+    body: event.body ? JSON.parse(event.body) : null
+  });
+
   // Set CORS headers for preflight requests
   if (event.httpMethod === 'OPTIONS') {
     return {
@@ -30,6 +37,71 @@ exports.handler = async function(event, context) {
   }
 
   try {
+    // Validate request body
+    if (!event.body) {
+      console.error('No request body provided');
+      return {
+        statusCode: 400,
+        body: JSON.stringify({ 
+          error: 'Bad Request',
+          message: 'Request body is required'
+        }),
+        headers: { 
+          'Content-Type': 'application/json',
+          'Access-Control-Allow-Origin': '*'
+        }
+      };
+    }
+
+    let requestBody;
+    try {
+      requestBody = JSON.parse(event.body);
+    } catch (parseError) {
+      console.error('Failed to parse request body:', parseError);
+      return {
+        statusCode: 400,
+        body: JSON.stringify({ 
+          error: 'Bad Request',
+          message: 'Invalid JSON in request body'
+        }),
+        headers: { 
+          'Content-Type': 'application/json',
+          'Access-Control-Allow-Origin': '*'
+        }
+      };
+    }
+
+    // Validate required fields
+    if (!requestBody.model) {
+      console.error('No model specified in request');
+      return {
+        statusCode: 400,
+        body: JSON.stringify({ 
+          error: 'Bad Request',
+          message: 'Model name is required'
+        }),
+        headers: { 
+          'Content-Type': 'application/json',
+          'Access-Control-Allow-Origin': '*'
+        }
+      };
+    }
+
+    if (!requestBody.messages || !Array.isArray(requestBody.messages) || requestBody.messages.length === 0) {
+      console.error('Invalid or empty messages array');
+      return {
+        statusCode: 400,
+        body: JSON.stringify({ 
+          error: 'Bad Request',
+          message: 'Messages array is required and must not be empty'
+        }),
+        headers: { 
+          'Content-Type': 'application/json',
+          'Access-Control-Allow-Origin': '*'
+        }
+      };
+    }
+
     // Check if API keys are set
     const groqApiKey = process.env.QROQ_API_KEY || process.env.GROQ_API_KEY || process.env.API_KEY;
     const toolhouseApiKey = process.env.TOOLHOUSE_API_KEY;
@@ -49,8 +121,14 @@ exports.handler = async function(event, context) {
       };
     }
 
+    // Log the validated request
+    console.log('Validated request:', {
+      model: requestBody.model,
+      messageCount: requestBody.messages.length,
+      enableWebSearch: requestBody.enableWebSearch
+    });
+
     // Parse the request body
-    const requestBody = JSON.parse(event.body);
     const modelName = requestBody.model;
     console.log('Request received for model:', modelName);
     
@@ -339,7 +417,7 @@ async function handleToolhouseWebSearch(groqApiKey, toolhouseApiKey, requestBody
           messages: messageHistory,
           temperature: requestBody.temperature || 0.7,
           top_p: requestBody.top_p || 0.9,
-          max_tokens: requestBody.max_tokens || 12800  // Increased from 1024 to 12800
+          max_tokens: requestBody.max_tokens || 128000  // Increased to 128K tokens
         })
       });
       
@@ -388,76 +466,64 @@ async function handleToolhouseWebSearch(groqApiKey, toolhouseApiKey, requestBody
  * Process API responses and handle errors
  */
 async function processApiResponse(response, modelName) {
-  if (!response) {
-    throw new Error('Failed to get response from API after multiple attempts');
-  }
+  console.log(`Processing API response for model ${modelName}`);
+  console.log('Response status:', response.status);
+  
+  const responseHeaders = {
+    'Content-Type': 'application/json',
+    'Access-Control-Allow-Origin': '*'
+  };
 
-  // Handle response errors
-  if (!response.ok) {
-    const errorData = await response.text();
-    console.error(`API error: ${response.status}`, errorData);
+  try {
+    const responseText = await response.text();
+    console.log('Raw response:', responseText);
     
-    let errorMessage;
+    let responseData;
     try {
-      // Try to parse error as JSON
-      const parsedError = JSON.parse(errorData);
-      errorMessage = parsedError.error?.message || 'Unknown API error';
-    } catch {
-      // If parsing fails, use the raw text
-      errorMessage = errorData || `Error ${response.status}`;
+      responseData = JSON.parse(responseText);
+    } catch (parseError) {
+      console.error('Failed to parse API response:', parseError);
+      return {
+        statusCode: 500,
+        body: JSON.stringify({
+          error: 'Invalid API Response',
+          message: 'The API returned an invalid JSON response',
+          details: responseText
+        }),
+        headers: responseHeaders
+      };
     }
-    
-    // Special error message for 401 errors
-    if (response.status === 401) {
-      errorMessage = "Authentication failed. Please check your API keys in Netlify environment variables.";
+
+    if (!response.ok) {
+      console.error('API error response:', responseData);
+      return {
+        statusCode: response.status,
+        body: JSON.stringify({
+          error: responseData.error || 'API Error',
+          message: responseData.message || 'An error occurred while processing your request',
+          details: responseData
+        }),
+        headers: responseHeaders
+      };
     }
-    
-    // Special handling for 400 errors related to images
-    const isVisionModel = modelName && (
-      modelName.includes('vision') || 
-      modelName.includes('llava') || 
-      modelName.includes('claude-3') ||
-      modelName.includes('gemini')
-    );
-    
-    if (response.status === 400 && isVisionModel) {
-      errorMessage = `${errorMessage}\n\nThis may be because:\n1. The selected model doesn't support the image format\n2. The image is too large\n3. The model doesn't fully support multimodal inputs`;
-    }
-    
+
     return {
-      statusCode: response.status,
-      body: JSON.stringify({ 
-        error: `API error: ${response.status}`,
-        message: errorMessage,
-        details: {
-          possible_fixes: [
-            "Verify the API keys are correct in Netlify",
-            "Check that the model name is valid",
-            "Ensure your API subscriptions are active",
-            "For vision models, try a different image format or size"
-          ]
-        }
+      statusCode: 200,
+      body: responseText,
+      headers: responseHeaders
+    };
+  } catch (error) {
+    console.error('Error processing API response:', error);
+    return {
+      statusCode: 500,
+      body: JSON.stringify({
+        error: 'Response Processing Error',
+        message: 'Failed to process the API response',
+        details: error.message
       }),
-      headers: { 
-        'Content-Type': 'application/json',
-        'Access-Control-Allow-Origin': '*'
-      }
+      headers: responseHeaders
     };
   }
-
-  // Parse the response
-  const data = await response.json();
-  console.log('Received successful response from API');
-
-  // Return the response
-  return {
-    statusCode: 200,
-    body: JSON.stringify(data),
-    headers: { 
-      'Content-Type': 'application/json',
-      'Access-Control-Allow-Origin': '*'
-    }
-  };
 }
 
 /**
