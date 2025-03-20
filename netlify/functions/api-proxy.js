@@ -130,6 +130,11 @@ async function handleStandardGroqRequest(apiKey, requestBody) {
   const apiEndpoint = 'https://api.groq.com/openai/v1/chat/completions';
   console.log('Using standard Groq API endpoint');
   
+  // Create a clean copy of the request body without enableWebSearch
+  const cleanRequestBody = { ...requestBody };
+  delete cleanRequestBody.enableWebSearch;
+  console.log('Removed enableWebSearch field from request to Groq API');
+  
   // Implement retry logic
   let retries = 3;
   let response;
@@ -141,7 +146,7 @@ async function handleStandardGroqRequest(apiKey, requestBody) {
       const timeoutId = setTimeout(() => controller.abort(), 60000); // 60-second timeout
       
       // Log request size for debugging
-      const requestSize = JSON.stringify(requestBody).length;
+      const requestSize = JSON.stringify(cleanRequestBody).length;
       console.log(`Request size: ${requestSize} bytes`);
       
       // Make a request to the Groq API
@@ -152,7 +157,7 @@ async function handleStandardGroqRequest(apiKey, requestBody) {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${apiKey}`
         },
-        body: JSON.stringify(requestBody),
+        body: JSON.stringify(cleanRequestBody),
         signal: controller.signal
       });
       
