@@ -283,9 +283,9 @@
     
     .chat-input textarea {
       flex: 1;
-      min-height: 45px;
+      min-height: 24px;
       max-height: 200px;
-      padding: 12px;
+      padding: 8px 12px;
       background-color: var(--bg-component);
       border: 1px solid var(--border-medium);
       border-radius: var(--radius-sm);
@@ -324,6 +324,7 @@
       cursor: pointer;
       transition: all var(--transition-fast);
       border: none;
+      font-weight: 500;
     }
     
     #sendBtn:hover {
@@ -570,6 +571,22 @@
       overflow: hidden;
       text-overflow: ellipsis;
       transition: opacity var(--transition-fast), transform var(--transition-fast);
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    
+    .web-search-indicator {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      color: var(--accent-primary);
+      font-size: 0.7rem;
+    }
+    
+    .web-search-indicator svg {
+      width: 12px;
+      height: 12px;
     }
     
     .message:hover .word-count-badge {
@@ -2254,15 +2271,15 @@
                 <path d="M21.44 11.05l-9.19 9.19a6 6 0 01-8.49-8.49l9.19-9.19a4 4 0 015.66 5.66l-9.2 9.19a2 2 0 01-2.83-2.83l8.49-8.48"/>
               </svg>
             </label>
-            <button id="webSearchBtn" class="action-button" type="button" onclick="toggleWebSearch()" title="Toggle web search">
+            <button id="webSearchBtn" class="action-button" type="button" title="Toggle web search">
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <circle cx="11" cy="11" r="8"/>
                 <line x1="21" y1="21" x2="16.65" y2="16.65"/>
               </svg>
             </button>
           </div>
-          <input type="file" id="fileInput" class="file-input" multiple>
         </div>
+        <input type="file" id="fileInput" class="file-input" multiple>
         <div id="attachedFiles" class="attached-files" style="display: none;"></div>
       </div>
     </div>
@@ -2407,8 +2424,8 @@
         </div>
         
         <div class="enhanced-reasoning-option">
-          <input type="radio" id="standardReasoning" name="reasoningEnhancement" value="standard">
-          <label for="standardReasoning">Fixed Reasoning Depth</label>
+          <input type="radio" id="standardReasoningEnhancement" name="reasoningEnhancement" value="standard">
+          <label for="standardReasoningEnhancement">Fixed Reasoning Depth</label>
         </div>
         <div class="option-description">
           Uses the same reasoning approach for all problems regardless of complexity.
@@ -2558,6 +2575,7 @@
      ***********************/
     let MODEL_NAME = "";
     let MODEL_NAME_DISPLAY = "";
+    let enableWebSearch = false; // Add web search global variable
     
     // Server endpoint (Netlify serverless function)
     const API_PROXY_URL = "/.netlify/functions/api-proxy";
@@ -3553,6 +3571,20 @@ A: First segment: The car travels at 60 mph for 2 hours, so the distance covered
               `;
             }
             
+            // Add web search indicator if used
+            if (msg.webSearchUsed) {
+              const webSearchIndicator = document.createElement("div");
+              webSearchIndicator.className = "web-search-indicator";
+              webSearchIndicator.innerHTML = `
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <circle cx="11" cy="11" r="8"/>
+                  <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+                </svg>
+                Web search enabled
+              `;
+              wordCountBadge.appendChild(webSearchIndicator);
+            }
+            
             // If this is a CoD message, add token savings estimate
             if (msg.reasoningMethod && msg.reasoningMethod.startsWith("COD") && thread.messages.length > 1) {
               // Find a similar CoT message (if available) to compare token savings
@@ -3757,13 +3789,16 @@ A: First segment: The car travels at 60 mph for 2 hours, so the distance covered
      * Message Sending
      ***********************/
     async function sendMessage(message) {
+      // Get web search state
+      const webSearchEnabled = localStorage.getItem('webSearchEnabled') === 'true';
+      
       // NEW: Analyze problem complexity if enhanced reasoning is enabled
       if (ENHANCED_REASONING_ENABLED && REASONING_ENHANCEMENT === "adaptive") {
         analyzeProblemComplexity(message);
       }
       
       // Check if there are files to be included
-      const filesToSend = [...attachedFiles]; // Make a copy of the current files
+      const filesToSend = [...attachedFiles];
       
       // Add message to thread with files
       addMessageToCurrentThread(message, "user", false, filesToSend);
@@ -3786,275 +3821,143 @@ A: First segment: The car travels at 60 mph for 2 hours, so the distance covered
       // Parse message for word count requirements
       const wordCountRequest = parseWordCountRequest(message);
       
-      // FIXED: Use proper self-reflection instead of self-consistency for CoD
-      if (SELF_CONSISTENCY_ENABLED && REASONING_METHOD === "cod") {
-        // Add message showing we're thinking with self-reflection
-        addMessageToCurrentThread("Thinking with self-reflection...", "bot", true);
-        const thread = threads.find(t => t.id === currentThreadId);
-        const placeholderIndex = thread.messages.length - 1;
+      // Add message showing we're thinking
+      addMessageToCurrentThread("Bot is typing...", "bot", true);
+      const thread = threads.find(t => t.id === currentThreadId);
+      const placeholderIndex = thread.messages.length - 1;
 
-        // Build messages array with current settings and word count request
-        let messagesForApi = buildMessagesForChat(wordCountRequest);
-        
-        // Add self-reflection instruction to the prompt for CoD
-        if (messagesForApi.length > 0 && messagesForApi[0].role === "system") {
-          // Modify the system message to include self-reflection instruction
-          const originalPrompt = messagesForApi[0].content;
-          
-          // Add instruction before the "Examples:" section or at the end
-          const examplesIndex = originalPrompt.indexOf("Examples:");
-          
-          const selfReflectionInstruction = `\n\nIMPORTANT: Before concluding, add a self-reflection step to verify your work. Look for calculation errors, check your logic, and ensure you've interpreted the problem correctly. This reflection step should be labeled as 'Reflection:' or 'Checking work:' and will be highlighted differently in the UI.`;
-          
-          if (examplesIndex !== -1) {
-            // Insert before examples
-            messagesForApi[0].content = 
-              originalPrompt.substring(0, examplesIndex) + 
-              selfReflectionInstruction +
-              "\n\n" +
-              originalPrompt.substring(examplesIndex);
-          } else {
-            // Append to the end
-            messagesForApi[0].content = originalPrompt + selfReflectionInstruction;
-          }
-          
-          console.log("Added self-reflection instruction to CoD prompt");
-        }
+      // Build messages array with current settings and word count request
+      const messagesForApi = buildMessagesForChat(wordCountRequest);
 
-        // Create payload
-        const payload = {
-          model: MODEL_NAME,
-          max_tokens: MAX_TOKENS,
-          top_p: TOP_P,
-          temperature: TEMPERATURE,
-          messages: messagesForApi
-        };
-        
-        try {
-          // Add timestamp to URL to prevent caching
-          const timestamp = new Date().getTime();
-          const cacheBuster = `?t=${timestamp}`;
-          
-          // Set timeout for fetch to handle long-running requests
-          const controller = new AbortController();
-          const timeoutId = setTimeout(() => controller.abort(), 120000); // 2 minute timeout
-          
-          const response = await fetch(`${API_PROXY_URL}${cacheBuster}`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(payload),
-            signal: controller.signal
-          });
-          
-          clearTimeout(timeoutId); // Clear the timeout
-          
-          if (!response.ok) {
-            throw new Error(`HTTP error! Status: ${response.status}`);
-          }
-          
-          const data = await response.json();
-          const botReply = data.choices && data.choices[0] && data.choices[0].message && data.choices[0].message.content;
-          
-          if (botReply) {
-            const trimmedReply = botReply.trim();
-            
-            // Create response metadata
-            let reasoningInfo = REASONING_METHOD.toUpperCase();
-            if (REASONING_METHOD === "cod") {
-              reasoningInfo += `-${COD_WORD_LIMIT}`;
-              reasoningInfo += "-REFLECTION"; // Mark that this used the reflection approach
-            }
-            
-            // Process bot message to separate thinking and answer parts
-            const processed = processBotMessage(trimmedReply, REASONING_METHOD);
-            
-            thread.messages[placeholderIndex] = {
-              content: trimmedReply,
-              sender: "bot",
-              isPlaceholder: false,
-              timestamp: new Date(),
-              wordCount: (processed.thinkingWordCount || 0) + (processed.answerWordCount || 0),
-              reasoningMethod: reasoningInfo,
-              thinking: processed.thinking,
-              answer: processed.answer,
-              thinkingWordCount: processed.thinkingWordCount || 0,
-              answerWordCount: processed.answerWordCount || 0
-            };
-          } else {
-            thread.messages[placeholderIndex] = {
-              content: "No valid response received. Check model name and API key.",
-              sender: "bot",
-              isPlaceholder: false,
-              timestamp: new Date(),
-              wordCount: 0,
-              reasoningMethod: REASONING_METHOD.toUpperCase(),
-              thinking: null,
-              answer: null,
-              thinkingWordCount: 0,
-              answerWordCount: 0
-            };
-          }
-        } catch (error) {
-          console.error("Error communicating with API:", error);
-          
-          // Provide more detailed error message
-          let errorMessage = "Error communicating with API: " + error.message;
-          
-          // Add suggestions based on error type
-          if (error.message.includes("Failed to fetch")) {
-            errorMessage += "\n\nPossible solutions:\n1. Make sure your API key is set correctly in Netlify\n2. Check that your model name is valid\n3. Verify your internet connection";
-          } else if (error.message.includes("aborted")) {
-            errorMessage += "\n\nThe request timed out after 2 minutes. Try again or use a different model.";
-          } else if (error.message.includes("502")) {
-            errorMessage += "\n\nThe Qroq API server returned a 502 Bad Gateway error. This usually indicates a temporary server issue. Please try again in a few minutes.";
-          }
-          
-          thread.messages[placeholderIndex] = {
-            content: errorMessage,
-            sender: "bot",
-            isPlaceholder: false,
-            timestamp: new Date(),
-            wordCount: 0,
-            reasoningMethod: REASONING_METHOD.toUpperCase(),
-            thinking: null,
-            answer: null,
-            thinkingWordCount: 0,
-            answerWordCount: 0
-          };
-        }
-        renderCurrentThreadMessages();
-      } else if (SELF_CONSISTENCY_ENABLED && REASONING_METHOD === "cod") {
-        // Original self-consistency code path with multiple reasoning paths
-        // ... existing code ...
-      } else {
-        // Standard message sending (existing code)
-        addMessageToCurrentThread("Bot is typing...", "bot", true);
-        const thread = threads.find(t => t.id === currentThreadId);
-        const placeholderIndex = thread.messages.length - 1;
-
-        // Build messages array with current settings and word count request
-        const messagesForApi = buildMessagesForChat(wordCountRequest);
-
-        // Create payload
-        const payload = {
-          model: MODEL_NAME,
-          max_tokens: MAX_TOKENS,
-          top_p: TOP_P,
-          temperature: TEMPERATURE,
-          messages: messagesForApi
-        };
-        
-        console.log(`Sending request with ${REASONING_METHOD} reasoning ${REASONING_METHOD === "cod" ? `(word limit: ${COD_WORD_LIMIT})` : ""}`);
-        if (wordCountRequest) {
-          console.log(`Final answer word limit requested: ${wordCountRequest} words`);
-        }
-        console.log(`Parameters: temp=${TEMPERATURE}, top_p=${TOP_P}`);
-
-        try {
-          // Add timestamp to URL to prevent caching
-          const timestamp = new Date().getTime();
-          const cacheBuster = `?t=${timestamp}`;
-          
-          // Set timeout for fetch to handle long-running requests
-          const controller = new AbortController();
-          const timeoutId = setTimeout(() => controller.abort(), 120000); // 2 minute timeout
-          
-          const response = await fetch(`${API_PROXY_URL}${cacheBuster}`, {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json"
-            },
-            body: JSON.stringify(payload),
-            signal: controller.signal
-          });
-          
-          clearTimeout(timeoutId); // Clear the timeout
-          
-          if (!response.ok) {
-            console.error("API response error:", response.status, response.statusText);
-            throw new Error(`HTTP error! Status: ${response.status}`);
-          }
-          
-          const data = await response.json();
-          const botReply = data.choices &&
-                           data.choices[0] &&
-                           data.choices[0].message &&
-                           data.choices[0].message.content;
-          if (botReply) {
-            const trimmedReply = botReply.trim();
-            
-            // Create response metadata
-            let reasoningInfo = REASONING_METHOD.toUpperCase();
-            if (REASONING_METHOD === "cod") {
-              reasoningInfo += `-${COD_WORD_LIMIT}`;
-            }
-            
-            // Add enhanced reasoning info if used
-            if (ENHANCED_REASONING_ENABLED && 
-                REASONING_ENHANCEMENT === "adaptive" && 
-                PROBLEM_COMPLEXITY.complexity === "complex") {
-              reasoningInfo += "-ENHANCED";
-            }
-            
-            // Process bot message to separate thinking and answer parts
-            const processed = processBotMessage(trimmedReply, REASONING_METHOD);
-            
-            thread.messages[placeholderIndex] = {
-              content: trimmedReply,
-              sender: "bot",
-              isPlaceholder: false,
-              timestamp: new Date(),
-              wordCount: (processed.thinkingWordCount || 0) + (processed.answerWordCount || 0),
-              reasoningMethod: reasoningInfo,
-              thinking: processed.thinking,
-              answer: processed.answer,
-              thinkingWordCount: processed.thinkingWordCount || 0,
-              answerWordCount: processed.answerWordCount || 0
-            };
-          } else {
-            thread.messages[placeholderIndex] = {
-              content: "No valid response received. Check model name and API key.",
-              sender: "bot",
-              isPlaceholder: false,
-              timestamp: new Date(),
-              wordCount: 0,
-              reasoningMethod: REASONING_METHOD.toUpperCase(),
-              thinking: null,
-              answer: null,
-              thinkingWordCount: 0,
-              answerWordCount: 0
-            };
-          }
-        } catch (error) {
-          console.error("Error communicating with API:", error);
-          
-          // Provide more detailed error message
-          let errorMessage = "Error communicating with API: " + error.message;
-          
-          // Add suggestions based on error type
-          if (error.message.includes("Failed to fetch")) {
-            errorMessage += "\n\nPossible solutions:\n1. Make sure your API key is set correctly in Netlify\n2. Check that your model name is valid\n3. Verify your internet connection";
-          } else if (error.message.includes("aborted")) {
-            errorMessage += "\n\nThe request timed out after 2 minutes. Try again or use a different model.";
-          } else if (error.message.includes("502")) {
-            errorMessage += "\n\nThe Qroq API server returned a 502 Bad Gateway error. This usually indicates a temporary server issue. Please try again in a few minutes.";
-          }
-          
-          thread.messages[placeholderIndex] = {
-            content: errorMessage,
-            sender: "bot",
-            isPlaceholder: false,
-            timestamp: new Date(),
-            wordCount: 0,
-            reasoningMethod: REASONING_METHOD.toUpperCase(),
-            thinking: null,
-            answer: null,
-            thinkingWordCount: 0,
-            answerWordCount: 0
-          };
-        }
-        renderCurrentThreadMessages();
+      // Create payload with web search parameter
+      const payload = {
+        model: MODEL_NAME,
+        max_tokens: MAX_TOKENS,
+        top_p: TOP_P,
+        temperature: TEMPERATURE,
+        messages: messagesForApi,
+        enableWebSearch: webSearchEnabled
+      };
+      
+      console.log(`Sending request with ${REASONING_METHOD} reasoning ${REASONING_METHOD === "cod" ? `(word limit: ${COD_WORD_LIMIT})` : ""}`);
+      if (wordCountRequest) {
+        console.log(`Final answer word limit requested: ${wordCountRequest} words`);
       }
+      if (webSearchEnabled) {
+        console.log('Web search is enabled for this request');
+      }
+      console.log(`Parameters: temp=${TEMPERATURE}, top_p=${TOP_P}`);
+
+      try {
+        // Add timestamp to URL to prevent caching
+        const timestamp = new Date().getTime();
+        const cacheBuster = `?t=${timestamp}`;
+        
+        // Set timeout for fetch to handle long-running requests
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 120000); // 2 minute timeout
+        
+        const response = await fetch(`${API_PROXY_URL}${cacheBuster}`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify(payload),
+          signal: controller.signal
+        });
+        
+        clearTimeout(timeoutId); // Clear the timeout
+        
+        if (!response.ok) {
+          console.error("API response error:", response.status, response.statusText);
+          throw new Error(`HTTP error! Status: ${response.status}`);
+        }
+        
+        const data = await response.json();
+        const botReply = data.choices &&
+                         data.choices[0] &&
+                         data.choices[0].message &&
+                         data.choices[0].message.content;
+        if (botReply) {
+          const trimmedReply = botReply.trim();
+          
+          // Create response metadata
+          let reasoningInfo = REASONING_METHOD.toUpperCase();
+          if (REASONING_METHOD === "cod") {
+            reasoningInfo += `-${COD_WORD_LIMIT}`;
+          }
+          
+          // Add enhanced reasoning info if used
+          if (ENHANCED_REASONING_ENABLED && 
+              REASONING_ENHANCEMENT === "adaptive" && 
+              PROBLEM_COMPLEXITY.complexity === "complex") {
+            reasoningInfo += "-ENHANCED";
+          }
+          
+          // Add web search info if used
+          if (webSearchEnabled) {
+            reasoningInfo += "-WEB";
+          }
+          
+          // Process bot message to separate thinking and answer parts
+          const processed = processBotMessage(trimmedReply, REASONING_METHOD);
+          
+          thread.messages[placeholderIndex] = {
+            content: trimmedReply,
+            sender: "bot",
+            isPlaceholder: false,
+            timestamp: new Date(),
+            wordCount: (processed.thinkingWordCount || 0) + (processed.answerWordCount || 0),
+            reasoningMethod: reasoningInfo,
+            thinking: processed.thinking,
+            answer: processed.answer,
+            thinkingWordCount: processed.thinkingWordCount || 0,
+            answerWordCount: processed.answerWordCount || 0,
+            webSearchUsed: webSearchEnabled
+          };
+        } else {
+          thread.messages[placeholderIndex] = {
+            content: "No valid response received. Check model name and API key.",
+            sender: "bot",
+            isPlaceholder: false,
+            timestamp: new Date(),
+            wordCount: 0,
+            reasoningMethod: REASONING_METHOD.toUpperCase(),
+            thinking: null,
+            answer: null,
+            thinkingWordCount: 0,
+            answerWordCount: 0
+          };
+        }
+      } catch (error) {
+        console.error("Error communicating with API:", error);
+        
+        // Provide more detailed error message
+        let errorMessage = "Error communicating with API: " + error.message;
+        
+        // Add suggestions based on error type
+        if (error.message.includes("Failed to fetch")) {
+          errorMessage += "\n\nPossible solutions:\n1. Make sure your API key is set correctly in Netlify\n2. Check that your model name is valid\n3. Verify your internet connection";
+        } else if (error.message.includes("aborted")) {
+          errorMessage += "\n\nThe request timed out after 2 minutes. Try again or use a different model.";
+        } else if (error.message.includes("502")) {
+          errorMessage += "\n\nThe API server returned a 502 Bad Gateway error. This usually indicates a temporary server issue. Please try again in a few minutes.";
+        }
+        
+        thread.messages[placeholderIndex] = {
+          content: errorMessage,
+          sender: "bot",
+          isPlaceholder: false,
+          timestamp: new Date(),
+          wordCount: 0,
+          reasoningMethod: REASONING_METHOD.toUpperCase(),
+          thinking: null,
+          answer: null,
+          thinkingWordCount: 0,
+          answerWordCount: 0
+        };
+      }
+      renderCurrentThreadMessages();
     }
 
     /***********************
@@ -4426,7 +4329,7 @@ Separate your steps with periods. Write your final answer after the #### separat
       const enhancedToggle = document.getElementById('enhancedReasoningToggle');
       const optionsContainer = document.getElementById('enhancedReasoningOptions');
       const adaptiveRadio = document.getElementById('adaptiveReasoning');
-      const standardRadio = document.getElementById('standardReasoning');
+      const standardRadio = document.getElementById('standardReasoningEnhancement');
       
       // Initialize state
       if (enhancedToggle) {
@@ -4535,7 +4438,7 @@ Separate your steps with periods. Write your final answer after the #### separat
         }
         
         const adaptiveRadio = document.getElementById('adaptiveReasoning');
-        const standardRadio = document.getElementById('standardReasoning');
+        const standardRadio = document.getElementById('standardReasoningEnhancement');
         
         if (adaptiveRadio && standardRadio) {
           if (REASONING_ENHANCEMENT === 'adaptive') {
@@ -4657,7 +4560,7 @@ Separate your steps with periods. Write your final answer after the #### separat
           }
           
           const adaptiveRadio = document.getElementById('adaptiveReasoning');
-          const standardRadio = document.getElementById('standardReasoning');
+          const standardRadio = document.getElementById('standardReasoningEnhancement');
           
           if (adaptiveRadio && standardRadio) {
             if (adaptiveRadio.checked) {
@@ -4813,36 +4716,6 @@ Separate your steps with periods. Write your final answer after the #### separat
         addListener("deleteThreadBtn", "click", deleteCurrentThread);
         addListener("downloadTxtBtn", "click", downloadCurrentThreadAsTxt);
         addListener("downloadPdfBtn", "click", downloadCurrentThreadAsPdf);
-        
-        // Message sending
-        addListener("sendBtn", "click", () => {
-          const userInput = document.getElementById("userInput");
-          if (userInput) {
-            const message = userInput.value.trim();
-            if (message || attachedFiles.length > 0) {
-              sendMessage(message);
-              userInput.value = "";
-              userInput.style.height = "45px"; // Reset height after sending
-            }
-          }
-        });
-        
-        const userInput = document.getElementById("userInput");
-        if (userInput) {
-          // Auto-expand textarea
-          userInput.addEventListener("input", function() {
-            this.style.height = "45px";
-            this.style.height = (this.scrollHeight) + "px";
-          });
-
-          // Handle Enter key
-          userInput.addEventListener("keydown", function(event) {
-            if (event.key === "Enter" && !event.shiftKey) {
-              event.preventDefault();
-              handleSendMessage();
-            }
-          });
-        }
         
         // Initialize file upload handling
         handleFileInput();
@@ -5011,12 +4884,126 @@ Separate your steps with periods. Write your final answer after the #### separat
     }
 
     // Initialize the application
-    document.addEventListener("DOMContentLoaded", init);
-    
-    // Backup initialization - in case the DOMContentLoaded event already fired
-    if (document.readyState === "complete" || document.readyState === "interactive") {
-      setTimeout(init, 1);
+    document.addEventListener("DOMContentLoaded", function() {
+      // Initialize chat input
+      const textarea = document.getElementById('userInput');
+      const sendBtn = document.getElementById('sendBtn');
+      const webSearchBtn = document.getElementById('webSearchBtn');
+
+      if (textarea) {
+        // Set initial height and focus
+        textarea.style.height = '24px';
+        textarea.focus();
+
+        // Auto-resize function
+        function autoResize() {
+          textarea.style.height = '24px';
+          textarea.style.height = Math.min(Math.max(textarea.scrollHeight, 24), 200) + 'px';
+        }
+
+        // Add event listeners
+        textarea.addEventListener('input', autoResize);
+        
+        // Handle Enter key
+        textarea.addEventListener('keydown', function(e) {
+          if (e.key === 'Enter' && !e.shiftKey) {
+            e.preventDefault();
+            const message = textarea.value.trim();
+            if (message || attachedFiles.length > 0) {
+              sendMessage(message);
+              textarea.value = '';
+              textarea.style.height = '24px';
+            }
+          }
+        });
+      }
+
+      // Handle send button click
+      if (sendBtn) {
+        sendBtn.addEventListener('click', () => {
+          const message = textarea.value.trim();
+          if (message || attachedFiles.length > 0) {
+            sendMessage(message);
+            textarea.value = '';
+            textarea.style.height = '24px';
+          }
+        });
+      }
+
+      // Handle web search toggle
+      if (webSearchBtn) {
+        webSearchBtn.addEventListener('click', toggleWebSearch);
+        
+        // Initialize web search state
+        const savedWebSearch = localStorage.getItem('webSearchEnabled') === 'true';
+        if (savedWebSearch) {
+          enableWebSearch = true;
+          webSearchBtn.style.backgroundColor = 'var(--accent-primary)';
+          webSearchBtn.style.color = 'white';
+        }
+      }
+
+      init();
+    });
+
+    // Remove the duplicate event listeners from initEventListeners function
+    function initEventListeners() {
+      try {
+        console.log("Initializing event listeners");
+        
+        // Helper function to safely add event listeners
+        const addListener = (id, event, handler) => {
+          const element = document.getElementById(id);
+          if (element) {
+            element.addEventListener(event, handler);
+          } else {
+            console.warn(`Element with id "${id}" not found for event listener`);
+          }
+        };
+        
+        // Settings buttons
+        addListener("openSettings", "click", openSettingsModal);
+        addListener("closeSettings", "click", closeSettingsModal);
+        addListener("closeModalX", "click", closeSettingsModal);
+        addListener("saveSettings", "click", saveSettings);
+        
+        // Thread management
+        addListener("newThreadBtn", "click", createNewThread);
+        addListener("deleteThreadBtn", "click", deleteCurrentThread);
+        addListener("downloadTxtBtn", "click", downloadCurrentThreadAsTxt);
+        addListener("downloadPdfBtn", "click", downloadCurrentThreadAsPdf);
+        
+        // Initialize file upload handling
+        handleFileInput();
+        
+        // Close modal when clicking outside
+        window.addEventListener("click", (event) => {
+          const modal = document.getElementById("settingsModal");
+          if (modal && event.target === modal) {
+            closeSettingsModal();
+          }
+        });
+        
+        // Set up settings UI functionality
+        setTimeout(() => {
+          try {
+            setupTabNavigation();
+            setupModelInput();
+            setupCODOptions();
+            setupEnhancedReasoningOptions();
+            setupSliders();
+            initSelfConsistency();
+            console.log("UI functionality setup complete");
+          } catch (err) {
+            console.error("Error setting up UI functionality:", err);
+          }
+        }, 100);
+      } catch (err) {
+        console.error("Error initializing event listeners:", err);
+      }
     }
+
+    // Remove the duplicate handleSendMessage function since we're handling it directly in the event listeners
 
     /***********************
      * File Upload Management
@@ -5193,118 +5180,23 @@ Separate your steps with periods. Write your final answer after the #### separat
       else return (bytes / 1048576).toFixed(1) + ' MB';
     }
 
-    let enableWebSearch = false;
-
-    // Add to the existing loadSettings function
-    function loadSettings() {
-      // ... existing code ...
-      
-      // Load web search setting
-      const savedWebSearch = localStorage.getItem('enableWebSearch') === 'true';
-      document.getElementById('webSearchToggle').checked = savedWebSearch;
-      enableWebSearch = savedWebSearch;
-    }
-
-    // Add event listener for web search toggle
-    document.getElementById('webSearchToggle').addEventListener('change', function(e) {
-      enableWebSearch = e.target.checked;
-      localStorage.setItem('enableWebSearch', enableWebSearch);
-    });
-
-    // Update the sendMessage function
-    async function sendMessage(message) {
-      // ... existing code ...
-      
-      // Prepare the request body
-      const requestBody = {
-        model: currentModel,
-        messages: messages,
-        stream: true,
-        enableWebSearch: enableWebSearch // Add web search parameter
-      };
-      
-      // ... rest of the existing code ...
-    }
-
+    /***********************
+     * Web Search Functions
+     ***********************/
     function toggleWebSearch() {
       const btn = document.getElementById('webSearchBtn');
+      if (!btn) return;
+      
       enableWebSearch = !enableWebSearch;
+      localStorage.setItem('webSearchEnabled', enableWebSearch);
+      
+      // Update button appearance
       btn.style.backgroundColor = enableWebSearch ? 'var(--accent-primary)' : 'var(--bg-component)';
       btn.style.color = enableWebSearch ? 'white' : 'var(--text-secondary)';
-      localStorage.setItem('enableWebSearch', enableWebSearch);
+      
+      // Show notification
       showNotification(enableWebSearch ? 'Web search enabled' : 'Web search disabled');
     }
-
-    // Update loadSettings to include web search state
-    function loadSettings() {
-      // ... existing code ...
-      const savedWebSearch = localStorage.getItem('enableWebSearch') === 'true';
-      enableWebSearch = savedWebSearch;
-      if (savedWebSearch) {
-        const btn = document.getElementById('webSearchBtn');
-        if (btn) {
-          btn.style.backgroundColor = 'var(--accent-primary)';
-          btn.style.color = 'white';
-        }
-      }
-    }
-
-    // Update the sendMessage function to include web search parameter
-    async function sendMessage(message) {
-      // ... existing code ...
-      const requestBody = {
-        model: MODEL_NAME,
-        messages: messages,
-        stream: true,
-        enableWebSearch: enableWebSearch
-      };
-      // ... rest of the existing code ...
-    }
-
-    function handleSendMessage() {
-      const messageInput = document.getElementById("userInput");
-      const message = messageInput.value.trim();
-      
-      if (message || attachedFiles.length > 0) {
-        sendMessage(message);
-        messageInput.value = "";
-        messageInput.style.height = "45px"; // Reset height after sending
-      }
-    }
-
-    // Update the auto-resize functionality for the textarea
-    function initTextarea() {
-      const textarea = document.getElementById('userInput');
-      if (!textarea) return;
-
-      function autoResize() {
-        textarea.style.height = 'auto';
-        textarea.style.height = (textarea.scrollHeight) + 'px';
-      }
-
-      // Initial height
-      textarea.style.height = '24px';
-
-      // Add event listeners
-      textarea.addEventListener('input', autoResize);
-      textarea.addEventListener('keydown', function(e) {
-        if (e.key === 'Enter' && !e.shiftKey) {
-          e.preventDefault();
-          const message = this.value.trim();
-          if (message || attachedFiles.length > 0) {
-            sendMessage(message);
-            this.value = '';
-            this.style.height = '24px';
-          }
-        }
-      });
-    }
-
-    // Add this to your initialization code
-    document.addEventListener('DOMContentLoaded', function() {
-      initTextarea();
-      // ... rest of your init code ...
-    });
   </script>
   <form hidden="" method="post" name="feedback" data-netlify="true">
     <input type="hidden" name="form-name" value="feedback">
