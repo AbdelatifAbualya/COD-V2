@@ -50,7 +50,24 @@ exports.handler = async function(event, context) {
 
     // Parse the request body
     const requestBody = JSON.parse(event.body);
-    console.log('Request received for model:', requestBody.model);
+    const modelName = requestBody.model;
+    console.log('Request received for model:', modelName);
+    
+    // Check if this is a vision model
+    const isVisionModel = modelName && (
+      modelName.includes('vision') || 
+      modelName.includes('llava') || 
+      modelName.includes('claude-3') ||
+      modelName.includes('gemini')
+    );
+    
+    console.log(`Model ${modelName} is ${isVisionModel ? 'a vision model' : 'not a vision model'}`);
+    
+    // Process any images in the request for vision models
+    if (isVisionModel && requestBody.messages) {
+      requestBody.messages = processImagesInMessages(requestBody.messages);
+      console.log('Processed images in messages for vision model');
+    }
     
     // We'll use the Groq API endpoint
     const apiEndpoint = 'https://api.groq.com/openai/v1/chat/completions';
@@ -65,6 +82,35 @@ exports.handler = async function(event, context) {
         // Set up abort controller for timeout
         const controller = new AbortController();
         const timeoutId = setTimeout(() => controller.abort(), 60000); // 60-second timeout
+        
+        // Log request size for debugging
+        const requestSize = JSON.stringify(requestBody).length;
+        console.log(`Request size: ${requestSize} bytes`);
+        
+        // Log the request structure (without full image data)
+        const debugRequestBody = JSON.parse(JSON.stringify(requestBody));
+        if (debugRequestBody.messages) {
+          debugRequestBody.messages = debugRequestBody.messages.map(msg => {
+            if (Array.isArray(msg.content)) {
+              return {
+                ...msg,
+                content: msg.content.map(item => {
+                  if (item.type === 'image_url') {
+                    return {
+                      type: 'image_url',
+                      image_url: { 
+                        url: item.image_url.url.substring(0, 50) + '... [truncated]' 
+                      }
+                    };
+                  }
+                  return item;
+                })
+              };
+            }
+            return msg;
+          });
+        }
+        console.log('Processed request structure:', JSON.stringify(debugRequestBody, null, 2));
         
         // Make a request to the Groq API
         console.log(`Sending request to Groq API (attempts remaining: ${retries})`);
@@ -125,6 +171,11 @@ exports.handler = async function(event, context) {
         errorMessage = "Authentication failed. Please check your QROQ_API_KEY value in Netlify environment variables.";
       }
       
+      // Special handling for 400 errors related to images
+      if (response.status === 400 && isVisionModel) {
+        errorMessage = `${errorMessage}\n\nThis may be because:\n1. The selected model doesn't support the image format\n2. The image is too large\n3. The model doesn't fully support multimodal inputs`;
+      }
+      
       return {
         statusCode: response.status,
         body: JSON.stringify({ 
@@ -134,7 +185,9 @@ exports.handler = async function(event, context) {
             possible_fixes: [
               "Verify the API key is correct in Netlify",
               "Check that the model name is valid for Groq API",
-              "Ensure your Groq API subscription is active"
+              "Ensure your Groq API subscription is active",
+              "Try a different image format or size",
+              "Verify the model supports vision features"
             ]
           }
         }),
@@ -182,3 +235,40 @@ exports.handler = async function(event, context) {
     };
   }
 };
+
+/**
+ * Process images in messages to ensure they're in the correct format for the API
+ * @param {Array} messages - Array of message objects
+ * @returns {Array} - Processed messages
+ */
+function processImagesInMessages(messages) {
+  return messages.map(message => {
+    // Only process user messages with content array
+    if (message.role === 'user' && Array.isArray(message.content)) {
+      return {
+        ...message,
+        content: message.content.map(item => {
+          if (item.type === 'image_url' && item.image_url) {
+            // Process data URLs
+            if (item.image_url.url && item.image_url.url.startsWith('data:')) {
+              const match = item.image_url.url.match(/^data:(.+?);base64,(.+)$/);
+              if (match) {
+                const [_, mimeType, base64Data] = match;
+                
+                // For Groq, prefer base64 format for images
+                return {
+                  type: 'image_url',
+                  image_url: {
+                    url: `data:${mimeType};base64,${base64Data}`
+                  }
+                };
+              }
+            }
+          }
+          return item;
+        })
+      };
+    }
+    return message;
+  });
+}
