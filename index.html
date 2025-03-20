@@ -1731,29 +1731,70 @@
 
     /* Feedback Button Styling */
     #openFeedbackBtn {
-      position: fixed;
-      bottom: 20px;
-      left: 300px; /* Position it just to the right of the sidebar */
-      background-color: var(--accent-primary);
-      color: white;
-      border: none;
-      padding: 10px 16px;
-      border-radius: 8px;
-      cursor: pointer;
-      font-weight: 500;
-      font-size: 0.9rem;
+      background-color: var(--bg-tertiary);
+      color: var(--text-primary);
+      border: 1px solid var(--border-medium);
+      width: 100%;
+      margin-top: 10px;
       display: flex;
       align-items: center;
+      justify-content: center;
       gap: 6px;
-      box-shadow: var(--shadow-md);
+      padding: 0.75rem;
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      font-size: 0.9rem;
+      font-weight: 500;
       transition: all var(--transition-fast);
-      z-index: 1000;
     }
 
     #openFeedbackBtn:hover {
-      transform: translateY(-2px);
+      background-color: var(--bg-hover);
+      transform: translateY(-1px);
+    }
+
+    /* Modal Content Styling */
+    .modal-content {
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+      border-radius: 10px;
+      border: 1px solid var(--border-medium);
+    }
+
+    /* Tab Button Styling */
+    .tab-btn {
+      border-radius: 6px;
+      font-weight: 500;
+      padding: 10px 15px;
+    }
+
+    .tab-btn.active {
+      background-color: var(--accent-primary);
+      box-shadow: none;
+    }
+
+    /* Feedback Form Styling */
+    #feedbackModal textarea {
+      width: 100%;
+      background-color: var(--bg-component);
+      color: var(--text-primary);
+      border: 1px solid var(--border-medium);
+      border-radius: 5px;
+      padding: 10px;
+      margin-bottom: 20px;
+    }
+
+    #feedbackModal button[type="submit"] {
+      background-color: var(--accent-primary);
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 5px;
+      cursor: pointer;
+      float: right;
+    }
+
+    #feedbackModal button[type="submit"]:hover {
       background-color: var(--accent-secondary);
-      box-shadow: var(--shadow-lg);
     }
 
     /* Enhanced Model Dropdown Styling */
@@ -2218,6 +2259,10 @@
         <button id="downloadTxtBtn">Download TXT</button>
         <button id="downloadPdfBtn">Download PDF</button>
         <button id="clearThreadBtn">Clear Thread</button>
+        <button id="openFeedbackBtn">
+          <span>💬</span>
+          Feedback
+        </button>
       </div>
     </div>
 
@@ -2409,73 +2454,63 @@
   </div>
 </div>
 
-  <!-- Feedback Button and Modal -->
-  <div id="feedbackBtnContainer">
-    <button id="openFeedbackBtn">
-      <span>💬</span>
-      Feedback
-    </button>
-  </div>
-
-  <div id="feedbackModal" class="modal" style="display: none;">
-    <div class="modal-content" style="max-width: 500px;">
-      <button class="close-modal" id="closeFeedbackModal">×</button>
-      <h2>Share Your Feedback</h2>
+<!-- Feedback Modal -->
+<div id="feedbackModal" class="modal" style="display: none;">
+  <div class="modal-content" style="max-width: 500px;">
+    <button class="close-modal" id="closeFeedbackModal">×</button>
+    <h2>Share Your Feedback</h2>
+    
+    <form method="POST" name="feedback" data-netlify="true">
+      <input type="hidden" name="form-name" value="feedback">
+      <input type="hidden" id="feedbackModel" name="model" value="qwen-2.5-coder">
+      <input type="hidden" id="feedbackReasoning" name="reasoning_method" value="COD-20">
       
-      <form method="POST" name="feedback" data-netlify="true">
-        <input type="hidden" name="form-name" value="feedback">
-        
-        <input type="hidden" id="feedbackModel" name="model" value="qwen-2.5-coder">
-        <input type="hidden" id="feedbackReasoning" name="reasoning_method" value="COD-20">
-        
-        <label for="feedbackType">Feedback Type:</label>
-        <select id="feedbackType" name="feedback_type" style="width: 100%; margin-bottom: 15px;">
-          <option value="general">General Feedback</option>
-          <option value="bug">Report a Bug</option>
-          <option value="feature">Feature Request</option>
-          <option value="model_performance">Model Performance</option>
-        </select>
-        
-        <label>How would you rate your experience?</label>
-        <div style="display: flex; justify-content: space-between; margin: 10px 0 15px 0;">
-          <label style="flex: 1; text-align: center;">
-            <input type="radio" name="rating" value="1" required="">
-            <div>😞</div>
-            <div style="font-size: 0.8rem;">Poor</div>
-          </label>
-          <label style="flex: 1; text-align: center;">
-            <input type="radio" name="rating" value="2">
-            <div>😐</div>
-            <div style="font-size: 0.8rem;">Fair</div>
-          </label>
-          <label style="flex: 1; text-align: center;">
-            <input type="radio" name="rating" value="3">
-            <div>🙂</div>
-            <div style="font-size: 0.8rem;">Good</div>
-          </label>
-          <label style="flex: 1; text-align: center;">
-            <input type="radio" name="rating" value="4">
-            <div>😀</div>
-            <div style="font-size: 0.8rem;">Great</div>
-          </label>
-          <label style="flex: 1; text-align: center;">
-            <input type="radio" name="rating" value="5">
-            <div>🤩</div>
-            <div style="font-size: 0.8rem;">Excellent</div>
-          </label>
-        </div>
-        
-        <label for="feedbackComments">Comments:</label>
-        <textarea id="feedbackComments" name="comments" rows="4" style="width: 100%; background-color: rgb(46, 46, 46); color: rgb(255, 255, 255); border: 1px solid rgb(68, 68, 68); border-radius: 5px; padding: 10px; margin-bottom: 20px; --darkreader-inline-bgcolor: var(--darkreader-background-2e2e2e, #232627); --darkreader-inline-color: var(--darkreader-text-ffffff, #e8e6e3); --darkreader-inline-border-top: var(--darkreader-border-444444, #766d61); --darkreader-inline-border-right: var(--darkreader-border-444444, #766d61); --darkreader-inline-border-bottom: var(--darkreader-border-444444, #766d61); --darkreader-inline-border-left: var(--darkreader-border-444444, #766d61);" required="" data-darkreader-inline-bgcolor="" data-darkreader-inline-color="" data-darkreader-inline-border-top="" data-darkreader-inline-border-right="" data-darkreader-inline-border-bottom="" data-darkreader-inline-border-left=""></textarea>
-        
-        <button type="submit" style="background-color: rgb(74, 140, 255); color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; float: right; --darkreader-inline-bgcolor: var(--darkreader-background-4a8cff, #003aa0); --darkreader-inline-color: var(--darkreader-text-ffffff, #e8e6e3); --darkreader-inline-border-top: none; --darkreader-inline-border-right: none; --darkreader-inline-border-bottom: none; --darkreader-inline-border-left: none;" data-darkreader-inline-bgcolor="" data-darkreader-inline-color="" data-darkreader-inline-border-top="" data-darkreader-inline-border-right="" data-darkreader-inline-border-bottom="" data-darkreader-inline-border-left="">
-          Submit Feedback
-        </button>
-      </form>
-    </div>
+      <label for="feedbackType">Feedback Type:</label>
+      <select id="feedbackType" name="feedback_type" style="width: 100%; margin-bottom: 15px;">
+        <option value="general">General Feedback</option>
+        <option value="bug">Report a Bug</option>
+        <option value="feature">Feature Request</option>
+        <option value="model_performance">Model Performance</option>
+      </select>
+      
+      <label>How would you rate your experience?</label>
+      <div style="display: flex; justify-content: space-between; margin: 10px 0 15px 0;">
+        <label style="flex: 1; text-align: center;">
+          <input type="radio" name="rating" value="1" required>
+          <div>😞</div>
+          <div style="font-size: 0.8rem;">Poor</div>
+        </label>
+        <label style="flex: 1; text-align: center;">
+          <input type="radio" name="rating" value="2">
+          <div>😐</div>
+          <div style="font-size: 0.8rem;">Fair</div>
+        </label>
+        <label style="flex: 1; text-align: center;">
+          <input type="radio" name="rating" value="3">
+          <div>🙂</div>
+          <div style="font-size: 0.8rem;">Good</div>
+        </label>
+        <label style="flex: 1; text-align: center;">
+          <input type="radio" name="rating" value="4">
+          <div>😀</div>
+          <div style="font-size: 0.8rem;">Great</div>
+        </label>
+        <label style="flex: 1; text-align: center;">
+          <input type="radio" name="rating" value="5">
+          <div>🤩</div>
+          <div style="font-size: 0.8rem;">Excellent</div>
+        </label>
+      </div>
+      
+      <label for="feedbackComments">Comments:</label>
+      <textarea id="feedbackComments" name="comments" rows="4" required></textarea>
+      
+      <button type="submit">Submit Feedback</button>
+    </form>
   </div>
+</div>
 
-  <script>
+<script>
     /***********************
      * Global Configuration
      ***********************/
