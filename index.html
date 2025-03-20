@@ -1890,8 +1890,8 @@ html {-webkit-transition : -webkit-filter 300ms linear;}
 
       <label for="maxTokens">Max Tokens</label>
       <div class="range-container">
-        <input type="range" id="maxTokens" min="256" max="4096" step="128" value="1112">
-        <span id="maxTokensValue" class="range-value">1152</span>
+        <input type="range" id="maxTokens" min="256" max="128000" step="128" value="16384">
+        <span id="maxTokensValue" class="range-value">16384</span>
       </div>
       <p style="font-size: 0.8rem; color: #aaa; margin-top: 0;">Maximum length of the response.</p>
     </div>
@@ -1988,109 +1988,10 @@ html {-webkit-transition : -webkit-filter 300ms linear;}
     let ENHANCED_REASONING_ENABLED = true;
     let REASONING_ENHANCEMENT = "adaptive"; // Options: "adaptive", "standard"
     
-    // NEW: Problem complexity detection
-    let PROBLEM_COMPLEXITY = {
-      hasMath: false,
-      hasLogic: false,
-      multiStep: false,
-      complexity: "normal" // Options: "simple", "normal", "complex"
-    };
-    
-    // Prompts for different reasoning methods
-    let PROMPTS = {
-      standard: "",
-      
-      cot: `Think step by step to solve this problem. Explain your reasoning at each step, then provide your final answer.`,
-      
-      cod: `Think step by step, but produce only minimal notes for each step (${COD_WORD_LIMIT} words maximum per step). Use mathematical notation where possible. Keep only essential information needed to solve the problem. Focus on key calculations and intermediate results without narrative explanation.
-  
-Separate your steps with periods. Write your final answer after the #### separator.
-
-Examples:
-Q: Jason had 20 lollipops. He gave Denny some lollipops. Now Jason has 12 lollipops. How many lollipops did Jason give to Denny?
-A: 20 initial. 12 remaining. 20 - 12 = 8. #### 8 lollipops
-
-Q: Roger has $125. He spends $55 on a video game and then receives $25 for his birthday. How much money does Roger have now?
-A: Start: $125. Spent: $55. 125 - 55 = $70. Received: $25. 70 + 25 = $95. #### $95
-
-Q: A square has a perimeter of 20 cm. What is its area?
-A: Perimeter = 20 cm. Side length = 20/4 = 5 cm. Area = 5² = 25 cm². #### 25 square centimeters
-
-Q: If a fabric store received 45 yards of cotton material and used 2/9 of it for a bulk order, how many yards of cotton material does the fabric store have left?
-A: Total: 45 yards. Used: 2/9 × 45 = 10 yards. Remaining: 45 - 10 = 35 yards. #### 35 yards
-
-Q: The temperature on Monday was -3°C. On Tuesday, it was 14°C. What was the change in temperature from Monday to Tuesday?
-A: Monday: -3°C. Tuesday: 14°C. Change: 14 - (-3) = 17°C. #### 17°C`
-    };
-    
-    // NEW: Enhanced prompts for complex problems with different word limits
-    let ENHANCED_PROMPTS = {
-      cot: `Think step by step to solve this problem. This appears to be a complex problem that requires careful reasoning. Break down your thinking into clear steps, making sure to consider all relevant information and constraints. 
-
-For complex problems, use as many steps as needed to work through the solution thoroughly. It's better to use more steps with clear reasoning than to skip steps.
-
-Check your calculations and logic at each step. After you've completed your reasoning process, provide your final answer.`,
-      
-      cod5: `Think step by step to solve this complex problem. For each step, use at most 5 words to capture the essential reasoning, but use AS MANY STEPS as needed to thoroughly work through the problem. Use mathematical notation where efficient. Show ALL intermediate calculations and logical inferences.
-
-IMPORTANT: Instead of trying to fit complex reasoning into fewer steps, break your reasoning into more numerous simple steps. For example, instead of one step with "Calculate area using length×width=50×30=1500", use multiple steps:
-1. Length = 50.
-2. Width = 30.
-3. Area = length × width.
-4. Area = 50 × 30.
-5. Area = 1500.
-
-Separate your steps with periods. Write your final answer after the #### separator.
-
-Example of solving a complex problem with sufficient steps:
-Q: A car travels at 60 mph. After 2 hours, it increases speed to 75 mph for 1 hour. It then decreases to 50 mph for the final 30 minutes. What is the total distance traveled?
-A: First segment: speed 60 mph. First segment: time 2h. First segment: distance = 60 × 2. First segment: distance = 120 miles. Second segment: speed 75 mph. Second segment: time 1h. Second segment: distance = 75 × 1. Second segment: distance = 75 miles. Third segment: speed 50 mph. Third segment: time 0.5h. Third segment: distance = 50 × 0.5. Third segment: distance = 25 miles. Total distance: 120 + 75 + 25. Total distance = 220 miles. #### 220 miles`,
-
-      cod10: `Think step by step to solve this complex problem. For each step, use up to 10 words to capture the essential reasoning. Use AS MANY STEPS as needed to fully solve the problem. Include ALL intermediate calculations and logical inferences.
-
-IMPORTANT: For complex problems, it's better to use more steps with clear reasoning than to try cramming too much into each step. Break complex calculations into multiple steps.
-
-When thinking through difficult parts of a problem:
-1. Identify what information you need
-2. Think about how to derive that information
-3. Perform calculations systematically
-4. Check your work at key points
-
-Separate your steps with periods. Write your final answer after the #### separator.
-
-Example of solving a complex problem:
-Q: A car travels at 60 mph. After 2 hours, it increases speed to 75 mph for 1 hour. It then decreases to 50 mph for the final 30 minutes. What is the total distance traveled?
-A: First segment: speed 60 mph for 2 hours. First segment distance calculation: 60 mph × 2h. First segment distance = 120 miles. Second segment: speed 75 mph for 1 hour. Second segment distance calculation: 75 mph × 1h. Second segment distance = 75 miles. Third segment: speed 50 mph for 0.5 hours. Third segment distance calculation: 50 mph × 0.5h. Third segment distance = 25 miles. Need to sum all segment distances. Total distance calculation: 120 + 75 + 25. Total distance traveled = 220 miles. #### 220 miles`,
-      
-      cod15: `Think step by step to solve this complex problem. For each step, use up to 15 words to capture the essential reasoning, providing more detail for critical steps. Use mathematical notation where helpful but include explanations of your approach at key points.
-
-Separate your steps with periods. Write your final answer after the #### separator.
-
-Example of solving a complex problem:
-Q: A car travels at 60 mph. After 2 hours, it increases speed to 75 mph for 1 hour. It then decreases to 50 mph for the final 30 minutes. What is the total distance traveled?
-A: First segment: The car travels at 60 mph for 2 hours, so distance = 60 × 2 = 120 miles. Second segment: The car increases to 75 mph for 1 hour, so distance = 75 × 1 = 75 miles. Third segment: The car decreases to 50 mph for 0.5 hours, so distance = 50 × 0.5 = 25 miles. Total distance traveled = 120 + 75 + 25 = 220 miles. #### 220 miles`,
-      
-      cod17: `Think step by step to solve this complex problem. For each step, use up to 17 words to provide clear reasoning, especially for difficult parts. Balance precision and concision, using math notation to save words.
-
-Separate your steps with periods. Write your final answer after the #### separator.
-
-Example of solving a complex problem:
-Q: A car travels at 60 mph. After 2 hours, it increases speed to 75 mph for 1 hour. It then decreases to 50 mph for the final 30 minutes. What is the total distance traveled?
-A: First segment: The car travels at 60 mph for 2 hours, giving distance = 60 × 2 = 120 miles. Second segment: Speed increases to 75 mph for 1 hour, so this segment's distance = 75 miles. Third segment: Speed is 50 mph for 0.5 hours, contributing 50 × 0.5 = 25 miles. Total journey distance = 120 + 75 + 25 = 220 miles. #### 220 miles`,
-      
-      cod20: `Think step by step to solve this complex problem. For each step, use up to 20 words to provide clear reasoning, explaining your approach more thoroughly for the difficult parts of the problem.
-
-Separate your steps with periods. Write your final answer after the #### separator.
-
-Example of solving a complex problem:
-Q: A car travels at 60 mph. After 2 hours, it increases speed to 75 mph for 1 hour. It then decreases to 50 mph for the final 30 minutes. What is the total distance traveled?
-A: First segment: The car travels at 60 mph for 2 hours, so the distance covered in this segment is 60 × 2 = 120 miles. Second segment: The car then increases speed to 75 mph and maintains this for 1 hour, covering 75 × 1 = 75 miles. Third segment: Finally, the car decreases speed to 50 mph for 30 minutes (0.5 hours), covering 50 × 0.5 = 25 miles. Total distance traveled over the entire journey = 120 + 75 + 25 = 220 miles. #### 220 miles`
-    };
-    
-    // Default generation parameters
+    // Default generation parameters - Updated default
     let TEMPERATURE = 0.5;
     let TOP_P = 0.90;
-    let MAX_TOKENS = 1112;
+    let MAX_TOKENS = 16384;
 
     // Initialize global self-reflection variables
     let SELF_REFLECTION_ENABLED = true;
@@ -3983,15 +3884,23 @@ Separate your steps with periods. Write your final answer after the #### separat
       });
     }
     
-    // Settings slider handling
+    // Settings slider handling - Updated for proper event handling
     function setupSliders() {
       // Connect all sliders to their value displays
       document.querySelectorAll('input[type="range"]').forEach(slider => {
         const valueDisplay = document.getElementById(`${slider.id}Value`);
         if (valueDisplay) {
+          // Initial value set
+          valueDisplay.textContent = slider.value;
+          
+          // Update on input
           slider.addEventListener('input', () => {
             valueDisplay.textContent = slider.value;
           });
+          
+          // Force initial update
+          const event = new Event('input');
+          slider.dispatchEvent(event);
         }
       });
     }
@@ -4028,7 +3937,7 @@ Separate your steps with periods. Write your final answer after the #### separat
           }
         }
         
-        // Set parameter sliders
+        // Set parameter sliders - Make sure to properly set the maxTokens slider
         setSliderAndValue("temp", TEMPERATURE);
         setSliderAndValue("topP", TOP_P);
         setSliderAndValue("maxTokens", MAX_TOKENS);
@@ -4050,14 +3959,25 @@ Separate your steps with periods. Write your final answer after the #### separat
         // Deactivate all tab buttons
         tabButtons.forEach(btn => btn.classList.remove('active'));
         
-        // Activate only the first tab
-        if (tabButtons.length > 0) {
-          tabButtons[0].classList.add('active');
-          const firstTabId = tabButtons[0].getAttribute('data-tab');
-          const firstTabContent = document.getElementById(firstTabId);
-          if (firstTabContent) {
-            firstTabContent.classList.add('active');
-            firstTabContent.style.display = 'block';
+        // Find the parameters tab by default (usually more useful)
+        const parametersTab = document.querySelector('.tab-btn[data-tab="parametersTab"]');
+        if (parametersTab) {
+          parametersTab.classList.add('active');
+          const tabContent = document.getElementById('parametersTab');
+          if (tabContent) {
+            tabContent.classList.add('active');
+            tabContent.style.display = 'block';
+          }
+        } else {
+          // Fallback to first tab if parameters tab not found
+          if (tabButtons.length > 0) {
+            tabButtons[0].classList.add('active');
+            const firstTabId = tabButtons[0].getAttribute('data-tab');
+            const firstTabContent = document.getElementById(firstTabId);
+            if (firstTabContent) {
+              firstTabContent.classList.add('active');
+              firstTabContent.style.display = 'block';
+            }
           }
         }
         
@@ -4071,7 +3991,13 @@ Separate your steps with periods. Write your final answer after the #### separat
       const slider = document.getElementById(id);
       const valueDisplay = document.getElementById(`${id}Value`);
       
-      if (slider) slider.value = value;
+      if (slider) {
+        slider.value = value;
+        // Make sure to trigger any input handlers
+        const event = new Event('input', { bubbles: true });
+        slider.dispatchEvent(event);
+      }
+      
       if (valueDisplay) valueDisplay.textContent = value;
     }
 
@@ -4165,7 +4091,7 @@ Separate your steps with periods. Write your final answer after the #### separat
           console.error("Error getting self-reflection settings:", selfErr);
         }
         
-        // Save generation parameters safely
+        // Save generation parameters safely - Improved error handling
         try {
           const tempSlider = document.getElementById("temp");
           if (tempSlider) {
@@ -4180,7 +4106,15 @@ Separate your steps with periods. Write your final answer after the #### separat
           
           const maxTokensSlider = document.getElementById("maxTokens");
           if (maxTokensSlider) {
-            MAX_TOKENS = parseInt(maxTokensSlider.value);
+            const newValue = parseInt(maxTokensSlider.value);
+            if (!isNaN(newValue) && newValue > 0) {
+              MAX_TOKENS = newValue;
+              console.log("Max tokens updated to:", MAX_TOKENS);
+            } else {
+              console.warn("Invalid max tokens value:", maxTokensSlider.value);
+            }
+          } else {
+            console.warn("Max tokens slider not found");
           }
           
           console.log("Parameters saved:", {TEMPERATURE, TOP_P, MAX_TOKENS});
@@ -4377,17 +4311,25 @@ Separate your steps with periods. Write your final answer after the #### separat
         // Load custom prompts if available
         const storedPrompts = localStorage.getItem("customPrompts");
         if (storedPrompts) {
-          const parsedPrompts = JSON.parse(storedPrompts);
-          // Merge with default prompts to ensure all properties exist
-          PROMPTS = { ...PROMPTS, ...parsedPrompts };
+          try {
+            const parsedPrompts = JSON.parse(storedPrompts);
+            // Merge with default prompts to ensure all properties exist
+            PROMPTS = { ...PROMPTS, ...parsedPrompts };
+          } catch (e) {
+            console.error("Error parsing stored prompts:", e);
+          }
         }
         
         // Load enhanced prompts if available
         const storedEnhancedPrompts = localStorage.getItem("enhancedPrompts");
         if (storedEnhancedPrompts) {
-          const parsedEnhancedPrompts = JSON.parse(storedEnhancedPrompts);
-          // Merge with default prompts to ensure all properties exist
-          ENHANCED_PROMPTS = { ...ENHANCED_PROMPTS, ...parsedEnhancedPrompts };
+          try {
+            const parsedEnhancedPrompts = JSON.parse(storedEnhancedPrompts);
+            // Merge with default prompts to ensure all properties exist
+            ENHANCED_PROMPTS = { ...ENHANCED_PROMPTS, ...parsedEnhancedPrompts };
+          } catch (e) {
+            console.error("Error parsing enhanced prompts:", e);
+          }
         }
         
         const temp = localStorage.getItem("temperature");
@@ -4397,7 +4339,13 @@ Separate your steps with periods. Write your final answer after the #### separat
         if (topP) TOP_P = parseFloat(topP);
         
         const maxTokens = localStorage.getItem("maxTokens");
-        if (maxTokens) MAX_TOKENS = parseInt(maxTokens);
+        if (maxTokens) {
+          const parsedMaxTokens = parseInt(maxTokens);
+          if (!isNaN(parsedMaxTokens) && parsedMaxTokens > 0) {
+            MAX_TOKENS = parsedMaxTokens;
+            console.log("Loaded max tokens:", MAX_TOKENS);
+          }
+        }
         
         // Load self-reflection settings
         const selfReflectionEnabled = localStorage.getItem("selfReflectionEnabled");
