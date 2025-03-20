@@ -2335,87 +2335,142 @@
     </div>
     
     <!-- Reasoning Tab -->
-    <div id="reasoningTab" class="tab-content">
+    <div id="reasoningTab" class="tab-content" style="display: none;">
       <div class="settings-section-header">Reasoning Method</div>
-      
-      <div class="reasoning-method-container">
-        <div class="reasoning-option" onclick="document.getElementById('standardReasoning').click()">
-          <input type="radio" id="standardReasoning" name="reasoningMethod" value="standard">
-          <div class="reasoning-option-content">
-            <div class="reasoning-option-title">Standard (No special prompt)</div>
-            <div class="reasoning-option-description">Default model behavior with no special reasoning instructions.</div>
+      <div class="feature-section">
+        <div class="radio-options">
+          <div class="radio-option">
+            <input type="radio" id="standardReasoning" name="reasoningMethod" value="standard">
+            <label for="standardReasoning">Standard (No special prompt)</label>
+            <div class="tooltip">?
+              <span class="tooltiptext">Default model behavior with no special reasoning instructions.</span>
+            </div>
           </div>
-          <span class="reasoning-help-icon" title="Default model behavior with no special reasoning instructions.">ⓘ</span>
+          
+          <div class="radio-option">
+            <input type="radio" id="cotReasoning" name="reasoningMethod" value="cot">
+            <label for="cotReasoning">Chain of Thought (CoT)</label>
+            <div class="tooltip">?
+              <span class="tooltiptext">Instructs the model to think step-by-step to solve problems. Improves reasoning but uses more tokens.</span>
+            </div>
+          </div>
+          
+          <div class="radio-option">
+            <input type="radio" id="codReasoning" name="reasoningMethod" value="cod" checked>
+            <label for="codReasoning">Chain of Draft (CoD)</label>
+            <div class="tooltip">?
+              <span class="tooltiptext">Uses minimal words per step (research paper approach) to reduce token usage while maintaining reasoning quality.</span>
+            </div>
+          </div>
         </div>
         
-        <div class="reasoning-option" onclick="document.getElementById('cotReasoning').click()">
-          <input type="radio" id="cotReasoning" name="reasoningMethod" value="cot">
-          <div class="reasoning-option-content">
-            <div class="reasoning-option-title">Chain of Thought (CoT)</div>
-            <div class="reasoning-option-description">Step-by-step reasoning with detailed explanations. Best for complex problems.</div>
+        <!-- COD Word Limit options -->
+        <div id="codOptions" class="cod-options" style="display: none;">
+          <div class="option-label">Word limit per step:</div>
+          <div class="cod-word-limit-options">
+            <div class="cod-word-limit-option" data-value="5">
+              <span class="cod-word-limit-value">5 words</span>
+              <span class="cod-word-limit-desc">Original paper recommendation</span>
+            </div>
+            <div class="cod-word-limit-option" data-value="10">
+              <span class="cod-word-limit-value">10 words</span>
+              <span class="cod-word-limit-desc">Balanced brevity and clarity</span>
+            </div>
+            <div class="cod-word-limit-option" data-value="15">
+              <span class="cod-word-limit-value">15 words</span>
+              <span class="cod-word-limit-desc">More descriptive steps</span>
+            </div>
+            <div class="cod-word-limit-option" data-value="17">
+              <span class="cod-word-limit-value">17 words</span>
+              <span class="cod-word-limit-desc">Better for complex reasoning</span>
+            </div>
+            <div class="cod-word-limit-option selected" data-value="20">
+              <span class="cod-word-limit-value">20 words</span>
+              <span class="cod-word-limit-desc">Detailed steps for math & logic</span>
+            </div>
           </div>
-          <span class="reasoning-help-icon" title="Instructs the model to think step-by-step to solve problems. Improves reasoning but uses more tokens.">ⓘ</span>
-        </div>
-        
-        <div class="reasoning-option" onclick="document.getElementById('codReasoning').click()">
-          <input type="radio" id="codReasoning" name="reasoningMethod" value="cod" checked>
-          <div class="reasoning-option-content">
-            <div class="reasoning-option-title">Chain of Draft (CoD)</div>
-            <div class="reasoning-option-description">Concise step-by-step reasoning with minimal words. Efficient token usage.</div>
+          
+          <div class="cod-examples">
+            <div class="cod-examples-header">Chain of Draft Example</div>
+            <div class="cod-example-item">
+              <div class="cod-example-question">Q: If a fabric store received 45 yards of cotton and used 2/9 of it, how many yards remain?</div>
+              <div class="cod-example-answer">A: Total: 45 yards. Used: 2/9 × 45 = 10 yards. Remaining: 45 - 10 = 35 yards. #### 35 yards</div>
+            </div>
           </div>
-          <span class="reasoning-help-icon" title="Uses minimal words per step to reduce token usage while maintaining reasoning quality.">ⓘ</span>
         </div>
       </div>
-
+      
+      <!-- NEW: Enhanced Reasoning Controls -->
       <div class="advanced-options-header">
-        <div class="advanced-options-title">
-          <span>Advanced Reasoning Options</span>
-          <span class="reasoning-help-icon" title="Configure additional reasoning capabilities">ⓘ</span>
-        </div>
+        Advanced Reasoning Options
         <label class="toggle-switch">
           <input type="checkbox" id="enhancedReasoningToggle" checked>
           <span class="toggle-slider"></span>
         </label>
       </div>
-
+      
       <div id="enhancedReasoningOptions" class="enhanced-reasoning">
-        <div class="reasoning-option" onclick="document.getElementById('adaptiveReasoning').click()">
+        <div class="enhanced-reasoning-option">
           <input type="radio" id="adaptiveReasoning" name="reasoningEnhancement" value="adaptive" checked>
-          <div class="reasoning-option-content">
-            <div class="reasoning-option-title">
-              Adaptive Reasoning
-              <span class="auto-detection-badge"><span class="indicator"></span>Auto</span>
-            </div>
-            <div class="reasoning-option-description">
-              Automatically adjusts reasoning depth based on problem complexity.
-            </div>
-          </div>
+          <label for="adaptiveReasoning">Adaptive Reasoning</label>
+          <span class="auto-detection-badge"><span class="indicator"></span>Auto</span>
         </div>
-
-        <div class="reasoning-option" onclick="document.getElementById('standardReasoning').click()">
-          <input type="radio" id="fixedReasoning" name="reasoningEnhancement" value="standard">
-          <div class="reasoning-option-content">
-            <div class="reasoning-option-title">Fixed Reasoning Depth</div>
-            <div class="reasoning-option-description">
-              Uses the same reasoning approach regardless of complexity.
-            </div>
-          </div>
+        <div class="option-description">
+          Automatically increases reasoning depth for complex problems (math, logic, multi-step reasoning).
         </div>
-
+        
+        <div class="enhanced-reasoning-option">
+          <input type="radio" id="standardReasoning" name="reasoningEnhancement" value="standard">
+          <label for="standardReasoning">Fixed Reasoning Depth</label>
+        </div>
+        <div class="option-description">
+          Uses the same reasoning approach for all problems regardless of complexity.
+        </div>
+        
         <div class="problem-analyzer">
           <div class="analyzer-title">
-            <span class="analyzer-icon">🔍</span>
-            Problem Complexity Detection
+            <span class="analyzer-icon">🔍</span> Problem Complexity Detection
           </div>
           <div class="analyzer-help">
-            When adaptive reasoning is enabled, the system automatically analyzes:
-            <ul>
+            When adaptive reasoning is enabled, the system will automatically analyze your questions to detect:
+            <ul style="margin-top: 5px; padding-left: 20px; font-size: 0.85rem;">
               <li>Mathematical expressions and calculations</li>
               <li>Multi-step reasoning requirements</li>
               <li>Logical dependencies and constraints</li>
               <li>Complex or abstract concepts</li>
             </ul>
             For complex problems, the model will use more detailed reasoning steps even with CoD.
+          </div>
+        </div>
+      </div>
+
+      <!-- Replace Self-Consistency Section with Self-Reflection -->
+      <div class="advanced-options-header">
+        Self-Reflection for Chain of Draft
+        <label class="toggle-switch">
+          <input type="checkbox" id="selfReflectionToggle" checked>
+          <span class="toggle-slider"></span>
+        </label>
+      </div>
+
+      <div id="selfReflectionInfo" class="enhanced-reasoning">
+        <div class="option-description">
+          Adds a reflection step after reasoning to help the model verify its own work and catch mistakes.
+        </div>
+        
+        <div class="problem-analyzer">
+          <div class="analyzer-title">
+            <span class="analyzer-icon">🔍</span> How Self-Reflection Works
+          </div>
+          <div class="analyzer-help">
+            When using Chain of Draft with self-reflection:
+            <ul style="margin-top: 5px; padding-left: 20px; font-size: 0.85rem;">
+              <li>The model reasons step-by-step as usual</li>
+              <li>Before concluding, it adds a reflection step to check for errors</li>
+              <li>This helps identify calculation mistakes, misunderstandings, or logic errors</li>
+              <li>The reflection is highlighted in the UI for easy identification</li>
+            </ul>
+            This approach improves accuracy with a single API call, unlike self-consistency which required multiple calls.
           </div>
         </div>
       </div>
@@ -4172,30 +4227,30 @@ A: First segment: The car travels at 60 mph for 2 hours, so the distance covered
       
       // Model information database
       const modelInfo = {
+        "qwen-qwq-32b": {
+          name: "Qwen QWQ (32B)",
+          tags: ["32B", "Fast", "Efficient"],
+          description: "Optimized version of Qwen model focused on quick responses while maintaining high quality output."
+        },
         "qwen-2.5-coder-32b": {
           name: "Qwen 2.5 Coder (32B)",
           tags: ["32B", "Coding", "Reasoning"],
           description: "Alibaba's Qwen 2.5 Coder model specialized for programming tasks with strong reasoning capabilities."
+        },
+        "llama-3.2-90b-vision-preview": {
+          name: "Llama 3.2 Vision (90B)",
+          tags: ["90B", "Vision", "Multimodal"],
+          description: "Meta's vision-enabled Llama model capable of understanding both text and images with enhanced reasoning capabilities."
         },
         "llama-3.3-70b-versatile": {
           name: "Llama 3.3 (70B)",
           tags: ["70B", "Versatile", "Advanced"],
           description: "Meta's Llama 3.3 70B model offering strong performance across a wide range of tasks with advanced reasoning capabilities."
         },
-        "mixtral-8x7b-32768": {
-          name: "Mixtral 8x7B",
-          tags: ["MoE", "General", "Balanced"],
-          description: "Mixture of Experts model offering strong performance across diverse tasks with extended context window."
-        },
-        "qwen-qwq-32b": {
-          name: "Qwen QWQ (32B)",
-          tags: ["32B", "Fast", "Efficient"],
-          description: "Optimized version of Qwen model focused on quick responses while maintaining high quality output."
-        },
-        "llama-3.2-90b-vision-preview": {
-          name: "Llama 3.2 Vision (90B)",
-          tags: ["90B", "Vision", "Multimodal"],
-          description: "Meta's vision-enabled Llama model capable of understanding both text and images with enhanced reasoning capabilities."
+        "deepseek-r1-distill-qwen-32b": {
+          name: "DeepSeek R1 Distill Qwen (32B)",
+          tags: ["32B", "Distilled", "Efficient"],
+          description: "DeepSeek's distilled version of Qwen model optimized for efficient performance while maintaining strong capabilities."
         }
       };
       
