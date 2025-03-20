@@ -79,9 +79,9 @@ exports.handler = async function(event, context) {
     
     while (retries > 0) {
       try {
-        // Set up abort controller for timeout
+        // Set up abort controller for timeout - increased from 60000 to 180000 (3 minutes)
         const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 60000); // 60-second timeout
+        const timeoutId = setTimeout(() => controller.abort(), 180000); // 3-minute timeout
         
         // Log request size for debugging
         const requestSize = JSON.stringify(requestBody).length;
