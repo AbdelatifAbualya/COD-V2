@@ -1,10 +1,13 @@
 {
-  "name": "llm-playground-cot-cod",
-  "version": "1.1.0",
-  "description": "LLM Playground for comparing Chain of Thought and Chain of Draft reasoning with file upload support and 128K context window",
+  "name": "apiProxy",
+  "version": "1.0.0",
+  "description": "API Proxy for LLM Playground",
+  "main": "app.js",
   "dependencies": {
+    "aws-serverless-express": "^3.3.5",
+    "body-parser": "^1.19.0",
+    "express": "^4.17.1",
     "node-fetch": "^2.6.7",
-    "buffer": "^6.0.3",
     "abort-controller": "^3.0.0"
   },
   "engines": {
