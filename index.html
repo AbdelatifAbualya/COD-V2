@@ -3516,20 +3516,6 @@ A: First segment: The car travels at 60 mph for 2 hours, so the distance covered
       const modelTags = document.getElementById('modelTags');
       const modelDescription = document.getElementById('modelDescription');
       
-      // Model information database for models
-      const modelInfo = {
-        "qwen-qwq-32b": {
-          name: "Qwen QWQ (32B)",
-          tags: ["32B", "128K Context", "Alibaba Cloud"],
-          description: "Alibaba Cloud's Qwen QWQ model with 128K context window."
-        },
-        "deepseek-r1-distill-llama-70b-specdec": {
-          name: "DeepSeek R1 Distill LLaMA (70B)",
-          tags: ["70B", "128K Context", "16,384 Spec"],
-          description: "DeepSeek's 70B distilled LLaMA model with specialized decoding and 128K context window."
-        }
-      };
-      
       // Clear existing options except the default one
       while (modelSelect.options.length > 1) {
         modelSelect.remove(1);
@@ -3593,12 +3579,12 @@ A: First segment: The car travels at 60 mph for 2 hours, so the distance covered
         }
       }
       
-      // Set model button
+      // Set model button handler
       setModelBtn.addEventListener('click', () => {
-        const modelName = modelSelect.value;
-        if (modelName) {
-          MODEL_NAME = modelName;
-          MODEL_NAME_DISPLAY = modelInfo[modelName] ? modelInfo[modelName].name : getModelDisplayName(modelName);
+        const selectedValue = modelSelect.value;
+        if (selectedValue) {
+          MODEL_NAME = selectedValue;
+          MODEL_NAME_DISPLAY = modelInfo[selectedValue]?.name || selectedValue;
           updateCurrentModelDisplay();
           showNotification('Model set: ' + MODEL_NAME_DISPLAY);
         } else {
@@ -3876,9 +3862,14 @@ Separate your steps with periods. Write your final answer after the #### separat
         
         // Save model name from dropdown
         const modelSelect = document.getElementById("modelSelect");
-        if (modelSelect) {
+        if (modelSelect && modelSelect.value) {
           MODEL_NAME = modelSelect.value;
-          MODEL_NAME_DISPLAY = modelInfo[MODEL_NAME]?.name || getModelDisplayName(MODEL_NAME);
+          MODEL_NAME_DISPLAY = modelInfo[MODEL_NAME]?.name || MODEL_NAME;
+          console.log("Selected model:", MODEL_NAME);
+        } else {
+          console.error("No model selected");
+          showNotification("Please select a model");
+          return;
         }
         
         // Save reasoning method
@@ -3892,7 +3883,6 @@ Separate your steps with periods. Write your final answer after the #### separat
         
         // Save COD word limit if applicable
         if (REASONING_METHOD === "cod") {
-          // Get the selected CoD word limit option
           const selectedOption = document.querySelector('.cod-word-limit-option.selected');
           if (selectedOption) {
             COD_WORD_LIMIT = parseInt(selectedOption.getAttribute('data-value'));
@@ -3926,8 +3916,7 @@ Separate your steps with periods. Write your final answer after the #### separat
         };
         
         TEMPERATURE = getNumericValue("temp", 0.5, parseFloat);
-        // Add this line - Qroq API can sometimes reject 0 as a temperature value
-        if (TEMPERATURE === 0) TEMPERATURE = 0.01; // Ensure minimum value for Qroq API
+        if (TEMPERATURE === 0) TEMPERATURE = 0.01;
         
         TOP_P = getNumericValue("topP", 0.9, parseFloat);
         MAX_TOKENS = getNumericValue("maxTokens", 1112, parseInt);
@@ -3967,7 +3956,7 @@ Separate your steps with periods. Write your final answer after the #### separat
         }
       } catch (err) {
         console.error("Error in saveSettings:", err);
-        showNotification("Error saving settings");
+        showNotification("Error saving settings: " + err.message);
       }
     }
 
