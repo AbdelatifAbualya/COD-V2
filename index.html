@@ -3299,8 +3299,11 @@ A: First segment: The car travels at 60 mph for 2 hours, so the distance covered
           model: MODEL_NAME,
           messages: messagesForApi,
           temperature: TEMPERATURE,
-          max_tokens: MAX_TOKENS
+          max_tokens: MAX_TOKENS,
+          top_p: TOP_P
         };
+        
+        console.log(`Using max_tokens: ${MAX_TOKENS} for self-consistency paths`);
         
         try {
           // Generate multiple reasoning paths SEQUENTIALLY
@@ -3567,7 +3570,7 @@ A: First segment: The car travels at 60 mph for 2 hours, so the distance covered
         if (wordCountRequest) {
           console.log(`Final answer word limit requested: ${wordCountRequest} words`);
         }
-        console.log(`Parameters: temp=${TEMPERATURE}, top_p=${TOP_P}`);
+        console.log(`Parameters: temp=${TEMPERATURE}, top_p=${TOP_P}, max_tokens=${MAX_TOKENS}`);
 
         try {
           // Add timestamp to URL to prevent caching
