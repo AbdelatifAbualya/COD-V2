@@ -11,7 +11,7 @@
   "keywords": [
     "api-proxy",
     "llm",
-    "serverless",
+    "cod",
     "lambda"
   ],
   "author": "Your Name",
@@ -28,6 +28,6 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/yourusername/llm-playground"
+    "url": "https://github.com/AbdelatifAbualya/COD-V2"
   }
 }
