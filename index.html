@@ -145,6 +145,183 @@
     gap: 8px;
     flex-direction: column;
   }
+  
+  /* Self-consistency results styling */
+  .self-consistency-results {
+    margin-top: 15px;
+    padding-top: 12px;
+    border-top: 1px dotted #444;
+  }
+  
+  .sc-header {
+    font-size: 0.8rem;
+    color: #90cdf4;
+    margin-bottom: 10px;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+  }
+  
+  .sc-icon {
+    margin-right: 6px;
+    font-size: 1rem;
+  }
+  
+  .sc-content {
+    font-size: 0.85rem;
+    color: #ddd;
+  }
+  
+  .sc-agreement {
+    margin-bottom: 8px;
+  }
+  
+  .sc-label {
+    margin-bottom: 5px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.85rem;
+  }
+  
+  .sc-progress-container {
+    height: 6px;
+    background-color: #2a3746;
+    border-radius: 3px;
+    overflow: hidden;
+    margin-top: 4px;
+  }
+  
+  .sc-progress-bar {
+    height: 100%;
+    background: linear-gradient(90deg, #4a8cff, #63b3ed);
+    border-radius: 3px;
+  }
+  
+  /* Enhanced agreement styling */
+  .sc-progress-bar.high-agreement {
+    background: linear-gradient(90deg, #48bb78, #68d391);
+  }
+  
+  .sc-progress-bar.medium-agreement {
+    background: linear-gradient(90deg, #ecc94b, #f6e05e);
+  }
+  
+  .sc-progress-bar.low-agreement {
+    background: linear-gradient(90deg, #e53e3e, #fc8181);
+  }
+  
+  /* Statistics section styling */
+  .sc-stats {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 12px;
+    padding: 8px 0;
+    border-top: 1px dotted #444;
+    border-bottom: 1px dotted #444;
+  }
+  
+  .sc-stat-item {
+    text-align: center;
+    flex: 1;
+  }
+  
+  .sc-stat-label {
+    font-size: 0.75rem;
+    color: #888;
+    margin-bottom: 4px;
+  }
+  
+  .sc-stat-value {
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: #90cdf4;
+  }
+  
+  /* Path toggle and details */
+  .sc-path-toggle {
+    display: flex;
+    align-items: center;
+    background-color: #2c3b4f;
+    padding: 8px 12px;
+    border-radius: 4px;
+    margin-top: 12px;
+    cursor: pointer;
+    font-size: 0.85rem;
+    transition: background-color 0.2s ease;
+  }
+  
+  .sc-path-toggle:hover {
+    background-color: #3a4d64;
+  }
+  
+  .sc-path-toggle-icon {
+    margin-right: 8px;
+    font-size: 0.7rem;
+  }
+  
+  .sc-path-details {
+    display: none;
+    padding: 10px;
+    background-color: #252b38;
+    border-radius: 4px;
+    margin-top: 8px;
+  }
+  
+  .sc-path-details.visible {
+    display: block;
+  }
+  
+  .sc-path-item {
+    padding: 8px;
+    border-bottom: 1px solid #3d4e63;
+    margin-bottom: 8px;
+    font-size: 0.8rem;
+    color: #bbb;
+  }
+  
+  .sc-path-item:last-child {
+    border-bottom: none;
+    margin-bottom: 0;
+  }
+  
+  .sc-badge {
+    display: inline-block;
+    padding: 2px 6px;
+    border-radius: 3px;
+    font-size: 0.7rem;
+    margin-left: 8px;
+  }
+  
+  .sc-badge-agreement {
+    background-color: rgba(72, 187, 120, 0.2);
+    color: #68d391;
+  }
+  
+  .sc-badge-disagreement {
+    background-color: rgba(229, 62, 62, 0.2);
+    color: #fc8181;
+  }
+
+  .sc-paths {
+    margin-top: 12px;
+    font-size: 0.8rem;
+  }
+  
+  .sc-path-info {
+    margin-bottom: 5px;
+    color: #aaa;
+  }
+  
+  .sc-toggle {
+    cursor: pointer;
+    color: #90cdf4;
+    user-select: none;
+    font-size: 0.75rem;
+    text-decoration: underline;
+    margin-top: 5px;
+    display: inline-block;
+  }
     .sidebar button {
       width: 100%;
       margin-top: 0.5rem;
@@ -2806,6 +2983,13 @@ A: First segment: The car travels at 60 mph for 2 hours, so the distance covered
               answerContent.innerHTML = transformMessage(formatFinalAnswer(answerText));
               answerDiv.appendChild(answerContent);
               
+              // Add self-consistency results in a dedicated, styled section
+              if (msg.selfConsistency || msg.selfConsistencyResults) {
+                // Use the appropriate property depending on your data structure
+                const scData = msg.selfConsistency || msg.selfConsistencyResults;
+                renderSelfConsistencyResults(answerDiv, scData);
+              }
+              
               messageContainer.appendChild(answerDiv);
             }
             
@@ -3275,7 +3459,8 @@ A: First segment: The car travels at 60 mph for 2 hours, so the distance covered
               agreementPercentage,
               highestCount,
               completedPaths,
-              responses
+              responses,
+              mostCommonAnswer
             };
           };
           
@@ -3293,37 +3478,35 @@ A: First segment: The car travels at 60 mph for 2 hours, so the distance covered
             // Process the response to separate thinking and answer
             const processed = processBotMessage(result.bestResponse, REASONING_METHOD);
             
-            // Build an explanation of the self-consistency results
-            const selfConsistencyInfo = `
-
----
-**Self-Consistency Summary:**
-- Generated ${result.completedPaths} independent reasoning paths
-- ${result.highestCount} paths agreed on this answer (${Math.round(result.agreementPercentage)}% agreement)`;
+            // Build an explanation of the self-consistency results - replacing with empty string
+            const selfConsistencyInfo = ``;  // We'll add this information in a better way below
             
-            // Append the self-consistency info to the answer
+            // Don't append self-consistency info to the answer
             if (processed.answer) {
-              processed.answer += selfConsistencyInfo;
+              // Don't modify processed.answer here
             } else {
-              processed.answer = result.bestResponse + selfConsistencyInfo;
+              processed.answer = result.bestResponse;
             }
             
             thread.messages[placeholderIndex] = {
-              content: result.bestResponse + selfConsistencyInfo,
+              content: result.bestResponse,  // Don't append summary here
               sender: "bot",
               isPlaceholder: false,
               timestamp: new Date(),
               wordCount: (processed.thinkingWordCount || 0) + (processed.answerWordCount || 0),
               reasoningMethod: reasoningInfo,
               thinking: processed.thinking,
-              answer: processed.answer,
+              answer: processed.answer,  // Original answer without appended text
               thinkingWordCount: processed.thinkingWordCount || 0,
               answerWordCount: processed.answerWordCount || 0,
-              selfConsistencyResults: {
+              // Add detailed self-consistency results
+              selfConsistency: {
                 paths: SELF_CONSISTENCY_PATHS,
                 agreement: result.agreementPercentage,
                 agreementCount: result.highestCount,
-                allResponses: result.responses
+                totalPaths: result.completedPaths,
+                mostCommonAnswer: result.mostCommonAnswer || "Not determined",
+                allResponses: result.responses // Include all responses for detailed path view
               }
             };
           } else {
@@ -4592,27 +4775,144 @@ Separate your steps with periods. Write your final answer after the #### separat
       // Process the best response
       const processed = processBotMessage(bestResponse, REASONING_METHOD);
       
-      // Build an explanation of the self-consistency results
-      const selfConsistencySummary = `
-**Self-Consistency Summary:**
-- Generated ${responsePaths.length} independent reasoning paths
-- ${highestCount} paths agreed on this answer (${Math.round(agreementPercentage)}% agreement)
-`;
-      
-      // Append the self-consistency info to the answer
       return {
         bestResponse: bestResponse,
         processedResponse: {
           ...processed,
-          answer: processed.answer + '\n\n' + selfConsistencySummary
+          answer: processed.answer // Don't append the summary text, we'll display it separately
         },
         agreement: {
           count: highestCount,
           percentage: agreementPercentage,
           totalPaths: responsePaths.length,
-          mostCommonAnswer: mostCommonAnswerText || mostCommonAnswer
+          mostCommonAnswer: mostCommonAnswerText || mostCommonAnswer,
+          allResponses: responsePaths // Include all responses for detailed view
         }
       };
+    }
+
+    /**
+     * Renders the self-consistency results in a cleaner, more visual format
+     * @param {HTMLElement} answerDiv - The answer div container
+     * @param {Object} scData - Self-consistency data
+     */
+    function renderSelfConsistencyResults(answerDiv, scData) {
+      // Create the self-consistency container
+      const scDiv = document.createElement("div");
+      scDiv.className = "self-consistency-results";
+      
+      // Add header
+      const scHeader = document.createElement("div");
+      scHeader.className = "sc-header";
+      scHeader.innerHTML = `<span class="sc-icon">🗳️</span> Self-Consistency Voting Results`;
+      scDiv.appendChild(scHeader);
+      
+      // Main content container
+      const scContent = document.createElement("div");
+      scContent.className = "sc-content";
+      
+      // Calculate agreement percentage
+      const agreementPercent = Math.round(scData.agreement);
+      
+      // Determine agreement level for styling
+      let agreementLevel = "";
+      if (agreementPercent >= 80) {
+        agreementLevel = "high-agreement";
+      } else if (agreementPercent >= 50) {
+        agreementLevel = "medium-agreement";
+      } else {
+        agreementLevel = "low-agreement";
+      }
+      
+      // Create the agreement indicator
+      const agreementHTML = `
+        <div class="sc-agreement">
+          <div class="sc-label">
+            <span>Consensus Level</span>
+            <span>${agreementPercent}% agreement</span>
+          </div>
+          <div class="sc-progress-container">
+            <div class="sc-progress-bar ${agreementLevel}" style="width: ${agreementPercent}%"></div>
+          </div>
+        </div>
+      `;
+      
+      scContent.innerHTML = agreementHTML;
+      
+      // Add statistics section
+      const statsDiv = document.createElement("div");
+      statsDiv.className = "sc-stats";
+      
+      // Add key statistics
+      statsDiv.innerHTML = `
+        <div class="sc-stat-item">
+          <div class="sc-stat-label">TOTAL PATHS</div>
+          <div class="sc-stat-value">${scData.totalPaths}</div>
+        </div>
+        <div class="sc-stat-item">
+          <div class="sc-stat-label">AGREEING PATHS</div>
+          <div class="sc-stat-value">${scData.agreementCount}</div>
+        </div>
+        <div class="sc-stat-item">
+          <div class="sc-stat-label">HIGHEST AGREEMENT</div>
+          <div class="sc-stat-value">${agreementPercent}%</div>
+        </div>
+      `;
+      
+      scContent.appendChild(statsDiv);
+      
+      // Add paths toggle section if we have all responses
+      if (scData.allResponses && scData.allResponses.length > 0) {
+        const pathsDiv = document.createElement("div");
+        pathsDiv.className = "sc-paths";
+        
+        const toggleButton = document.createElement("div");
+        toggleButton.className = "sc-path-toggle";
+        toggleButton.innerHTML = `<span class="sc-path-toggle-icon">▶</span> Show all reasoning paths`;
+        
+        const pathDetails = document.createElement("div");
+        pathDetails.className = "sc-path-details";
+        
+        // Add individual paths
+        scData.allResponses.forEach((path, index) => {
+          // Extract just the first 100 characters for preview
+          const previewText = path.substring(0, 100).trim() + "...";
+          const pathItem = document.createElement("div");
+          pathItem.className = "sc-path-item";
+          
+          // Add a badge to indicate if this path agrees with the final answer
+          const hasAgreement = path.includes(scData.mostCommonAnswer) || 
+                               (scData.mostCommonAnswer && scData.mostCommonAnswer.startsWith("Witness") && 
+                                path.includes(scData.mostCommonAnswer.replace("Witness ", "Witness")));
+          
+          const badgeHTML = hasAgreement 
+            ? '<span class="sc-badge sc-badge-agreement">Agreeing</span>' 
+            : '<span class="sc-badge sc-badge-disagreement">Different Answer</span>';
+          
+          pathItem.innerHTML = `<strong>Path ${index + 1}:</strong> ${badgeHTML}<br>${previewText}`;
+          pathDetails.appendChild(pathItem);
+        });
+        
+        // Add toggle functionality
+        toggleButton.addEventListener("click", () => {
+          toggleButton.classList.toggle("expanded");
+          pathDetails.classList.toggle("visible");
+          
+          // Update toggle text
+          if (toggleButton.classList.contains("expanded")) {
+            toggleButton.innerHTML = `<span class="sc-path-toggle-icon">▼</span> Hide reasoning paths`;
+          } else {
+            toggleButton.innerHTML = `<span class="sc-path-toggle-icon">▶</span> Show all reasoning paths`;
+          }
+        });
+        
+        pathsDiv.appendChild(toggleButton);
+        pathsDiv.appendChild(pathDetails);
+        scContent.appendChild(pathsDiv);
+      }
+      
+      scDiv.appendChild(scContent);
+      answerDiv.appendChild(scDiv);
     }
   </script>
   <form hidden method='post' name='feedback'>
