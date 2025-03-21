@@ -1,15 +1,16 @@
 version: 1
 frontend:
   phases:
+    preBuild:
+      commands:
+        - npm ci || npm install
     build:
       commands:
-        - echo "No build commands required for this static site"
+        - npm run build
   artifacts:
     baseDirectory: /
     files:
       - '**/*'
   cache:
-    paths: []
-
-# Note: Amplify Function configurations are managed through the Amplify CLI
-# and don't need to be specified in this file
+    paths:
+      - node_modules/**/*
