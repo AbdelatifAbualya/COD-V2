@@ -2313,13 +2313,11 @@
       <label for="modelSelect">Select LLM Model</label>
       <div class="model-select-container">
         <select id="modelSelect" class="model-dropdown">
-          <option value="" disabled selected>Choose a model...</option>
-          <option value="qwen-qwq-32b">Qwen QWQ (32B)</option>
-          <option value="llama-3.3-70b-versatile">Llama 3.3 (70B)</option>
-          <option value="qwen-2.5-coder-32b">Qwen 2.5 Coder (32B)</option>
-          <option value="llama-3.2-90b-vision-preview">Llama 3.2 Vision (90B)</option>
-          <option value="deepseek-r1-distill-llama-70b-specdec">DeepSeek R1 Distill Llama (70B)</option>
-        </select>
+          <option value="" disabled="" selected="">Choose a model...</option>
+          
+          
+          
+       <option value="qwen-2.5-coder-32b">Qwen 2.5 Coder (32B)</option><option value="llama-3.3-70b-versatile">Llama 3.3 (70B)</option><option value="mixtral-8x7b-32768">Mixtral 8x7B</option><option value="qwen-qwq-32b">Qwen QWQ (32B)</option><option value="llama-3.2-90b-vision-preview">Llama 3.2 Vision (90B)</option></select>
         <div class="dropdown-arrow">▼</div>
       </div>
 
@@ -2586,7 +2584,7 @@
     let enableWebSearch = false; // Add web search global variable
     
     // Server endpoint (Netlify serverless function)
-   const API_PROXY_URL = "https://8xeq7j7094.execute-api.eu-central-1.amazonaws.com/test";
+    const API_PROXY_URL = "/.netlify/functions/api-proxy";
     
     // Reasoning Method
     let REASONING_METHOD = "cod"; // Options: "standard", "cot", "cod"
@@ -3440,10 +3438,10 @@ A: First segment: The car travels at 60 mph for 2 hours, so the distance covered
 
     // Cleanup function
     function removeGlobalSelfConsistencyVars() {
-      delete window.SELF_CONSISTENCY_ENABLED;
-      delete window.SELF_CONSISTENCY_PATHS;
-      delete window.initSelfConsistency;
-      delete window.saveSelfConsistencySettings;
+      window.SELF_CONSISTENCY_ENABLED = undefined;
+      window.SELF_CONSISTENCY_PATHS = undefined;
+      window.initSelfConsistency = undefined;
+      window.saveSelfConsistencySettings = undefined;
     }
 
     /***********************
@@ -3672,86 +3670,111 @@ A: First segment: The car travels at 60 mph for 2 hours, so the distance covered
     /***********************
      * Build Messages Array for Chat Completions
      ***********************/
-    // Model-specific COD prompts
-    const MODEL_SPECIFIC_PROMPTS = {
-      "qwen-qwq-32b": {
-        cod: `IMPORTANT: You MUST follow Chain of Draft format with EXACTLY ${COD_WORD_LIMIT} words maximum per step.
-
-Rules:
-1. Each step MUST be numbered and use MAXIMUM ${COD_WORD_LIMIT} words
-2. Use mathematical notation wherever possible
-3. NO explanations or narrative - only essential calculations and logic
-4. Separate steps with periods
-5. Final answer MUST come after #### separator
-
-Example format:
-1. Initial values: x = 5, y = 3.
-2. Calculate x + y = 8.
-3. Multiply result by 2: 8 × 2 = 16.
-#### 16
-
-Your response MUST follow this exact format with no deviations.`
-      },
-      "deepseek-r1-distill-llama-70b-specdec": {
-        cod: `STRICT FORMAT REQUIREMENT: Chain of Draft with ${COD_WORD_LIMIT} words maximum per step.
-
-FORMAT RULES:
-1. Number each step
-2. MAXIMUM ${COD_WORD_LIMIT} words per step - NO EXCEPTIONS
-3. Use mathematical notation and symbols
-4. NO explanations - only calculations and logic
-5. Separate steps with periods
-6. End with #### followed by final answer
-
-Example:
-1. Given: speed = 60 mph, time = 2h.
-2. Distance = speed × time = 60 × 2.
-3. Final distance = 120 miles.
-#### 120 miles
-
-FOLLOW THIS FORMAT EXACTLY.`
-      }
-    };
-
-    // Update buildMessagesForChat function
     function buildMessagesForChat(wordCountRequest = null) {
       const thread = threads.find(t => t.id === currentThreadId);
       if (!thread) return [];
       
       const messages = [];
+      
       let systemPrompt = "";
       
-      // Check if current model is a Qwen reasoning model
-      const isQwenModel = MODEL_NAME.toLowerCase().includes('qwen-qwq') || 
-                         MODEL_NAME.toLowerCase().includes('deepseek-r1-distill');
+      // Use enhanced reasoning for complex problems if enabled
+      let shouldUseEnhancedPrompt = false;
+      let problemType = "";
       
-      if (REASONING_METHOD === "cod" && isQwenModel) {
-        // Use model-specific COD prompt
-        systemPrompt = MODEL_SPECIFIC_PROMPTS[MODEL_NAME]?.cod || PROMPTS.cod;
+      // Determine if this is a complex problem that needs enhanced reasoning
+      if (ENHANCED_REASONING_ENABLED && REASONING_ENHANCEMENT === "adaptive") {
+        if (PROBLEM_COMPLEXITY.complexity === "complex") {
+          shouldUseEnhancedPrompt = true;
+          problemType = "complex";
+          console.log("Using enhanced prompts for complex problem detected");
+        } 
+        else if (PROBLEM_COMPLEXITY.hasMath && (PROBLEM_COMPLEXITY.multiStep || PROBLEM_COMPLEXITY.hasLogic)) {
+          // Even if not fully "complex", if it has math AND either multi-step reasoning or logic,
+          // it's still worth enhancing the prompt
+          shouldUseEnhancedPrompt = true;
+          problemType = "mathematical";
+          console.log("Using enhanced prompts for mathematical problem detected");
+        }
+      }
+      
+      // If we have a reasoning method other than standard, add the system prompt
+      if (REASONING_METHOD !== "standard") {
+        // Determine which prompt to use based on complexity and settings
+        if (shouldUseEnhancedPrompt) {
+          if (REASONING_METHOD === "cot") {
+            systemPrompt = ENHANCED_PROMPTS.cot;
+          } else if (REASONING_METHOD === "cod") {
+            // Use the appropriate CoD prompt based on word limit
+            if (COD_WORD_LIMIT === 5) {
+              systemPrompt = ENHANCED_PROMPTS.cod5;
+            } else if (COD_WORD_LIMIT === 10) {
+              systemPrompt = ENHANCED_PROMPTS.cod10;
+            } else if (COD_WORD_LIMIT === 15) {
+              systemPrompt = ENHANCED_PROMPTS.cod15;
+            } else if (COD_WORD_LIMIT === 17) {
+              systemPrompt = ENHANCED_PROMPTS.cod17;
+            } else if (COD_WORD_LIMIT === 20) {
+              systemPrompt = ENHANCED_PROMPTS.cod20;
+            } else {
+              // Fallback to standard prompt but update word limit
+              systemPrompt = PROMPTS[REASONING_METHOD].replace(/\(\d+ words maximum per step\)/, `(${COD_WORD_LIMIT} words maximum per step)`);
+            }
+          }
+        } else {
+          // Use the selected reasoning method prompt
+          systemPrompt = PROMPTS[REASONING_METHOD];
+          
+          // If it's COD, update the word limit
+          if (REASONING_METHOD === "cod") {
+            // First update the word limit
+            systemPrompt = systemPrompt.replace(/\(\d+ words maximum per step\)/, `(${COD_WORD_LIMIT} words maximum per step)`);
+            
+            // If this is a problem that needs many steps, add instructions to use more steps
+            if (PROBLEM_COMPLEXITY.estimatedSteps > 5) {
+              // Insert guidance about using sufficient steps after the first paragraph
+              const firstParagraphEnd = systemPrompt.indexOf("\n\n");
+              if (firstParagraphEnd !== -1) {
+                const beforeInsert = systemPrompt.substring(0, firstParagraphEnd);
+                const afterInsert = systemPrompt.substring(firstParagraphEnd);
+                
+                const insertText = `\n\nIMPORTANT: This problem may require ${PROBLEM_COMPLEXITY.estimatedSteps}+ reasoning steps. Use as many steps as needed to fully solve the problem - it's better to break complex reasoning into more simple steps than to skip important details.`;
+                
+                systemPrompt = beforeInsert + insertText + afterInsert;
+              }
+            }
+          }
+        }
         
-        // Add format priming exchange
+        let reasoningInfo = `${REASONING_METHOD.toUpperCase()}`;
+        if (REASONING_METHOD === "cod") {
+          reasoningInfo += `-${COD_WORD_LIMIT}`;
+        }
+        
+        if (shouldUseEnhancedPrompt) {
+          reasoningInfo += " (Enhanced for complex problem)";
+        }
+        
+        console.log(`Using ${reasoningInfo} prompt`);
+        
+        if (wordCountRequest) {
+          console.log(`Added instruction for ${wordCountRequest} word limit on final answer only`);
+        }
+        
         messages.push({
           role: "system",
           content: systemPrompt
         });
-        
-        messages.push({
-          role: "user",
-          content: `Before answering my questions, confirm you will strictly follow Chain of Draft format with MAXIMUM ${COD_WORD_LIMIT} words per step as instructed.`
-        });
-        
-        messages.push({
-          role: "assistant",
-          content: `I confirm I will strictly follow Chain of Draft format with maximum ${COD_WORD_LIMIT} words per step. I'll number each step, use mathematical notation where possible, and provide my final answer after the #### separator.`
-        });
       } else {
-        // Use standard prompts for other cases
-        if (REASONING_METHOD !== "standard") {
-          systemPrompt = PROMPTS[REASONING_METHOD];
+        console.log("Using standard reasoning (no special prompt)");
+        
+        // If word count limit was requested, add a system message for it
+        if (wordCountRequest && wordCountRequest > 0) {
           messages.push({
             role: "system",
-            content: systemPrompt
+            content: `Please limit your response to ${wordCountRequest} words maximum.`
           });
+          console.log(`Added instruction for ${wordCountRequest} word limit`);
         }
       }
       
@@ -3774,21 +3797,6 @@ FOLLOW THIS FORMAT EXACTLY.`
     async function sendMessage(message) {
       // Get web search state
       const webSearchEnabled = localStorage.getItem('webSearchEnabled') === 'true';
-      
-      // Check if current model is a Qwen reasoning model
-      const isQwenModel = MODEL_NAME.toLowerCase().includes('qwen-qwq') || 
-                         MODEL_NAME.toLowerCase().includes('deepseek-r1-distill');
-      
-      // Adjust parameters for Qwen models using COD
-      let tempTemp = TEMPERATURE;
-      let tempTopP = TOP_P;
-      
-      if (REASONING_METHOD === "cod" && isQwenModel) {
-        // Use stricter parameters for Qwen models with COD
-        tempTemp = 0.15;
-        tempTopP = 0.85;
-        console.log("Using stricter parameters for Qwen model with COD");
-      }
       
       // NEW: Analyze problem complexity if enhanced reasoning is enabled
       if (ENHANCED_REASONING_ENABLED && REASONING_ENHANCEMENT === "adaptive") {
@@ -3831,8 +3839,8 @@ FOLLOW THIS FORMAT EXACTLY.`
       const payload = {
         model: MODEL_NAME,
         max_tokens: MAX_TOKENS,
-        top_p: tempTopP,
-        temperature: tempTemp,
+        top_p: TOP_P,
+        temperature: TEMPERATURE,
         messages: messagesForApi,
         enableWebSearch: webSearchEnabled
       };
@@ -3844,7 +3852,7 @@ FOLLOW THIS FORMAT EXACTLY.`
       if (webSearchEnabled) {
         console.log('Web search is enabled for this request');
       }
-      console.log(`Parameters: temp=${tempTemp}, top_p=${tempTopP}`);
+      console.log(`Parameters: temp=${TEMPERATURE}, top_p=${TOP_P}`);
 
       try {
         // Add timestamp to URL to prevent caching
@@ -4120,11 +4128,6 @@ FOLLOW THIS FORMAT EXACTLY.`
           tags: ["32B", "Fast", "Efficient"],
           description: "Optimized version of Qwen model focused on quick responses while maintaining high quality output."
         },
-        "llama-3.3-70b-versatile": {
-          name: "Llama 3.3 (70B)",
-          tags: ["70B", "Versatile", "Advanced"],
-          description: "Meta's Llama 3.3 70B model offering strong performance across a wide range of tasks with advanced reasoning capabilities."
-        },
         "qwen-2.5-coder-32b": {
           name: "Qwen 2.5 Coder (32B)",
           tags: ["32B", "Coding", "Reasoning"],
@@ -4135,10 +4138,15 @@ FOLLOW THIS FORMAT EXACTLY.`
           tags: ["90B", "Vision", "Multimodal"],
           description: "Meta's vision-enabled Llama model capable of understanding both text and images with enhanced reasoning capabilities."
         },
-        "deepseek-r1-distill-llama-70b-specdec": {
-          name: "DeepSeek R1 Distill Llama (70B)",
-          tags: ["70B", "Distilled", "Specialized"],
-          description: "DeepSeek's distilled version of Llama model optimized for specialized tasks with efficient performance."
+        "llama-3.3-70b-versatile": {
+          name: "Llama 3.3 (70B)",
+          tags: ["70B", "Versatile", "Advanced"],
+          description: "Meta's Llama 3.3 70B model offering strong performance across a wide range of tasks with advanced reasoning capabilities."
+        },
+        "deepseek-r1-distill-qwen-32b": {
+          name: "DeepSeek R1 Distill Qwen (32B)",
+          tags: ["32B", "Distilled", "Efficient"],
+          description: "DeepSeek's distilled version of Qwen model optimized for efficient performance while maintaining strong capabilities."
         }
       };
       
@@ -4250,23 +4258,8 @@ FOLLOW THIS FORMAT EXACTLY.`
       const codOptions = document.getElementById('codOptions');
       if (!codOptions) return;
       
-      // Check if current model is a Qwen reasoning model
-      const isQwenModel = MODEL_NAME.toLowerCase().includes('qwen-qwq') || 
-                         MODEL_NAME.toLowerCase().includes('deepseek-r1-distill');
-      
       codOptions.innerHTML = `
         <div class="option-label">Word limit per step:</div>
-        ${isQwenModel ? `
-        <div class="word-limit-warning" style="
-          background-color: rgba(255, 193, 7, 0.1);
-          border: 1px solid rgba(255, 193, 7, 0.3);
-          border-radius: var(--radius-sm);
-          padding: 10px;
-          margin-bottom: 15px;
-          color: #ffc107;
-          font-size: 0.9rem;">
-          <strong>Note:</strong> For Qwen reasoning models, a word limit of 15-20 words is recommended for best results.
-        </div>` : ''}
         <div class="cod-word-limit-options">
           <div class="cod-word-limit-option ${COD_WORD_LIMIT === 5 ? 'selected' : ''}" data-value="5">
             <span class="cod-word-limit-value">5 words</span>
@@ -4298,14 +4291,6 @@ FOLLOW THIS FORMAT EXACTLY.`
           </div>
         </div>
       `;
-      
-      // If it's a Qwen model, pre-select 15 words
-      if (isQwenModel && COD_WORD_LIMIT < 15) {
-        const option15 = codOptions.querySelector('[data-value="15"]');
-        if (option15) {
-          option15.click();
-        }
-      }
       
       // Add event listeners to the word limit options
       const wordLimitOptions = document.querySelectorAll('.cod-word-limit-option');
@@ -4757,7 +4742,7 @@ Separate your steps with periods. Write your final answer after the #### separat
             setupCODOptions();
             setupEnhancedReasoningOptions();
             setupSliders();
-            initSelfReflection();
+            initSelfConsistency();
             console.log("UI functionality setup complete");
           } catch (err) {
             console.error("Error setting up UI functionality:", err);
@@ -5013,7 +4998,7 @@ Separate your steps with periods. Write your final answer after the #### separat
             setupCODOptions();
             setupEnhancedReasoningOptions();
             setupSliders();
-            initSelfReflection();
+            initSelfConsistency();
             console.log("UI functionality setup complete");
           } catch (err) {
             console.error("Error setting up UI functionality:", err);
@@ -5234,5 +5219,6 @@ Separate your steps with periods. Write your final answer after the #### separat
 
 <script async="" id="netlify-rum-container" src="./LLM Playground (COT vs COD)_files/rum" data-netlify-rum-site-id="46b8ee21-754a-4a63-b741-fe88bac724f4" data-netlify-deploy-branch="main" data-netlify-deploy-context="production" data-netlify-cwv-token="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzaXRlX2lkIjoiNDZiOGVlMjEtNzU0YS00YTYzLWI3NDEtZmU4OGJhYzcyNGY0IiwiYWNjb3VudF9pZCI6IjY3YzU0MzUzYzc2MjdjOTUxZDZmNTU0MSIsImRlcGxveV9pZCI6IjY3Y2JjOGE0NzRlY2E1MDAwODQ5MWVhYiIsImlzc3VlciI6Im5mc2VydmVyIn0.eeKx8JPS1uEj-YKOwtWMAEBFgcCAjTWkB8RLzmCfMmI"></script>
 
-</body>
+
+<script async id="netlify-rum-container" src="/.netlify/scripts/rum" data-netlify-rum-site-id="49f667dd-e402-4fab-a0c0-7809ec627695" data-netlify-deploy-branch="main" data-netlify-deploy-context="production" data-netlify-cwv-token="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzaXRlX2lkIjoiNDlmNjY3ZGQtZTQwMi00ZmFiLWEwYzAtNzgwOWVjNjI3Njk1IiwiYWNjb3VudF9pZCI6IjY3YzU0MzUzYzc2MjdjOTUxZDZmNTU0MSIsImRlcGxveV9pZCI6IjY3ZGJmNTRjYzgxMTllMDAwODJkZTkyMiIsImlzc3VlciI6Im5mc2VydmVyIn0.gnt9v5j6g7Ba4E4C8nUFNXNfEDtkF3I_thIUVKPgCwY"></script></body>
 </html>
