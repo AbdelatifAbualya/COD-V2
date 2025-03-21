@@ -1661,7 +1661,50 @@
     </div>
   </div>
 
+  <!-- Main JavaScript -->
   <script>
+    // Improved answer normalization function
+    function improvedNormalizeAnswer(answer) {
+      if (!answer) return "";
+      
+      // Remove common prefixes
+      let normalized = answer.replace(/^(the answer is|therefore|thus|so|hence|the result is|we get|we find that|the final answer is|the value is|the solution is):\s*/i, "");
+      
+      // Trim whitespace and convert to lowercase
+      normalized = normalized.trim().toLowerCase();
+      
+      // Extract numerical values with optional units
+      const numericalMatch = normalized.match(/(\d+(\.\d+)?)/);
+      if (numericalMatch) {
+        return numericalMatch[0]; // Return just the number for matching
+      }
+      
+      // Handle common answer formats (yes/no, true/false)
+      if (/^(yes|no|true|false)(\.|!|\s|$)/i.test(normalized)) {
+        return normalized.match(/^(yes|no|true|false)/i)[0].toLowerCase();
+      }
+      
+      // Handle letter answers (A, B, C, D, etc.)
+      if (/^(option\s+)?[a-d](\.|!|\s|$)/i.test(normalized)) {
+        return normalized.match(/[a-d]/i)[0].toLowerCase();
+      }
+      
+      // Remove units but preserve the core meaning
+      const unitRegex = /\b(dollars|inches|feet|meters|pounds|kg|miles|km|years|days|hours|minutes|seconds|percent|degrees|watts|volts|amps|\$|%|°C|°F)\b/gi;
+      normalized = normalized.replace(unitRegex, " ");
+      
+      // Remove articles and common helping verbs
+      normalized = normalized.replace(/\b(the|a|an|is|are|was|were|has|have|had|be|being|been|will|would|should|could|can|may|might)\b/gi, " ");
+      
+      // Remove punctuation and excess whitespace
+      normalized = normalized.replace(/[^\w\s]/g, " ").replace(/\s+/g, " ").trim();
+      
+      return normalized;
+    }
+    
+    // Global Variables and Settings
+    // ... existing code ...
+
     /***********************
      * Model Information
      ***********************/
@@ -2195,36 +2238,15 @@ A: First segment: The car travels at 60 mph for 2 hours, so the distance covered
 
     // Helper function to normalize answers for better matching
     function normalizeAnswer(answer) {
+      if (!answer) return "";
+      // Convert to lowercase and trim whitespace
+      let normalized = answer.toLowerCase().trim();
       // Remove common prefixes
-      let normalized = answer.replace(/^(the answer is|therefore|thus|so|hence|the result is|we get|we find that|the final answer is|the value is|the solution is):\s*/i, "");
-      
-      // Check for numerical answers first
-      const numericalMatch = normalized.match(/(\d+(\.\d+)?)/);
-      if (numericalMatch) {
-        return numericalMatch[0]; // Return just the number for matching
-      }
-      
-      // Remove units for better matching (but preserve them for display)
-      const unitRegex = /\b(dollars|inches|feet|meters|pounds|kg|miles|km|years|days|hours|minutes|seconds|percent|degrees|watts|volts|amps|\$|%|°C|°F)\b/gi;
-      
-      // Store the units to preserve the full answer
-      const units = answer.match(unitRegex) || [];
-      
-      // Temporarily remove units for comparison
-      normalized = normalized.replace(unitRegex, "");
-      
-      // Remove common formatting and punctuation
-      normalized = normalized.replace(/[.,;:!\s]+/g, " ").trim();
-      
-      // More aggressive cleaning for longer text answers
-      normalized = normalized.replace(/\b(the|a|an|is|are|was|were|has|have|had|be|being|been|will|would|should|could|can|may|might)\b/gi, "");
-      
-      // Remove extra whitespace
+      normalized = normalized.replace(/^(the answer is|therefore|thus|so|hence):\s*/i, "");
+      // Remove punctuation
+      normalized = normalized.replace(/[^\w\s]/g, "");
+      // Remove extra spaces
       normalized = normalized.replace(/\s+/g, " ").trim();
-      
-      // Convert to lowercase for case-insensitive comparison
-      normalized = normalized.toLowerCase();
-      
       return normalized;
     }
 
@@ -3058,12 +3080,13 @@ A: First segment: The car travels at 60 mph for 2 hours, so the distance covered
               // Create a modified payload with slightly different temperature
               // Use smaller increments (0.02 instead of 0.05) to prevent too much diversity
               const pathPayload = {
-                ...basePayload
+                ...basePayload,
+                temperature: TEMPERATURE + (i * 0.02) // Increment temperature by 0.02 for each path
               };
               
               // Only modify temperature if using more than one path
               if (SELF_CONSISTENCY_PATHS > 1) {
-                pathPayload.temperature = basePayload.parameters.temperature + (i * 0.02);
+                pathPayload.temperature = TEMPERATURE + (i * 0.02);
               }
               
               try {
@@ -4406,45 +4429,6 @@ Separate your steps with periods. Write your final answer after the #### separat
       if (bytes < 1024) return bytes + ' bytes';
       else if (bytes < 1048576) return (bytes / 1024).toFixed(1) + ' KB';
       else return (bytes / 1048576).toFixed(1) + ' MB';
-    }
-
-    // Add this improved answer normalization function
-    function improvedNormalizeAnswer(answer) {
-      if (!answer) return "";
-      
-      // Remove common prefixes
-      let normalized = answer.replace(/^(the answer is|therefore|thus|so|hence|the result is|we get|we find that|the final answer is|the value is|the solution is):\s*/i, "");
-      
-      // Trim whitespace and convert to lowercase
-      normalized = normalized.trim().toLowerCase();
-      
-      // Extract numerical values with optional units
-      const numericalMatch = normalized.match(/(\d+(\.\d+)?)/);
-      if (numericalMatch) {
-        return numericalMatch[0]; // Return just the number for matching
-      }
-      
-      // Handle common answer formats (yes/no, true/false)
-      if (/^(yes|no|true|false)(\.|!|\s|$)/i.test(normalized)) {
-        return normalized.match(/^(yes|no|true|false)/i)[0].toLowerCase();
-      }
-      
-      // Handle letter answers (A, B, C, D, etc.)
-      if (/^(option\s+)?[a-d](\.|!|\s|$)/i.test(normalized)) {
-        return normalized.match(/[a-d]/i)[0].toLowerCase();
-      }
-      
-      // Remove units but preserve the core meaning
-      const unitRegex = /\b(dollars|inches|feet|meters|pounds|kg|miles|km|years|days|hours|minutes|seconds|percent|degrees|watts|volts|amps|\$|%|°C|°F)\b/gi;
-      normalized = normalized.replace(unitRegex, " ");
-      
-      // Remove articles and common helping verbs
-      normalized = normalized.replace(/\b(the|a|an|is|are|was|were|has|have|had|be|being|been|will|would|should|could|can|may|might)\b/gi, " ");
-      
-      // Remove punctuation and excess whitespace
-      normalized = normalized.replace(/[^\w\s]/g, " ").replace(/\s+/g, " ").trim();
-      
-      return normalized;
     }
   </script>
   <form hidden method='post' name='feedback'>
