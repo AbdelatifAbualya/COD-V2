@@ -1762,6 +1762,8 @@
   
 Separate your steps with periods. Write your final answer after the #### separator.
 
+IMPORTANT: Always include a clear final answer after the #### separator. For questions asking to identify something or someone specific, make your conclusion explicit (e.g., "The answer is X" or "X is the correct choice").
+
 Examples:
 Q: Jason had 20 lollipops. He gave Denny some lollipops. Now Jason has 12 lollipops. How many lollipops did Jason give to Denny?
 A: 20 initial. 12 remaining. 20 - 12 = 8. #### 8 lollipops
@@ -1776,7 +1778,10 @@ Q: If a fabric store received 45 yards of cotton material and used 2/9 of it for
 A: Total: 45 yards. Used: 2/9 × 45 = 10 yards. Remaining: 45 - 10 = 35 yards. #### 35 yards
 
 Q: The temperature on Monday was -3°C. On Tuesday, it was 14°C. What was the change in temperature from Monday to Tuesday?
-A: Monday: -3°C. Tuesday: 14°C. Change: 14 - (-3) = 17°C. #### 17°C`
+A: Monday: -3°C. Tuesday: 14°C. Change: 14 - (-3) = 17°C. #### 17°C
+
+Q: In a logic puzzle with three witnesses, only one of them is a Knight who always tells the truth. Based on their statements, which witness is the Knight?
+A: Witness 1 claims 3 is Knight. Witness 2 claims not Knight. Witness 3 claims not Knight. If 1 is Knight, contradictions appear. If 2 is Knight, consistent. If 3 is Knight, contradictions appear. #### Witness 2 is the Knight.`
     };
     
     // NEW: Enhanced prompts for complex problems with different word limits
@@ -2478,6 +2483,31 @@ A: First segment: The car travels at 60 mph for 2 hours, so the distance covered
           let thinking = content.substring(0, separatorIndex).trim();
           let answer = content.substring(separatorIndex + 4).trim();
           
+          // If we have no meaningful answer after #### but this appears to be the end of reasoning
+          if (!answer || answer.length < 2) {
+            // Look for common conclusion patterns in the last portion of the thinking
+            const conclusionIndicators = [
+              /Therefore[,:]?\s+(.*)/i,
+              /Thus[,:]?\s+(.*)/i,
+              /Hence[,:]?\s+(.*)/i,
+              /So[,:]?\s+(.*)/i,
+              /The answer is[:]?\s+(.*)/i,
+              /In conclusion[,:]?\s+(.*)/i,
+              /Finally[,:]?\s+(.*)/i
+            ];
+            
+            // Take the last 30% of the thinking text to look for conclusions
+            const searchArea = thinking.substring(Math.floor(thinking.length * 0.7));
+            
+            for (const pattern of conclusionIndicators) {
+              const match = searchArea.match(pattern);
+              if (match && match[1]) {
+                answer = match[1].trim();
+                break;
+              }
+            }
+          }
+          
           return {
             content: content,
             thinking: thinking,
@@ -2492,6 +2522,39 @@ A: First segment: The car travels at 60 mph for 2 hours, so the distance covered
             "Therefore", "Thus", "Hence", "So", "Result", "Answer", "Finally", 
             "In conclusion", "The answer is", "This gives us"
           ];
+          
+          // Look for logical conclusion patterns that might appear in the last part of the text
+          let lastConclusionIndex = -1;
+          let conclusionText = "";
+          
+          // Examine the last 30% of the content for conclusion markers
+          const searchStartPos = Math.floor(content.length * 0.7);
+          const lastPortion = content.substring(searchStartPos);
+          
+          for (const phrase of conclusionPhrases) {
+            const phraseIndex = lastPortion.indexOf(phrase);
+            if (phraseIndex !== -1) {
+              const absoluteIndex = searchStartPos + phraseIndex;
+              if (absoluteIndex > lastConclusionIndex) {
+                lastConclusionIndex = absoluteIndex;
+                conclusionText = phrase;
+              }
+            }
+          }
+          
+          // If we found a conclusion phrase
+          if (lastConclusionIndex !== -1) {
+            const thinking = content.substring(0, lastConclusionIndex).trim();
+            const answer = content.substring(lastConclusionIndex).trim();
+            
+            return {
+              content: content,
+              thinking: thinking,
+              answer: answer,
+              thinkingWordCount: countWords(thinking),
+              answerWordCount: countWords(answer)
+            };
+          }
           
           // Split by periods to identify steps
           const parts = content.split('.');
@@ -2721,6 +2784,15 @@ A: First segment: The car travels at 60 mph for 2 hours, so the distance covered
             
             // If we have an answer (for CoD, CoT or Standard)
             if (msg.answer) {
+              // Check for duplicate content (where answer contains thinking)
+              let answerText = msg.answer;
+              if (msg.thinking && answerText.includes(msg.thinking)) {
+                // Answer contains full thinking - extract just the unique part
+                answerText = answerText.substring(msg.thinking.length).trim();
+                // If the remaining answer starts with a period or common separator, remove it
+                answerText = answerText.replace(/^[.,;:\s]+/, '');
+              }
+              
               const answerDiv = document.createElement("div");
               answerDiv.className = "final-answer";
               
@@ -2730,8 +2802,8 @@ A: First segment: The car travels at 60 mph for 2 hours, so the distance covered
               answerDiv.appendChild(answerLabel);
               
               const answerContent = document.createElement("div");
-              // Use our new formatting function here
-              answerContent.innerHTML = transformMessage(formatFinalAnswer(msg.answer));
+              // Use our new formatting function here with the deduplicated answer
+              answerContent.innerHTML = transformMessage(formatFinalAnswer(answerText));
               answerDiv.appendChild(answerContent);
               
               messageContainer.appendChild(answerDiv);
@@ -4429,6 +4501,118 @@ Separate your steps with periods. Write your final answer after the #### separat
       if (bytes < 1024) return bytes + ' bytes';
       else if (bytes < 1048576) return (bytes / 1024).toFixed(1) + ' KB';
       else return (bytes / 1048576).toFixed(1) + ' MB';
+    }
+
+    /***********************
+     * Helper function to extract Knight identity for logical puzzles
+     ***********************/
+    function extractKnightIdentity(answer) {
+      const witnessMatch = answer.match(/witness\s*(\d+)/i);
+      if (witnessMatch && witnessMatch[1]) {
+        return parseInt(witnessMatch[1]);
+      }
+      return null;
+    }
+
+    /***********************
+     * Process multiple reasoning paths and find the most common answer
+     ***********************/
+    function processConsistencyPaths(responsePaths) {
+      // Count occurrences of each unique answer
+      const answerCounts = {};
+      const processedPaths = [];
+      
+      responsePaths.forEach(path => {
+        // Get the processed version of this path
+        const processed = processBotMessage(path, REASONING_METHOD);
+        processedPaths.push(processed);
+        
+        // Extract the answer only
+        if (processed.answer) {
+          // Use the full answer text as the key
+          const answerKey = processed.answer.trim();
+          answerCounts[answerKey] = (answerCounts[answerKey] || 0) + 1;
+          
+          // If this is a logic puzzle about knights, also track witness numbers
+          const witnessIdentity = extractKnightIdentity(processed.answer);
+          if (witnessIdentity) {
+            const witnessKey = `Witness ${witnessIdentity}`;
+            answerCounts[witnessKey] = (answerCounts[witnessKey] || 0) + 1;
+          }
+        }
+      });
+      
+      // Find the most common answer
+      let highestCount = 0;
+      let mostCommonAnswer = null;
+      let mostCommonAnswerText = null;
+      
+      Object.keys(answerCounts).forEach(answer => {
+        if (answerCounts[answer] > highestCount) {
+          highestCount = answerCounts[answer];
+          mostCommonAnswer = answer;
+          
+          // Find the full text of the most common answer
+          processedPaths.forEach(path => {
+            if (path.answer && path.answer.trim() === answer) {
+              mostCommonAnswerText = path.answer;
+            } else if (answer.startsWith("Witness ") && extractKnightIdentity(path.answer) === parseInt(answer.replace("Witness ", ""))) {
+              mostCommonAnswerText = path.answer;
+            }
+          });
+        }
+      });
+      
+      // Calculate agreement percentage
+      const agreementPercentage = (highestCount / responsePaths.length) * 100;
+      
+      // Select the best response - the one with the most common answer
+      let bestResponse = null;
+      
+      if (mostCommonAnswer) {
+        // Find a response path that contains the most common answer
+        for (const path of responsePaths) {
+          const processed = processBotMessage(path, REASONING_METHOD);
+          if (processed.answer && processed.answer.includes(mostCommonAnswer)) {
+            bestResponse = path;
+            break;
+          } else if (mostCommonAnswer.startsWith("Witness ") && 
+                    extractKnightIdentity(processed.answer) === parseInt(mostCommonAnswer.replace("Witness ", ""))) {
+            bestResponse = path;
+            break;
+          }
+        }
+      }
+      
+      // If we couldn't find a matching path, use the first one
+      if (!bestResponse && responsePaths.length > 0) {
+        bestResponse = responsePaths[0];
+      }
+      
+      // Process the best response
+      const processed = processBotMessage(bestResponse, REASONING_METHOD);
+      
+      // Build an explanation of the self-consistency results
+      const selfConsistencySummary = `
+**Self-Consistency Summary:**
+- Generated ${responsePaths.length} independent reasoning paths
+- ${highestCount} paths agreed on this answer (${Math.round(agreementPercentage)}% agreement)
+`;
+      
+      // Append the self-consistency info to the answer
+      return {
+        bestResponse: bestResponse,
+        processedResponse: {
+          ...processed,
+          answer: processed.answer + '\n\n' + selfConsistencySummary
+        },
+        agreement: {
+          count: highestCount,
+          percentage: agreementPercentage,
+          totalPaths: responsePaths.length,
+          mostCommonAnswer: mostCommonAnswerText || mostCommonAnswer
+        }
+      };
     }
   </script>
   <form hidden method='post' name='feedback'>
