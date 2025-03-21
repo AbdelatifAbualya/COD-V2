@@ -17,7 +17,7 @@
 # Set function timeout (must be in build.environment) - increased from 120 to 300  
 [build.environment]
   AWS_LAMBDA_FUNCTION_TIMEOUT = "300"
-  # Note: You need to set GROQ_API_KEY in the Netlify UI environment variables
+  # Note: You need to set QROQ_API_KEY or GROQ_API_KEY in the Netlify UI environment variables
 
 # Set up chunked uploads for large request bodies
 [build.processing]
