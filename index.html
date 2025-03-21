@@ -3020,11 +3020,8 @@ A: First segment: The car travels at 60 mph for 2 hours, so the distance covered
         const basePayload = {
           model: MODEL_NAME,
           messages: messagesForApi,
-          parameters: {
-            max_tokens: MAX_TOKENS,
-            top_p: TOP_P,
-            temperature: TEMPERATURE
-          }
+          temperature: TEMPERATURE,
+          max_tokens: MAX_TOKENS
         };
         
         try {
