@@ -1494,6 +1494,66 @@
     .message-image:hover {
       transform: scale(1.01);
     }
+
+    .thinking-container {
+      margin-top: 15px;
+      padding: 15px;
+      background-color: #161c26;
+      border-radius: 6px;
+      white-space: pre-wrap;
+      font-size: 0.95rem;
+      line-height: 1.5;
+      max-height: 500px;
+      overflow-y: auto;
+      position: relative;
+      color: #c5d5e9;
+    }
+    
+    .thinking-label {
+      position: absolute;
+      top: -10px;
+      left: 15px;
+      padding: 2px 8px;
+      background-color: #3b82f6;
+      color: white;
+      font-size: 0.75rem;
+      border-radius: 4px;
+      font-weight: 500;
+    }
+    
+    .cod-thinking {
+      font-family: 'Roboto Mono', monospace;
+    }
+    
+    /* Improved CoD step styling */
+    .cod-step {
+      margin-bottom: 8px;
+      padding: 10px;
+      background: #1e293b;
+      border-left: 3px solid #3b82f6;
+      border-radius: 4px;
+      font-family: 'Roboto Mono', monospace;
+    }
+    
+    .step-number {
+      display: inline-block;
+      width: 24px;
+      height: 24px;
+      margin-right: 10px;
+      background: #2563eb;
+      color: white;
+      text-align: center;
+      border-radius: 50%;
+      font-weight: bold;
+    }
+    
+    .final-answer {
+      margin-top: 15px;
+      padding: 15px;
+      background: #172554;
+      border-radius: 8px;
+      border-left: 4px solid #3b82f6;
+    }
   </style>
 </head>
 <body>
@@ -1935,30 +1995,21 @@
       
       cot: `Think step by step to solve this problem. Explain your reasoning at each step, then provide your final answer.`,
       
-      cod: `Think step by step, but produce only minimal notes for each step (${COD_WORD_LIMIT} words maximum per step). Use mathematical notation where possible. Keep only essential information needed to solve the problem. Focus on key calculations and intermediate results without narrative explanation.
-  
-Separate your steps with periods. Write your final answer after the #### separator.
+      cod: `You must think step by step using EXACTLY ${COD_WORD_LIMIT} words per step. No exceptions.
 
-IMPORTANT: Always include a clear final answer after the #### separator. For questions asking to identify something or someone specific, make your conclusion explicit (e.g., "The answer is X" or "X is the correct choice").
+FORMATTING RULES:
+1. Each step must be exactly ${COD_WORD_LIMIT} words - no more, no less
+2. Number your steps (Step 1, Step 2, etc.)
+3. Use line breaks between steps, NOT periods
+4. Use mathematical notation where possible
+5. Write your final answer after #### separator
 
-Examples:
-Q: Jason had 20 lollipops. He gave Denny some lollipops. Now Jason has 12 lollipops. How many lollipops did Jason give to Denny?
-A: 20 initial. 12 remaining. 20 - 12 = 8. #### 8 lollipops
-
-Q: Roger has $125. He spends $55 on a video game and then receives $25 for his birthday. How much money does Roger have now?
-A: Start: $125. Spent: $55. 125 - 55 = $70. Received: $25. 70 + 25 = $95. #### $95
-
-Q: A square has a perimeter of 20 cm. What is its area?
-A: Perimeter = 20 cm. Side length = 20/4 = 5 cm. Area = 5² = 25 cm². #### 25 square centimeters
-
-Q: If a fabric store received 45 yards of cotton material and used 2/9 of it for a bulk order, how many yards of cotton material does the fabric store have left?
-A: Total: 45 yards. Used: 2/9 × 45 = 10 yards. Remaining: 45 - 10 = 35 yards. #### 35 yards
-
-Q: The temperature on Monday was -3°C. On Tuesday, it was 14°C. What was the change in temperature from Monday to Tuesday?
-A: Monday: -3°C. Tuesday: 14°C. Change: 14 - (-3) = 17°C. #### 17°C
-
-Q: In a logic puzzle with three witnesses, only one of them is a Knight who always tells the truth. Based on their statements, which witness is the Knight?
-A: Witness 1 claims 3 is Knight. Witness 2 claims not Knight. Witness 3 claims not Knight. If 1 is Knight, contradictions appear. If 2 is Knight, consistent. If 3 is Knight, contradictions appear. #### Witness 2 is the Knight.`
+Example with ${COD_WORD_LIMIT}-word steps:
+Step 1: Problem requires finding Knight among witnesses.
+Step 2: Witness 1 statement implies conditional logic.
+Step 3: Testing each witness as Knight systematically.
+...
+#### Witness 2 is the Knight.`
     };
     
     // NEW: Enhanced prompts for complex problems with different word limits
@@ -2648,107 +2699,20 @@ A: First segment: The car travels at 60 mph for 2 hours, so the distance covered
     }
 
     /***********************
+     * CoD Word Limit Enforcement 
+     ***********************/
+    function enforceWordLimitForCoD(prompt, wordLimit) {
+      // Add stronger enforcement language to the prompt
+      return `${prompt}\n\nCRITICAL: You MUST follow the ${wordLimit}-word limit per step exactly. Any step exceeding ${wordLimit} words will be rejected. Format each step as "Step N: your ${wordLimit} words here." and separate steps with line breaks, NOT periods. Always include #### before your final answer.`;
+    }
+
+    /***********************
      * Process Bot Messages - IMPROVED VERSION FOR COD
      ***********************/
     function processBotMessage(content, reasoningMethod) {
       // For Chain of Draft (CoD) mode, extract thinking steps and final answer
       if (reasoningMethod === "cod") {
-        const separatorIndex = content.indexOf("####");
-        
-        if (separatorIndex !== -1) {
-          // Extract thinking steps and final answer
-          let thinking = content.substring(0, separatorIndex).trim();
-          let answer = content.substring(separatorIndex + 4).trim();
-          
-          // If we have no meaningful answer after #### but this appears to be the end of reasoning
-          if (!answer || answer.length < 2) {
-            // Look for common conclusion patterns in the last portion of the thinking
-            const conclusionIndicators = [
-              /Therefore[,:]?\s+(.*)/i,
-              /Thus[,:]?\s+(.*)/i,
-              /Hence[,:]?\s+(.*)/i,
-              /So[,:]?\s+(.*)/i,
-              /The answer is[:]?\s+(.*)/i,
-              /In conclusion[,:]?\s+(.*)/i,
-              /Finally[,:]?\s+(.*)/i
-            ];
-            
-            // Take the last 30% of the thinking text to look for conclusions
-            const searchArea = thinking.substring(Math.floor(thinking.length * 0.7));
-            
-            for (const pattern of conclusionIndicators) {
-              const match = searchArea.match(pattern);
-              if (match && match[1]) {
-                answer = match[1].trim();
-                break;
-              }
-            }
-          }
-          
-          return {
-            content: content,
-            thinking: thinking,
-            answer: answer,
-            thinkingWordCount: countWords(thinking),
-            answerWordCount: countWords(answer)
-          };
-        } else {
-          // Try to identify thinking steps and final answer based on structure
-          // Look for phrases that might indicate a conclusion
-          const conclusionPhrases = [
-            "Therefore", "Thus", "Hence", "So", "Result", "Answer", "Finally", 
-            "In conclusion", "The answer is", "This gives us"
-          ];
-          
-          // Look for logical conclusion patterns that might appear in the last part of the text
-          let lastConclusionIndex = -1;
-          let conclusionText = "";
-          
-          // Examine the last 30% of the content for conclusion markers
-          const searchStartPos = Math.floor(content.length * 0.7);
-          const lastPortion = content.substring(searchStartPos);
-          
-          for (const phrase of conclusionPhrases) {
-            const phraseIndex = lastPortion.indexOf(phrase);
-            if (phraseIndex !== -1) {
-              const absoluteIndex = searchStartPos + phraseIndex;
-              if (absoluteIndex > lastConclusionIndex) {
-                lastConclusionIndex = absoluteIndex;
-                conclusionText = phrase;
-              }
-            }
-          }
-          
-          // If we found a conclusion phrase
-          if (lastConclusionIndex !== -1) {
-            const thinking = content.substring(0, lastConclusionIndex).trim();
-            const answer = content.substring(lastConclusionIndex).trim();
-            
-            return {
-              content: content,
-              thinking: thinking,
-              answer: answer,
-              thinkingWordCount: countWords(thinking),
-              answerWordCount: countWords(answer)
-            };
-          }
-          
-          // Split by periods to identify steps
-          const parts = content.split('.');
-          if (parts.length > 1) {
-            // Use the last part as the answer and everything else as thinking
-            const lastPart = parts.pop().trim();
-            const thinking = parts.join('.').trim();
-            
-            return {
-              content: content,
-              thinking: thinking,
-              answer: lastPart,
-              thinkingWordCount: countWords(thinking),
-              answerWordCount: countWords(lastPart)
-            };
-          }
-        }
+        return processCoDBotMessage(content);
       }
       
       // For Chain of Thought (CoT) mode, try to identify a logical final answer section
@@ -2800,8 +2764,9 @@ A: First segment: The car travels at 60 mph for 2 hours, so the distance covered
           }
         }
         
-        // If we found a conclusion marker in a reasonable position
-        if (lastMarkerIndex > content.length * 0.6) {
+        // If we found a reasonable marker
+        if (lastMarkerIndex > -1) {
+          // Extract thinking and answer
           const thinking = content.substring(0, lastMarkerIndex).trim();
           const answer = content.substring(lastMarkerIndex).trim();
           
@@ -2813,51 +2778,94 @@ A: First segment: The car travels at 60 mph for 2 hours, so the distance covered
             answerWordCount: countWords(answer)
           };
         }
+      }
+      
+      // Default case (no clear separation) - try to infer a separation point
+      // First, check if there's a sharp language change that might indicate a shift to the answer
+      const paragraphs = content.split(/\n\n+/);
+      
+      if (paragraphs.length > 1) {
+        // Use the last paragraph as the potential answer
+        const lastParagraph = paragraphs.pop();
+        const restOfText = paragraphs.join("\n\n");
         
-        // Last resort: if text has multiple paragraphs, try to use the last paragraph as answer
-        const paragraphs = content.split(/\n\s*\n/);
-        if (paragraphs.length > 1) {
-          const lastParagraph = paragraphs[paragraphs.length - 1].trim();
-          // Only use last paragraph as answer if it's relatively short compared to whole text
-          if (lastParagraph.length < content.length * 0.3) {
-            const thinking = content.substring(0, content.lastIndexOf(lastParagraph)).trim();
-            return {
-              content: content,
-              thinking: thinking,
-              answer: lastParagraph,
-              thinkingWordCount: countWords(thinking),
-              answerWordCount: countWords(lastParagraph)
-            };
-          }
+        // If the last paragraph looks like it could be a standalone summary
+        if (lastParagraph.length < restOfText.length * 0.3 && 
+            lastParagraph.length > 10 && 
+            !lastParagraph.includes("Example") && 
+            !lastParagraph.includes("Step")) {
+          
+          return {
+            content: content,
+            thinking: restOfText,
+            answer: lastParagraph,
+            thinkingWordCount: countWords(restOfText),
+            answerWordCount: countWords(lastParagraph)
+          };
         }
       }
       
-      // For standard reasoning
-      if (reasoningMethod === "standard") {
+      // If all else fails, consider everything as the answer
+      return {
+        content: content,
+        thinking: "",
+        answer: content,
+        thinkingWordCount: 0,
+        answerWordCount: countWords(content)
+      };
+    }
+    
+    /***********************
+     * Improved CoD Parser Function
+     ***********************/
+    function processCoDBotMessage(content) {
+      const segments = content.split('####');
+      
+      if (segments.length < 2) {
+        // Fallback for improper formatting
         return {
-          content: content,
-          thinking: null, 
-          answer: content,
-          thinkingWordCount: 0,
-          answerWordCount: countWords(content)
+          thinking: content,
+          answer: "Unable to extract final answer. Model didn't use proper CoD format.",
+          thinkingWordCount: countWords(content),
+          answerWordCount: 0,
+          content: content
         };
       }
       
-      // Default: if unable to separate, return entire content
+      const thinking = segments[0].trim();
+      const answer = segments[1].trim();
+      
+      // Format thinking steps for better display
+      const formattedThinking = thinking
+        .split(/\.\s+/)
+        .filter(step => step.trim().length > 0)
+        .map((step, index) => 
+          `<div class="cod-step">
+            <span class="step-number">${index + 1}</span>
+            <span class="step-content">${step.trim()}${!step.endsWith('.') ? '.' : ''}</span>
+          </div>`
+        ).join('');
+      
       return {
         content: content,
-        thinking: reasoningMethod === "cot" || reasoningMethod === "cod" ? content : null,
-        answer: reasoningMethod === "standard" ? content : null,
-        thinkingWordCount: reasoningMethod === "cot" || reasoningMethod === "cod" ? countWords(content) : 0,
-        answerWordCount: reasoningMethod === "standard" ? countWords(content) : 0
+        thinking: thinking,
+        formattedThinking: formattedThinking,
+        answer: answer,
+        thinkingWordCount: countWords(thinking),
+        answerWordCount: countWords(answer)
       };
     }
 
     /***********************
      * Format Thinking Steps - IMPROVED FOR COD
      ***********************/
-    function formatThinkingSteps(thinking, reasoningMethod) {
+    function formatThinkingSteps(thinking, reasoningMethod, formattedThinking) {
       if (!thinking) return '';
+      
+      // If we already have formatted thinking steps from processCoDBotMessage, use that
+      if (formattedThinking) {
+        return formattedThinking;
+      }
       
       // Remove any "###" prefixes
       let cleanedThinking = thinking.replace(/^#{1,3}\s*/gm, '');
@@ -2868,7 +2876,7 @@ A: First segment: The car travels at 60 mph for 2 hours, so the distance covered
         
         // Create a more visually distinct format for CoD steps
         return steps.map((step, index) => 
-          `<div class="step cod-step">
+          `<div class="cod-step">
             <span class="step-number">${index + 1}</span>
             <span class="step-content">${step.trim()}${!step.endsWith('.') ? '.' : ''}</span>
           </div>`
@@ -2952,7 +2960,8 @@ A: First segment: The car travels at 60 mph for 2 hours, so the distance covered
               const thinkingContent = document.createElement("div");
               thinkingContent.innerHTML = formatThinkingSteps(
                 msg.thinking, 
-                msg.reasoningMethod ? msg.reasoningMethod.toLowerCase() : REASONING_METHOD
+                msg.reasoningMethod ? msg.reasoningMethod.toLowerCase() : REASONING_METHOD,
+                msg.formattedThinking
               );
               thinkingDiv.appendChild(thinkingContent);
               
@@ -3162,6 +3171,9 @@ A: First segment: The car travels at 60 mph for 2 hours, so the distance covered
               // Fallback to standard prompt but update word limit
               systemPrompt = PROMPTS[REASONING_METHOD].replace(/\(\d+ words maximum per step\)/, `(${COD_WORD_LIMIT} words maximum per step)`);
             }
+            
+            // Apply the enhanced word limit enforcement
+            systemPrompt = enforceWordLimitForCoD(systemPrompt, COD_WORD_LIMIT);
           }
         } else {
           // Use the selected reasoning method prompt
@@ -3351,7 +3363,8 @@ A: First segment: The car travels at 60 mph for 2 hours, so the distance covered
               try {
                 // Add a small delay between requests to prevent rate limiting
                 if (i > 0) {
-                  await new Promise(resolve => setTimeout(resolve, 500));
+                  // Use the fixed implementation with longer delay
+                  await fixSelfConsistencyVoting();
                 }
                 
                 // Set timeout for fetch to handle long-running requests
@@ -3359,6 +3372,9 @@ A: First segment: The car travels at 60 mph for 2 hours, so the distance covered
                 const timeoutId = setTimeout(() => controller.abort(), 90000); // 90-second timeout
                 
                 console.log(`Sending consistency path ${i+1}/${SELF_CONSISTENCY_PATHS} request with temp=${pathPayload.temperature}`);
+                
+                // Update max tokens to be more reasonable
+                pathPayload.max_tokens = 24000;  // From fixSelfConsistencyVoting
                 
                 const response = await fetch(`${API_PROXY_URL}${cacheBuster}`, {
                   method: "POST",
@@ -4917,6 +4933,28 @@ Separate your steps with periods. Write your final answer after the #### separat
       scDiv.appendChild(scContent);
       answerDiv.appendChild(scDiv);
     }
+
+    /***********************
+     * Fix Self-Consistency Implementation
+     ***********************/
+    function fixSelfConsistencyVoting() {
+      // Reduce paths to minimum needed
+      SELF_CONSISTENCY_PATHS = 2;
+      
+      // Lower token limit for self-consistency requests
+      const pathPayload = {
+        ...basePayload,
+        temperature: TEMPERATURE + (i * 0.02),
+        max_tokens: 24000  // More reasonable for API limits
+      };
+      
+      // Add longer delay between requests
+      return new Promise(resolve => setTimeout(resolve, 1500));
+    }
+
+    /***********************
+     * Self-Consistency Implementation
+     ***********************/
   </script>
   <form hidden method='post' name='feedback'>
     <input type="hidden" name="form-name" value="feedback">
