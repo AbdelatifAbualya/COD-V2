@@ -30,8 +30,8 @@ exports.handler = async function(event, context) {
   }
 
   try {
-    // Use only the correct GROQ_API_KEY environment variable
-    const apiKey = process.env.GROQ_API_KEY;
+    // Check both possible API key environment variable names
+    const apiKey = process.env.QROQ_API_KEY || process.env.GROQ_API_KEY;
     
     // Debug logging for API key (safely shows just the first 4 characters)
     console.log('API Key configured:', apiKey ? `Yes (first 4 chars: ${apiKey.substring(0, 4)})` : 'No');
@@ -42,7 +42,7 @@ exports.handler = async function(event, context) {
         statusCode: 500,
         body: JSON.stringify({ 
           error: 'API key not configured',
-          message: 'Please set GROQ_API_KEY in your Netlify environment variables'
+          message: 'Please set QROQ_API_KEY or GROQ_API_KEY in your Netlify environment variables'
         }),
         headers: { 
           'Content-Type': 'application/json',
@@ -125,7 +125,7 @@ exports.handler = async function(event, context) {
       
       // Special error message for 401 errors
       if (response.status === 401) {
-        errorMessage = "Authentication failed. Please check your GROQ_API_KEY value in Netlify environment variables.";
+        errorMessage = "Authentication failed. Please check your API key value in Netlify environment variables.";
       }
       
       return {
@@ -171,7 +171,7 @@ exports.handler = async function(event, context) {
           name: error.name,
           stack: process.env.NODE_ENV === 'development' ? error.stack : undefined,
           suggestions: [
-            "Verify GROQ_API_KEY is set correctly in Netlify environment variables",
+            "Verify API key is set correctly in Netlify environment variables",
             "Check if the model name is valid for Groq API",
             "Ensure network connection is stable",
             "Verify your Groq API subscription is active"
