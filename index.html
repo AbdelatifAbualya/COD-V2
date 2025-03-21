@@ -3249,23 +3249,24 @@ A: First segment: The car travels at 60 mph for 2 hours, so the distance covered
         // Build messages array with current settings and word count request
         const messagesForApi = buildMessagesForChat(wordCountRequest);
 
-        // Create payload
+        // Create payload - UPDATED FORMAT FOR GROQ API
         const payload = {
           model: MODEL_NAME,
-          max_tokens: MAX_TOKENS,
-          top_p: TOP_P,
-          top_k: TOP_K,
-          presence_penalty: PRESENCE_PENALTY,
-          frequency_penalty: FREQUENCY_PENALTY,
+          messages: messagesForApi,
           temperature: TEMPERATURE,
-          messages: messagesForApi
+          max_tokens: MAX_TOKENS
         };
+
+        // Only add top_p if it's not 0
+        if (TOP_P > 0) {
+          payload.top_p = TOP_P;
+        }
         
         console.log(`Sending request with ${REASONING_METHOD} reasoning ${REASONING_METHOD === "cod" ? `(word limit: ${COD_WORD_LIMIT})` : ""}`);
         if (wordCountRequest) {
           console.log(`Final answer word limit requested: ${wordCountRequest} words`);
         }
-        console.log(`Parameters: temp=${TEMPERATURE}, top_p=${TOP_P}, top_k=${TOP_K}`);
+        console.log(`Parameters: temp=${TEMPERATURE}, top_p=${TOP_P}`);
 
         try {
           // Add timestamp to URL to prevent caching
