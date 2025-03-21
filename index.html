@@ -1498,16 +1498,57 @@
 
       <div id="selfConsistencyOptions" class="self-consistency-options" style="display: none;">
         <div class="option-description">
-          Generates multiple reasoning paths and selects the most common answer, improving accuracy for complex problems. Works with both Chain of Thought (CoT) and Chain of Draft (CoD).
+          Self-consistency voting generates multiple reasoning paths and selects the most common answer, improving accuracy for complex problems.
         </div>
         
-        <div class="range-container" style="margin-top: 15px;">
-          <label for="pathCount">Number of reasoning paths: <span id="pathCountValue">3</span></label>
-          <input type="range" id="pathCount" min="2" max="5" step="1" value="3">
+        <div class="feature-section" style="margin-top: 15px; background-color: #2a3746; border-color: #3d4e63;">
+          <div class="option-label">Number of reasoning paths:</div>
+          <div class="range-container">
+            <input type="range" id="pathCount" min="2" max="5" step="1" value="${SELF_CONSISTENCY_PATHS}">
+            <span id="pathCountValue" class="range-value">${SELF_CONSISTENCY_PATHS}</span>
+          </div>
+          
+          <div class="sc-performance-info" style="margin-top: 12px; font-size: 0.85rem; color: #aaa;">
+            <div style="margin-bottom: 8px;">
+              <span style="font-weight: 500; color: #90cdf4;">Accuracy vs. Performance:</span>
+            </div>
+            <div class="sc-performance-grid" style="display: grid; grid-template-columns: auto 1fr; gap: 8px 12px; align-items: center;">
+              <div>2 paths:</div>
+              <div class="sc-bar-container" style="height: 8px; background-color: #2c3a4f; border-radius: 4px; overflow: hidden;">
+                <div class="sc-accuracy-bar" style="width: 65%; height: 100%; background-color: #4a8cff;"></div>
+              </div>
+              <div>3 paths:</div>
+              <div class="sc-bar-container" style="height: 8px; background-color: #2c3a4f; border-radius: 4px; overflow: hidden;">
+                <div class="sc-accuracy-bar" style="width: 80%; height: 100%; background-color: #4a8cff;"></div>
+              </div>
+              <div>5 paths:</div>
+              <div class="sc-bar-container" style="height: 8px; background-color: #2c3a4f; border-radius: 4px; overflow: hidden;">
+                <div class="sc-accuracy-bar" style="width: 95%; height: 100%; background-color: #4a8cff;"></div>
+              </div>
+            </div>
+          </div>
         </div>
         
         <div class="warning-message" style="margin-top: 10px; font-size: 0.8rem; color: #e8a56a;">
           <span style="font-weight: bold;">⚠️ Note:</span> Each additional path increases processing time and API usage.
+        </div>
+        
+        <div class="advanced-options-header" style="margin-top: 15px; font-size: 0.9rem;">
+          Model Support
+          <div class="tooltip">?
+            <span class="tooltiptext">Different models have varying levels of support for self-consistency voting.</span>
+          </div>
+        </div>
+        
+        <div class="model-compatibility" style="margin-top: 8px; font-size: 0.85rem;">
+          <div class="compatibility-item" style="display: flex; align-items: center; margin-bottom: 5px;">
+            <span style="width: 12px; height: 12px; border-radius: 50%; background-color: #4ade80; margin-right: 8px;"></span>
+            <span>DeepSeek R1 Distill (70B) - Excellent Compatibility</span>
+          </div>
+          <div class="compatibility-item" style="display: flex; align-items: center; margin-bottom: 5px;">
+            <span style="width: 12px; height: 12px; border-radius: 50%; background-color: #4ade80; margin-right: 8px;"></span>
+            <span>Qwen QWQ (32B) - Good Compatibility</span>
+          </div>
         </div>
       </div>
     </div>
@@ -2987,9 +3028,10 @@ A: First segment: The car travels at 60 mph for 2 hours, so the distance covered
         };
         
         try {
-          // Generate multiple reasoning paths
+          // Generate multiple reasoning paths SEQUENTIALLY
           const responses = [];
           const answers = {};
+          let completedPaths = 0;
           
           // Display progress in placeholder
           thread.messages[placeholderIndex] = {
@@ -3000,198 +3042,182 @@ A: First segment: The car travels at 60 mph for 2 hours, so the distance covered
           };
           renderCurrentThreadMessages();
           
-          for (let i = 0; i < SELF_CONSISTENCY_PATHS; i++) {
-            // Add timestamp to URL to prevent caching
-            const timestamp = new Date().getTime();
-            const cacheBuster = `?t=${timestamp}&path=${i}`;
-            
-            // Update payload with slightly different temperature for diversity
-            const pathPayload = {
-              ...basePayload,
-              temperature: basePayload.parameters.temperature + (i * 0.05) // Gradually increase temperature
-            };
-            
-            try {
-              // Update progress
+          // Use a sequential approach with promises
+          const generatePaths = async () => {
+            for (let i = 0; i < SELF_CONSISTENCY_PATHS; i++) {
+              // Update progress display
               thread.messages[placeholderIndex] = {
-                content: `Generating ${SELF_CONSISTENCY_PATHS} reasoning paths (${i}/${SELF_CONSISTENCY_PATHS} complete)...`,
+                content: `Generating ${SELF_CONSISTENCY_PATHS} reasoning paths (${completedPaths}/${SELF_CONSISTENCY_PATHS} in progress)...`,
                 sender: "bot",
                 isPlaceholder: true,
                 timestamp: new Date()
               };
               renderCurrentThreadMessages();
               
-              // Set timeout for fetch to handle long-running requests
-              const controller = new AbortController();
-              const timeoutId = setTimeout(() => controller.abort(), 120000); // 2 minute timeout
+              // Add timestamp to URL to prevent caching
+              const timestamp = new Date().getTime();
+              const cacheBuster = `?t=${timestamp}&path=${i}`;
               
-              const response = await fetch(`${API_PROXY_URL}${cacheBuster}`, {
-                method: "POST",
-                headers: {
-                  "Content-Type": "application/json"
-                },
-                body: JSON.stringify(pathPayload),
-                signal: controller.signal
-              });
+              // Create a modified payload with slightly different temperature
+              // Use smaller increments (0.02 instead of 0.05) to prevent too much diversity
+              const pathPayload = {
+                ...basePayload
+              };
               
-              clearTimeout(timeoutId); // Clear the timeout
-              
-              if (!response.ok) {
-                throw new Error(`HTTP error! Status: ${response.status}`);
+              // Only modify temperature if using more than one path
+              if (SELF_CONSISTENCY_PATHS > 1) {
+                pathPayload.temperature = basePayload.parameters.temperature + (i * 0.02);
               }
               
-              const data = await response.json();
-              const botReply = data.choices &&
-                             data.choices[0] &&
-                             data.choices[0].message &&
-                             data.choices[0].message.content;
-                             
-              if (botReply) {
-                const trimmedReply = botReply.trim();
-                responses.push(trimmedReply);
-                
-                // Process to extract answer
-                const processed = processBotMessage(trimmedReply, REASONING_METHOD);
-                const finalAnswer = processed.answer ? processed.answer.trim() : "";
-                
-                // Count this answer (simple voting)
-                if (finalAnswer) {
-                  // Normalize the answer a bit (remove common variants)
-                  const normalizedAnswer = normalizeAnswer(finalAnswer);
-                  answers[normalizedAnswer] = (answers[normalizedAnswer] || 0) + 1;
+              try {
+                // Add a small delay between requests to prevent rate limiting
+                if (i > 0) {
+                  await new Promise(resolve => setTimeout(resolve, 500));
                 }
+                
+                // Set timeout for fetch to handle long-running requests
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => controller.abort(), 90000); // 90-second timeout
+                
+                console.log(`Sending consistency path ${i+1}/${SELF_CONSISTENCY_PATHS} request with temp=${pathPayload.temperature}`);
+                
+                const response = await fetch(`${API_PROXY_URL}${cacheBuster}`, {
+                  method: "POST",
+                  headers: {
+                    "Content-Type": "application/json"
+                  },
+                  body: JSON.stringify(pathPayload),
+                  signal: controller.signal
+                });
+                
+                clearTimeout(timeoutId); // Clear the timeout
+                
+                if (!response.ok) {
+                  console.error(`Path ${i+1} error: HTTP ${response.status}`);
+                  throw new Error(`HTTP error! Status: ${response.status}`);
+                }
+                
+                const data = await response.json();
+                const botReply = data.choices &&
+                               data.choices[0] &&
+                               data.choices[0].message &&
+                               data.choices[0].message.content;
+                               
+                if (botReply) {
+                  const trimmedReply = botReply.trim();
+                  responses.push(trimmedReply);
+                  
+                  // Process to extract answer with more robust parsing
+                  const processed = processBotMessage(trimmedReply, REASONING_METHOD);
+                  let finalAnswer = processed.answer ? processed.answer.trim() : "";
+                  
+                  // If we couldn't extract an answer, try harder with pattern matching
+                  if (!finalAnswer && trimmedReply.includes("####")) {
+                    const parts = trimmedReply.split("####");
+                    if (parts.length > 1) {
+                      finalAnswer = parts[1].trim();
+                    }
+                  }
+                  
+                  // More fallbacks for answer extraction
+                  if (!finalAnswer) {
+                    // Try to extract the last sentence as the answer
+                    const sentences = trimmedReply.split(/[.!?](?:\s|$)/);
+                    if (sentences.length > 0) {
+                      finalAnswer = sentences[sentences.length - 1].trim();
+                    }
+                  }
+                  
+                  // Count this answer (simple voting)
+                  if (finalAnswer) {
+                    // Improved answer normalization
+                    const normalizedAnswer = improvedNormalizeAnswer(finalAnswer);
+                    console.log(`Path ${i+1} answer: "${finalAnswer}"`);
+                    console.log(`Normalized: "${normalizedAnswer}"`);
+                    
+                    answers[normalizedAnswer] = (answers[normalizedAnswer] || 0) + 1;
+                  }
+                  
+                  completedPaths++;
+                }
+              } catch (error) {
+                console.error(`Error in path ${i + 1}:`, error);
+                // Continue with other paths even if one fails
               }
-            } catch (error) {
-              console.error(`Error in path ${i + 1}:`, error);
-              // Continue with other paths even if one fails
             }
-          }
-          
-          // Find the most common answer
-          let mostCommonAnswer = "";
-          let highestCount = 0;
-          
-          for (const [answer, count] of Object.entries(answers)) {
-            if (count > highestCount) {
-              mostCommonAnswer = answer;
-              highestCount = count;
+            
+            // Find the most common answer
+            let mostCommonAnswer = "";
+            let highestCount = 0;
+            
+            console.log("Vote results:", answers);
+            
+            for (const [answer, count] of Object.entries(answers)) {
+              if (count > highestCount) {
+                mostCommonAnswer = answer;
+                highestCount = count;
+              }
             }
-          }
-          
-          // Calculate agreement percentage
-          const agreementPercentage = (highestCount / SELF_CONSISTENCY_PATHS) * 100;
-          
-          // Find a response that contains the most common answer
-          let bestResponse = "";
-          for (const response of responses) {
-            if (response.includes(mostCommonAnswer)) {
-              bestResponse = response;
-              break;
+            
+            // Calculate agreement percentage
+            const agreementPercentage = (highestCount / completedPaths) * 100;
+            
+            // Find a response that contains the most common answer
+            let bestResponse = "";
+            for (const response of responses) {
+              // Normalize each response for comparison
+              const normalizedResponse = improvedNormalizeAnswer(response);
+              if (normalizedResponse.includes(mostCommonAnswer)) {
+                bestResponse = response;
+                break;
+              }
             }
-          }
+            
+            // If no best response found (unlikely), use the first one
+            if (!bestResponse && responses.length > 0) {
+              bestResponse = responses[0];
+            }
+            
+            return {
+              bestResponse,
+              agreementPercentage,
+              highestCount,
+              completedPaths,
+              responses
+            };
+          };
           
-          // If no best response found (unlikely), use the first one
-          if (!bestResponse && responses.length > 0) {
-            bestResponse = responses[0];
-          }
+          // Execute the sequential generation
+          const result = await generatePaths();
           
-          if (bestResponse) {
+          if (result.bestResponse) {
             // Create response metadata
             let reasoningInfo = REASONING_METHOD.toUpperCase();
             if (REASONING_METHOD === "cod") {
               reasoningInfo += `-${COD_WORD_LIMIT}`;
             }
-            if (SELF_CONSISTENCY_ENABLED) {
-              reasoningInfo += `-SC-${SELF_CONSISTENCY_PATHS}`;
-            }
-            
-            // Add enhanced reasoning info if used
-            if (ENHANCED_REASONING_ENABLED && 
-                REASONING_ENHANCEMENT === "adaptive" && 
-                PROBLEM_COMPLEXITY.complexity === "complex") {
-              reasoningInfo += "-ENHANCED";
-            }
-            
-            // Check if this is likely a code question
-            const isCodeQuestion = bestResponse.includes("```");
+            reasoningInfo += `-SC-${SELF_CONSISTENCY_PATHS}`;
             
             // Process the response to separate thinking and answer
-            let processed;
-            
-            if (isCodeQuestion && REASONING_METHOD === "cod") {
-              // Special handling for code questions with Chain of Draft
-              const separatorIndex = bestResponse.indexOf("####");
-              
-              if (separatorIndex !== -1) {
-                // We found the standard separator
-                processed = {
-                  content: bestResponse,
-                  thinking: bestResponse.substring(0, separatorIndex).trim(),
-                  answer: bestResponse.substring(separatorIndex + 4).trim(),
-                };
-              } else {
-                // Look for the first code block as a separator
-                const codeBlockMatch = bestResponse.match(/```[\s\S]*?```/g);
-                
-                if (codeBlockMatch && codeBlockMatch.length > 0) {
-                  const firstCodeBlock = codeBlockMatch[0];
-                  const codeIndex = bestResponse.indexOf(firstCodeBlock);
-                  
-                  if (codeIndex > 0) {
-                    // Everything before the first code block is thinking
-                    processed = {
-                      content: bestResponse,
-                      thinking: bestResponse.substring(0, codeIndex).trim(),
-                      answer: bestResponse.substring(codeIndex).trim(),
-                    };
-                  } else {
-                    // If code block is at the beginning, treat everything as answer
-                    processed = {
-                      content: bestResponse,
-                      thinking: "",
-                      answer: bestResponse,
-                    };
-                  }
-                } else {
-                  // Fall back to standard processing
-                  processed = processBotMessage(bestResponse, REASONING_METHOD);
-                }
-              }
-              
-              // Calculate word counts
-              if (processed.thinking) {
-                processed.thinkingWordCount = countWords(processed.thinking);
-              } else {
-                processed.thinkingWordCount = 0;
-              }
-              
-              if (processed.answer) {
-                processed.answerWordCount = countWords(processed.answer);
-              } else {
-                processed.answerWordCount = 0;
-              }
-            } else {
-              // Standard processing for non-code questions
-              processed = processBotMessage(bestResponse, REASONING_METHOD);
-            }
+            const processed = processBotMessage(result.bestResponse, REASONING_METHOD);
             
             // Build an explanation of the self-consistency results
             const selfConsistencyInfo = `
 
 ---
 **Self-Consistency Summary:**
-- Generated ${SELF_CONSISTENCY_PATHS} independent reasoning paths
-- ${highestCount} paths agreed on this answer (${Math.round(agreementPercentage)}% agreement)`;
+- Generated ${result.completedPaths} independent reasoning paths
+- ${result.highestCount} paths agreed on this answer (${Math.round(result.agreementPercentage)}% agreement)`;
             
             // Append the self-consistency info to the answer
             if (processed.answer) {
               processed.answer += selfConsistencyInfo;
             } else {
-              processed.answer = bestResponse + selfConsistencyInfo;
+              processed.answer = result.bestResponse + selfConsistencyInfo;
             }
             
             thread.messages[placeholderIndex] = {
-              content: bestResponse + selfConsistencyInfo,
+              content: result.bestResponse + selfConsistencyInfo,
               sender: "bot",
               isPlaceholder: false,
               timestamp: new Date(),
@@ -3203,14 +3229,14 @@ A: First segment: The car travels at 60 mph for 2 hours, so the distance covered
               answerWordCount: processed.answerWordCount || 0,
               selfConsistencyResults: {
                 paths: SELF_CONSISTENCY_PATHS,
-                agreement: agreementPercentage,
-                agreementCount: highestCount,
-                allResponses: responses
+                agreement: result.agreementPercentage,
+                agreementCount: result.highestCount,
+                allResponses: result.responses
               }
             };
           } else {
             thread.messages[placeholderIndex] = {
-              content: "No valid responses received. Check model name and API key.",
+              content: "No valid responses received from self-consistency voting. Try with fewer paths or check API settings.",
               sender: "bot",
               isPlaceholder: false,
               timestamp: new Date(),
@@ -4383,6 +4409,45 @@ Separate your steps with periods. Write your final answer after the #### separat
       if (bytes < 1024) return bytes + ' bytes';
       else if (bytes < 1048576) return (bytes / 1024).toFixed(1) + ' KB';
       else return (bytes / 1048576).toFixed(1) + ' MB';
+    }
+
+    // Add this improved answer normalization function
+    function improvedNormalizeAnswer(answer) {
+      if (!answer) return "";
+      
+      // Remove common prefixes
+      let normalized = answer.replace(/^(the answer is|therefore|thus|so|hence|the result is|we get|we find that|the final answer is|the value is|the solution is):\s*/i, "");
+      
+      // Trim whitespace and convert to lowercase
+      normalized = normalized.trim().toLowerCase();
+      
+      // Extract numerical values with optional units
+      const numericalMatch = normalized.match(/(\d+(\.\d+)?)/);
+      if (numericalMatch) {
+        return numericalMatch[0]; // Return just the number for matching
+      }
+      
+      // Handle common answer formats (yes/no, true/false)
+      if (/^(yes|no|true|false)(\.|!|\s|$)/i.test(normalized)) {
+        return normalized.match(/^(yes|no|true|false)/i)[0].toLowerCase();
+      }
+      
+      // Handle letter answers (A, B, C, D, etc.)
+      if (/^(option\s+)?[a-d](\.|!|\s|$)/i.test(normalized)) {
+        return normalized.match(/[a-d]/i)[0].toLowerCase();
+      }
+      
+      // Remove units but preserve the core meaning
+      const unitRegex = /\b(dollars|inches|feet|meters|pounds|kg|miles|km|years|days|hours|minutes|seconds|percent|degrees|watts|volts|amps|\$|%|°C|°F)\b/gi;
+      normalized = normalized.replace(unitRegex, " ");
+      
+      // Remove articles and common helping verbs
+      normalized = normalized.replace(/\b(the|a|an|is|are|was|were|has|have|had|be|being|been|will|would|should|could|can|may|might)\b/gi, " ");
+      
+      // Remove punctuation and excess whitespace
+      normalized = normalized.replace(/[^\w\s]/g, " ").replace(/\s+/g, " ").trim();
+      
+      return normalized;
     }
   </script>
   <form hidden method='post' name='feedback'>
