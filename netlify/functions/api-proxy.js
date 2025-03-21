@@ -31,7 +31,7 @@ exports.handler = async function(event, context) {
 
   try {
     // Use only the correct GROQ_API_KEY environment variable
-    const apiKey = process.env.QROQ_API_KEY;
+    const apiKey = process.env.GROQ_API_KEY;
     
     // Debug logging for API key (safely shows just the first 4 characters)
     console.log('API Key configured:', apiKey ? `Yes (first 4 chars: ${apiKey.substring(0, 4)})` : 'No');
