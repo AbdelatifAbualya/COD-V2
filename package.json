@@ -1,12 +1,8 @@
-{
-  "name": "enhanced-llm-playground",
-  "version": "1.0.0",
-  "description": "LLM Playground (COT vs COD)",
-  "scripts": {
-    "build": "echo 'No build step required for static site'",
-    "test": "echo 'No tests configured'"
-  },
-  "author": "Your Name",
-  "license": "MIT",
-  "private": true
+"scripts": {
+  "build": "mkdir -p dist && cp -r index.html js css dist/",
+  "start": "npx serve",
+  "test": "echo 'No tests configured'"
+},
+"dependencies": {
+  "serve": "^14.2.1"
 }
