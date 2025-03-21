@@ -55,6 +55,17 @@ exports.handler = async function(event, context) {
     const requestBody = JSON.parse(event.body);
     console.log('Request received for model:', requestBody.model);
     
+    // UPDATED: Check if token limit is set and warn if very high
+    if (requestBody.max_tokens && requestBody.max_tokens > 32000) {
+      console.log(`Warning: Using a very high token limit of ${requestBody.max_tokens}. Make sure your model supports this.`);
+    }
+    
+    // Set default max tokens to 128k if not specified
+    if (!requestBody.max_tokens) {
+      requestBody.max_tokens = 128000;
+      console.log('Setting default max_tokens to 128000');
+    }
+    
     // We'll use the Groq API endpoint
     const apiEndpoint = 'https://api.groq.com/openai/v1/chat/completions';
     console.log(`Using Groq API endpoint: ${apiEndpoint}`);
@@ -65,9 +76,9 @@ exports.handler = async function(event, context) {
     
     while (retries > 0) {
       try {
-        // Set up abort controller for timeout
+        // UPDATED: Set up abort controller with increased timeout (180 seconds for large token limits)
         const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 60000); // 60-second timeout
+        const timeoutId = setTimeout(() => controller.abort(), 180000); // 3-minute timeout (increased from 60 seconds)
         
         // Make a request to the Groq API
         console.log(`Sending request to Groq API (attempts remaining: ${retries})`);
@@ -89,7 +100,7 @@ exports.handler = async function(event, context) {
           console.log('Received 502 from Groq API, retrying...');
           retries--;
           // Wait before retrying (exponential backoff)
-          await new Promise(resolve => setTimeout(resolve, (3 - retries) * 2000));
+          await new Promise(resolve => setTimeout(resolve, (3 - retries) * 3000)); // Increased wait time
         } else {
           // For any other status (success or other errors), break the retry loop
           break;
@@ -99,7 +110,7 @@ exports.handler = async function(event, context) {
         retries--;
         if (retries === 0) throw fetchError;
         // Wait before retrying
-        await new Promise(resolve => setTimeout(resolve, (3 - retries) * 2000));
+        await new Promise(resolve => setTimeout(resolve, (3 - retries) * 3000)); // Increased wait time
       }
     }
 
@@ -118,6 +129,11 @@ exports.handler = async function(event, context) {
         // Try to parse error as JSON
         const parsedError = JSON.parse(errorData);
         errorMessage = parsedError.error?.message || 'Unknown API error';
+        
+        // Check if the error is related to token limit
+        if (errorMessage.includes('token') && errorMessage.includes('limit')) {
+          errorMessage = `Token limit exceeded. The model may not support ${requestBody.max_tokens || 'the requested'} tokens. Try reducing the max_tokens value or using a different model.`;
+        }
       } catch {
         // If parsing fails, use the raw text
         errorMessage = errorData || `Error ${response.status}`;
@@ -126,6 +142,11 @@ exports.handler = async function(event, context) {
       // Special error message for 401 errors
       if (response.status === 401) {
         errorMessage = "Authentication failed. Please check your API key value in Netlify environment variables.";
+      }
+      
+      // Special handling for timeouts (504)
+      if (response.status === 504) {
+        errorMessage = "Request timed out. The response may be too long for the current token limit. Try reducing the max_tokens value.";
       }
       
       return {
@@ -137,7 +158,8 @@ exports.handler = async function(event, context) {
             possible_fixes: [
               "Verify the API key is correct in Netlify",
               "Check that the model name is valid for Groq API",
-              "Ensure your Groq API subscription is active"
+              "Ensure your Groq API subscription is active",
+              "Try reducing max_tokens if you're getting timeout or content length errors"
             ]
           }
         }),
@@ -151,6 +173,11 @@ exports.handler = async function(event, context) {
     // Parse the response
     const data = await response.json();
     console.log('Received successful response from Groq API');
+    
+    // Log token usage if available
+    if (data.usage) {
+      console.log(`Token usage: prompt=${data.usage.prompt_tokens}, completion=${data.usage.completion_tokens}, total=${data.usage.total_tokens}`);
+    }
 
     // Return the response
     return {
@@ -163,16 +190,24 @@ exports.handler = async function(event, context) {
     };
   } catch (error) {
     console.error('Function error:', error);
+    
+    // Special error message for abort errors (timeouts)
+    let errorMessage = error.message || 'Unknown error occurred';
+    if (error.name === 'AbortError' || errorMessage.includes('abort')) {
+      errorMessage = "Request timed out. Try reducing the max_tokens value or using a model that supports larger outputs.";
+    }
+    
     return {
       statusCode: 500,
       body: JSON.stringify({ 
-        error: error.message || 'Unknown error occurred',
+        error: errorMessage,
         details: {
           name: error.name,
           stack: process.env.NODE_ENV === 'development' ? error.stack : undefined,
           suggestions: [
             "Verify API key is set correctly in Netlify environment variables",
             "Check if the model name is valid for Groq API",
+            "Try reducing max_tokens if you're getting timeout errors",
             "Ensure network connection is stable",
             "Verify your Groq API subscription is active"
           ]
