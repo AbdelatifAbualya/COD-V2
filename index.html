@@ -1810,13 +1810,14 @@ A: First segment: The car travels at 60 mph for 2 hours, so the distance covered
     function getModelDisplayName(fullStr) {
       if (!fullStr) return "Model not set";
       
-      // Extract from path
+      // Check if we have info in our modelInfo database
+      if (modelInfo[fullStr]) {
+        return modelInfo[fullStr].name;
+      }
+      
+      // Fallback to basic name extraction
       const parts = fullStr.split("/");
       const lastChunk = parts[parts.length - 1] || "";
-      const dashIndex = lastChunk.lastIndexOf("-");
-      if (dashIndex !== -1) {
-        return lastChunk.substring(0, dashIndex);
-      }
       return lastChunk;
     }
     
@@ -2961,10 +2962,12 @@ A: First segment: The car travels at 60 mph for 2 hours, so the distance covered
         // Base payload 
         const basePayload = {
           model: MODEL_NAME,
-          max_tokens: MAX_TOKENS,
-          top_p: TOP_P,
-          temperature: TEMPERATURE + 0.2, // Increase temperature slightly for diversity
-          messages: messagesForApi
+          messages: messagesForApi,
+          parameters: {
+            max_tokens: MAX_TOKENS,
+            top_p: TOP_P,
+            temperature: TEMPERATURE
+          }
         };
         
         try {
@@ -2989,7 +2992,7 @@ A: First segment: The car travels at 60 mph for 2 hours, so the distance covered
             // Update payload with slightly different temperature for diversity
             const pathPayload = {
               ...basePayload,
-              temperature: basePayload.temperature + (i * 0.05) // Gradually increase temperature
+              temperature: basePayload.parameters.temperature + (i * 0.05) // Gradually increase temperature
             };
             
             try {
@@ -3871,11 +3874,11 @@ Separate your steps with periods. Write your final answer after the #### separat
         const prevSelfConsistency = SELF_CONSISTENCY_ENABLED;
         const prevSelfConsistencyPaths = SELF_CONSISTENCY_PATHS;
         
-        // Save model name
-        const modelNameEl = document.getElementById("modelName");
-        if (modelNameEl) {
-          MODEL_NAME = modelNameEl.value.trim();
-          MODEL_NAME_DISPLAY = getModelDisplayName(MODEL_NAME);
+        // Save model name from dropdown
+        const modelSelect = document.getElementById("modelSelect");
+        if (modelSelect) {
+          MODEL_NAME = modelSelect.value;
+          MODEL_NAME_DISPLAY = modelInfo[MODEL_NAME]?.name || getModelDisplayName(MODEL_NAME);
         }
         
         // Save reasoning method
