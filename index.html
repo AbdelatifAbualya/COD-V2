@@ -1751,8 +1751,8 @@
 
       <label for="maxTokens">Max Tokens</label>
       <div class="range-container">
-        <input type="range" id="maxTokens" min="256" max="4096" step="128" value="1112">
-        <span id="maxTokensValue" class="range-value">1112</span>
+        <input type="range" id="maxTokens" min="256" max="128000" step="1024" value="128000">
+        <span id="maxTokensValue" class="range-value">128000</span>
       </div>
       <p style="font-size: 0.8rem; color: #aaa; margin-top: 0;">Maximum number of tokens to generate in the response.</p>
     </div>
@@ -2029,7 +2029,7 @@ A: First segment: The car travels at 60 mph for 2 hours, so the distance covered
     let TEMPERATURE = 0.5;
     let TOP_P = 0.90;
     let TOP_K = 55;
-    let MAX_TOKENS = 1112;
+    let MAX_TOKENS = 128000;
     let PRESENCE_PENALTY = 0;
     let FREQUENCY_PENALTY = 0.4;
 
@@ -4237,7 +4237,7 @@ Separate your steps with periods. Write your final answer after the #### separat
         if (TEMPERATURE === 0) TEMPERATURE = 0.01;
         
         TOP_P = getNumericValue("topP", 0.9, parseFloat);
-        MAX_TOKENS = getNumericValue("maxTokens", 1112, parseInt);
+        MAX_TOKENS = getNumericValue("maxTokens", 128000, parseInt);
         
         // Update model display
         updateCurrentModelDisplay();
