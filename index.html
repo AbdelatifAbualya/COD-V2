@@ -1384,8 +1384,8 @@
       <div class="model-select-container">
         <select id="modelSelect" class="model-dropdown">
           <option value="" disabled selected>Choose a model...</option>
-          <option value="qwen-2.5-coder-32b">Qwen 2.5 Coder (32B)</option>
-          <option value="llama-3.3-70b-versatile">Llama 3.3 (70B)</option>
+          <option value="qwen-qwq-32b">Qwen QWQ (32B)</option>
+          <option value="deepseek-r1-distill-llama-70b-specdec">DeepSeek R1 Distill (70B)</option>
           <option value="mixtral-8x7b-32768">Mixtral 8x7B</option>
        </select>
         <div class="dropdown-arrow">▼</div>
@@ -1517,7 +1517,7 @@
     <div id="parametersTab" class="tab-content">
       <div class="settings-section-header">Generation Parameters</div>
       
-      <!-- Improved range sliders with visible values -->
+      <!-- Simplified parameters -->
       <label for="temp">Temperature</label>
       <div class="range-container">
         <input type="range" id="temp" min="0" max="1" step="0.01" value="0.5">
@@ -1532,33 +1532,12 @@
       </div>
       <p style="font-size: 0.8rem; color: #aaa; margin-top: 0;">Controls diversity via nucleus sampling: lower values exclude less probable tokens.</p>
 
-      <label for="topK">Top K</label>
-      <div class="range-container">
-        <input type="range" id="topK" min="0" max="100" step="1" value="55">
-        <span id="topKValue" class="range-value">55</span>
-      </div>
-      <p style="font-size: 0.8rem; color: #aaa; margin-top: 0;">Limits sampling to the top K most likely tokens.</p>
-
       <label for="maxTokens">Max Tokens</label>
       <div class="range-container">
         <input type="range" id="maxTokens" min="256" max="4096" step="128" value="1112">
         <span id="maxTokensValue" class="range-value">1112</span>
       </div>
       <p style="font-size: 0.8rem; color: #aaa; margin-top: 0;">Maximum number of tokens to generate in the response.</p>
-
-      <label for="presencePenalty">Presence Penalty</label>
-      <div class="range-container">
-        <input type="range" id="presencePenalty" min="-2" max="2" step="0.1" value="0">
-        <span id="presencePenaltyValue" class="range-value">0</span>
-      </div>
-      <p style="font-size: 0.8rem; color: #aaa; margin-top: 0;">Penalizes new tokens based on their presence in the input.</p>
-
-      <label for="frequencyPenalty">Frequency Penalty</label>
-      <div class="range-container">
-        <input type="range" id="frequencyPenalty" min="-2" max="2" step="0.1" value="0.4">
-        <span id="frequencyPenaltyValue" class="range-value">0.4</span>
-      </div>
-      <p style="font-size: 0.8rem; color: #aaa; margin-top: 0;">Penalizes tokens based on their frequency in the generated text.</p>
     </div>
     
     <div style="text-align: right; margin-top: 20px;">
@@ -2985,9 +2964,6 @@ A: First segment: The car travels at 60 mph for 2 hours, so the distance covered
           model: MODEL_NAME,
           max_tokens: MAX_TOKENS,
           top_p: TOP_P,
-          top_k: TOP_K,
-          presence_penalty: PRESENCE_PENALTY,
-          frequency_penalty: FREQUENCY_PENALTY,
           temperature: TEMPERATURE + 0.2, // Increase temperature slightly for diversity
           messages: messagesForApi
         };
@@ -3540,20 +3516,15 @@ A: First segment: The car travels at 60 mph for 2 hours, so the distance covered
       
       // Model information database for Qroq models
       const modelInfo = {
-        "qwen-2.5-coder-32b": {
-          name: "Qwen 2.5 Coder (32B)",
+        "qwen-qwq-32b": {
+          name: "Qwen QWQ (32B)",
           tags: ["32B", "Coding", "Reasoning"],
-          description: "Alibaba's Qwen 2.5 Coder model specialized for programming tasks with strong reasoning capabilities."
+          description: "Qwen's 32B model optimized for coding and reasoning tasks."
         },
-        "llama-3.3-70b-versatile": {
-          name: "Llama 3.3 (70B)",
-          tags: ["70B", "Versatile", "Advanced"],
-          description: "Meta's Llama 3.3 70B model offering strong performance across a wide range of tasks with advanced reasoning capabilities."
-        },
-        "mixtral-8x7b-32768": {
-          name: "Mixtral 8x7B",
-          tags: ["MoE", "General", "Balanced"],
-          description: "Mixture of Experts model offering strong performance across diverse tasks."
+        "deepseek-r1-distill-llama-70b-specdec": {
+          name: "DeepSeek R1 Distill (70B)",
+          tags: ["70B", "Distilled", "Specialized"],
+          description: "DeepSeek's 70B distilled model with specialized decoding capabilities."
         }
       };
       
@@ -3957,10 +3928,7 @@ Separate your steps with periods. Write your final answer after the #### separat
         if (TEMPERATURE === 0) TEMPERATURE = 0.01; // Ensure minimum value for Qroq API
         
         TOP_P = getNumericValue("topP", 0.9, parseFloat);
-        TOP_K = getNumericValue("topK", 55, parseInt);
         MAX_TOKENS = getNumericValue("maxTokens", 1112, parseInt);
-        PRESENCE_PENALTY = getNumericValue("presencePenalty", 0, parseFloat);
-        FREQUENCY_PENALTY = getNumericValue("frequencyPenalty", 0.4, parseFloat);
         
         // Update model display
         updateCurrentModelDisplay();
@@ -3974,10 +3942,7 @@ Separate your steps with periods. Write your final answer after the #### separat
           localStorage.setItem("reasoningEnhancement", REASONING_ENHANCEMENT);
           localStorage.setItem("temperature", TEMPERATURE.toString());
           localStorage.setItem("topP", TOP_P.toString());
-          localStorage.setItem("topK", TOP_K.toString());
           localStorage.setItem("maxTokens", MAX_TOKENS.toString());
-          localStorage.setItem("presencePenalty", PRESENCE_PENALTY.toString());
-          localStorage.setItem("frequencyPenalty", FREQUENCY_PENALTY.toString());
           
           // Save custom prompts
           localStorage.setItem("customPrompts", JSON.stringify(PROMPTS));
@@ -4138,17 +4103,8 @@ Separate your steps with periods. Write your final answer after the #### separat
         const topP = localStorage.getItem("topP");
         if (topP) TOP_P = parseFloat(topP);
         
-        const topK = localStorage.getItem("topK");
-        if (topK) TOP_K = parseInt(topK);
-        
         const maxTokens = localStorage.getItem("maxTokens");
         if (maxTokens) MAX_TOKENS = parseInt(maxTokens);
-        
-        const presencePenalty = localStorage.getItem("presencePenalty");
-        if (presencePenalty) PRESENCE_PENALTY = parseFloat(presencePenalty);
-        
-        const frequencyPenalty = localStorage.getItem("frequencyPenalty");
-        if (frequencyPenalty) FREQUENCY_PENALTY = parseFloat(frequencyPenalty);
         
         // Load self-consistency settings
         const selfConsistencyEnabled = localStorage.getItem("selfConsistencyEnabled");
