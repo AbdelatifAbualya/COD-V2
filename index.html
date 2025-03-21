@@ -1385,9 +1385,8 @@
         <select id="modelSelect" class="model-dropdown">
           <option value="" disabled selected>Choose a model...</option>
           <option value="qwen-qwq-32b">Qwen QWQ (32B)</option>
-          <option value="deepseek-r1-distill-llama-70b-specdec">DeepSeek R1 Distill (70B)</option>
-          <option value="mixtral-8x7b-32768">Mixtral 8x7B</option>
-       </select>
+          <option value="deepseek-r1-distill-llama-70b-specdec">DeepSeek R1 Distill LLaMA (70B)</option>
+        </select>
         <div class="dropdown-arrow">▼</div>
       </div>
 
@@ -3514,17 +3513,17 @@ A: First segment: The car travels at 60 mph for 2 hours, so the distance covered
       const modelTags = document.getElementById('modelTags');
       const modelDescription = document.getElementById('modelDescription');
       
-      // Model information database for Qroq models
+      // Model information database for models
       const modelInfo = {
         "qwen-qwq-32b": {
           name: "Qwen QWQ (32B)",
-          tags: ["32B", "Coding", "Reasoning"],
-          description: "Qwen's 32B model optimized for coding and reasoning tasks."
+          tags: ["32B", "128K Context", "Alibaba Cloud"],
+          description: "Alibaba Cloud's Qwen QWQ model with 128K context window."
         },
         "deepseek-r1-distill-llama-70b-specdec": {
-          name: "DeepSeek R1 Distill (70B)",
-          tags: ["70B", "Distilled", "Specialized"],
-          description: "DeepSeek's 70B distilled model with specialized decoding capabilities."
+          name: "DeepSeek R1 Distill LLaMA (70B)",
+          tags: ["70B", "128K Context", "16,384 Spec"],
+          description: "DeepSeek's 70B distilled LLaMA model with specialized decoding and 128K context window."
         }
       };
       
