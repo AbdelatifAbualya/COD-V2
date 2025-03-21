@@ -1,33 +1,12 @@
 {
-  "name": "llm-playground-api-proxy",
+  "name": "enhanced-llm-playground",
   "version": "1.0.0",
-  "description": "API Proxy for LLM Playground",
-  "main": "app.js",
+  "description": "LLM Playground (COT vs COD)",
   "scripts": {
-    "build": "echo 'No build needed for serverless function'",
-    "start": "node app.js",
+    "build": "echo 'No build step required for static site'",
     "test": "echo 'No tests configured'"
   },
-  "keywords": [
-    "api-proxy",
-    "llm",
-    "cod",
-    "lambda"
-  ],
   "author": "Your Name",
   "license": "MIT",
-  "dependencies": {
-    "aws-serverless-express": "^3.3.5",
-    "body-parser": "^1.19.0",
-    "express": "^4.17.1",
-    "node-fetch": "^2.6.7",
-    "abort-controller": "^3.0.0"
-  },
-  "engines": {
-    "node": ">=14"
-  },
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/AbdelatifAbualya/COD-V2"
-  }
+  "private": true
 }
