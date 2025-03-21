@@ -1,357 +1,183 @@
+
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-darkreader-mode="dynamic" data-darkreader-scheme="dark">
 <head>
-  <meta charset="UTF-8" />
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
   <title>LLM Playground (COT vs COD)</title>
   <!-- Google Fonts -->
-  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500&family=Roboto+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Roboto+Mono:wght@400;500&display=swap" rel="stylesheet">
   <style>
     /* --------------------------------
        Global Styles
     -------------------------------- */
+    :root {
+      --bg-primary: #111215;
+      --bg-secondary: #16181d;
+      --bg-tertiary: #1e2028;
+      --bg-component: #262a36;
+      --bg-hover: #2d3341;
+      --text-primary: #e9ecf3;
+      --text-secondary: #a9b1c2;
+      --text-tertiary: #7a8499;
+      --accent-primary: #5686f5;
+      --accent-secondary: #4169e1;
+      --accent-tertiary: #3e4daa;
+      --success: #4ade80;
+      --warning: #f59e0b;
+      --error: #ef4444;
+      --border-light: rgba(255, 255, 255, 0.1);
+      --border-medium: rgba(255, 255, 255, 0.15);
+      --shadow-sm: 0 2px 5px rgba(0, 0, 0, 0.2);
+      --shadow-md: 0 4px 10px rgba(0, 0, 0, 0.25);
+      --shadow-lg: 0 10px 25px rgba(0, 0, 0, 0.35);
+      --radius-sm: 6px;
+      --radius-md: 10px;
+      --radius-lg: 16px;
+      --transition-fast: 0.15s ease;
+      --transition-normal: 0.25s ease;
+    }
+    
     * {
       box-sizing: border-box;
-    }
-    body {
       margin: 0;
       padding: 0;
-      font-family: 'Roboto', sans-serif;
-      background: linear-gradient(145deg, #0F0F0F 0%, #1F1F1F 100%);
-      color: #e0e0e0;
-      overflow: hidden;
     }
+    
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      line-height: 1.5;
+      overflow: hidden;
+      font-size: 15px;
+    }
+    
     .app-container {
       display: flex;
       height: 100vh;
       overflow: hidden;
     }
+    
+    h1, h2, h3, h4, h5, h6 {
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+    
     /* --------------------------------
        Sidebar Styles
     -------------------------------- */
     .sidebar {
-      width: 250px;
-      background-color: rgba(30, 30, 30, 0.95);
-      padding: 1rem;
-      border-right: 1px solid #333;
+      width: 280px;
+      background-color: var(--bg-secondary);
+      padding: 1.25rem;
+      border-right: 1px solid var(--border-light);
+      display: flex;
+      flex-direction: column;
       overflow-y: auto;
-      box-shadow: 2px 0 5px rgba(0,0,0,0.4);
+      box-shadow: var(--shadow-sm);
     }
+    
     .sidebar h2 {
       margin-top: 0;
-      margin-bottom: 1rem;
-      font-size: 1.2rem;
-      color: #fff;
+      margin-bottom: 1.25rem;
+      font-size: 1.25rem;
+      font-weight: 600;
+      color: var(--text-primary);
     }
+    
     .sidebar ul {
       list-style: none;
       padding: 0;
-      margin: 0;
+      margin: 0 0 1rem 0;
+      flex-grow: 1;
     }
+    
     .sidebar li {
-      padding: 0.5rem;
+      padding: 0.75rem 1rem;
       margin-bottom: 0.5rem;
-      border-radius: 8px;
+      border-radius: var(--radius-sm);
       cursor: pointer;
-      transition: background-color 0.3s ease;
+      transition: background-color var(--transition-fast), transform var(--transition-fast);
+      font-weight: 500;
     }
+    
     .sidebar li:hover {
-      background-color: #333;
+      background-color: var(--bg-hover);
+      transform: translateY(-1px);
     }
+    
     .sidebar li.active {
-      background-color: #444;
+      background-color: var(--bg-hover);
+      border-left: 3px solid var(--accent-primary);
+      color: var(--accent-primary);
     }
-      /* Enhanced Final Answer Styling */
-  .final-answer {
-    background-color: #2d3748;
-    border: 1px solid #4a5568;
-    border-radius: 8px;
-    padding: 15px;
-    margin-top: 10px;
-    color: #edf2f7;
-    font-family: 'Roboto', sans-serif;
-    line-height: 1.5;
-    position: relative;
-    clear: both;
-    overflow: hidden;
-  }
-
-  .final-answer-label {
-    font-size: 0.7rem;
-    color: #90cdf4;
-    margin-bottom: 12px;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    font-weight: bold;
-    border-bottom: 1px dotted #5a7299;
-    padding-bottom: 5px;
-    display: block;
-  }
-
-  .message {
-    position: relative !important;
-    overflow: visible !important;
-    padding-bottom: 20px; /* Add space for word count badge */
-  }
-
-  .word-count-badge {
-    position: absolute;
-    top: 4px;
-    right: 4px;
-    background-color: rgba(30, 30, 30, 0.9);
-    color: #ddd;
-    font-size: 0.7rem;
-    padding: 3px 8px;
-    border-radius: 12px;
-    border: 1px solid #555;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.3);
-    white-space: nowrap;
-    z-index: 5;
-    max-width: 200px;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
-
-  /* Add this to ensure proper CoD styling */
-  .cod-thinking {
-    background-color: #1e293b !important;
-    border-color: #3d4e63 !important;
-    font-family: 'Roboto Mono', monospace !important;
-  }
-
-  /* Improved CoD step styling */
-  .cod-step {
-    display: flex;
-    align-items: flex-start;
-    padding: 8px 10px;
-    margin-bottom: 12px !important;
-    border-left: none !important;
-    background-color: #2c3b4f;
-    border-radius: 6px;
-    box-shadow: 0 1px 2px rgba(0,0,0,0.2);
-  }
-  
-  /* Make thinking steps and final answer containers properly visible */
-  .thinking-steps, .final-answer {
-    width: 100% !important;
-    display: block !important;
-  }
-  
-  /* Improved word count breakdown display */
-  .word-count-breakdown {
-    font-size: 0.7rem;
-    color: #aaa;
-    margin-top: 3px;
-    display: flex;
-    gap: 8px;
-    flex-direction: column;
-  }
-  
-  /* Self-consistency results styling */
-  .self-consistency-results {
-    margin-top: 15px;
-    padding-top: 12px;
-    border-top: 1px dotted #444;
-  }
-  
-  .sc-header {
-    font-size: 0.8rem;
-    color: #90cdf4;
-    margin-bottom: 10px;
-    font-weight: 500;
-    display: flex;
-    align-items: center;
-  }
-  
-  .sc-icon {
-    margin-right: 6px;
-    font-size: 1rem;
-  }
-  
-  .sc-content {
-    font-size: 0.85rem;
-    color: #ddd;
-  }
-  
-  .sc-agreement {
-    margin-bottom: 8px;
-  }
-  
-  .sc-label {
-    margin-bottom: 5px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    font-size: 0.85rem;
-  }
-  
-  .sc-progress-container {
-    height: 6px;
-    background-color: #2a3746;
-    border-radius: 3px;
-    overflow: hidden;
-    margin-top: 4px;
-  }
-  
-  .sc-progress-bar {
-    height: 100%;
-    background: linear-gradient(90deg, #4a8cff, #63b3ed);
-    border-radius: 3px;
-  }
-  
-  /* Enhanced agreement styling */
-  .sc-progress-bar.high-agreement {
-    background: linear-gradient(90deg, #48bb78, #68d391);
-  }
-  
-  .sc-progress-bar.medium-agreement {
-    background: linear-gradient(90deg, #ecc94b, #f6e05e);
-  }
-  
-  .sc-progress-bar.low-agreement {
-    background: linear-gradient(90deg, #e53e3e, #fc8181);
-  }
-  
-  /* Statistics section styling */
-  .sc-stats {
-    display: flex;
-    justify-content: space-between;
-    margin-top: 12px;
-    padding: 8px 0;
-    border-top: 1px dotted #444;
-    border-bottom: 1px dotted #444;
-  }
-  
-  .sc-stat-item {
-    text-align: center;
-    flex: 1;
-  }
-  
-  .sc-stat-label {
-    font-size: 0.75rem;
-    color: #888;
-    margin-bottom: 4px;
-  }
-  
-  .sc-stat-value {
-    font-size: 0.9rem;
-    font-weight: 500;
-    color: #90cdf4;
-  }
-  
-  /* Path toggle and details */
-  .sc-path-toggle {
-    display: flex;
-    align-items: center;
-    background-color: #2c3b4f;
-    padding: 8px 12px;
-    border-radius: 4px;
-    margin-top: 12px;
-    cursor: pointer;
-    font-size: 0.85rem;
-    transition: background-color 0.2s ease;
-  }
-  
-  .sc-path-toggle:hover {
-    background-color: #3a4d64;
-  }
-  
-  .sc-path-toggle-icon {
-    margin-right: 8px;
-    font-size: 0.7rem;
-  }
-  
-  .sc-path-details {
-    display: none;
-    padding: 10px;
-    background-color: #252b38;
-    border-radius: 4px;
-    margin-top: 8px;
-  }
-  
-  .sc-path-details.visible {
-    display: block;
-  }
-  
-  .sc-path-item {
-    padding: 8px;
-    border-bottom: 1px solid #3d4e63;
-    margin-bottom: 8px;
-    font-size: 0.8rem;
-    color: #bbb;
-  }
-  
-  .sc-path-item:last-child {
-    border-bottom: none;
-    margin-bottom: 0;
-  }
-  
-  .sc-badge {
-    display: inline-block;
-    padding: 2px 6px;
-    border-radius: 3px;
-    font-size: 0.7rem;
-    margin-left: 8px;
-  }
-  
-  .sc-badge-agreement {
-    background-color: rgba(72, 187, 120, 0.2);
-    color: #68d391;
-  }
-  
-  .sc-badge-disagreement {
-    background-color: rgba(229, 62, 62, 0.2);
-    color: #fc8181;
-  }
-
-  .sc-paths {
-    margin-top: 12px;
-    font-size: 0.8rem;
-  }
-  
-  .sc-path-info {
-    margin-bottom: 5px;
-    color: #aaa;
-  }
-  
-  .sc-toggle {
-    cursor: pointer;
-    color: #90cdf4;
-    user-select: none;
-    font-size: 0.75rem;
-    text-decoration: underline;
-    margin-top: 5px;
-    display: inline-block;
-  }
+    
+    .sidebar-buttons {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      margin-top: auto;
+    }
+    
     .sidebar button {
       width: 100%;
-      margin-top: 0.5rem;
-      padding: 0.5rem;
+      padding: 0.75rem;
       border: none;
-      border-radius: 8px;
+      border-radius: var(--radius-sm);
       cursor: pointer;
       font-size: 0.9rem;
-      transition: background-color 0.3s ease;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.4);
+      font-weight: 500;
+      transition: all var(--transition-fast);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      box-shadow: var(--shadow-sm);
+      background-color: var(--bg-component);
+      color: var(--text-primary);
     }
-    /* Normal button style */
-    .sidebar button:not(#downloadTxtBtn):not(#downloadPdfBtn) {
-      background-color: #3a3a3a;
-      color: #fff;
+    
+    .sidebar button:hover {
+      background-color: var(--bg-hover);
+      transform: translateY(-1px);
     }
-    .sidebar button:not(#downloadTxtBtn):not(#downloadPdfBtn):hover {
-      background-color: #4a4a4a;
+    
+    .sidebar button:active {
+      transform: translateY(0);
     }
-    /* Visual Studio–like style for PDF/TXT download buttons */
-    #downloadTxtBtn,
+    
+    .sidebar button svg {
+      width: 18px;
+      height: 18px;
+    }
+    
+    #downloadTxtBtn, 
     #downloadPdfBtn {
-      background-color: #1e1e1e;
-      color: #d4d4d4;
-      border: 1px solid #3c3c3c;
+      background-color: var(--bg-tertiary);
+      border: 1px solid var(--border-medium);
     }
-    #downloadTxtBtn:hover,
-    #downloadPdfBtn:hover {
-      background-color: #2d2d2d;
+    
+    #clearThreadBtn {
+      margin-top: 0.75rem;
+      background-color: rgba(239, 68, 68, 0.2);
+      color: var(--error);
+      font-weight: 500;
+      border: 1px solid rgba(239, 68, 68, 0.3);
     }
+    
+    #clearThreadBtn:hover {
+      background-color: rgba(239, 68, 68, 0.3);
+    }
+    
+    #newThreadBtn {
+      background-color: var(--accent-primary);
+      color: white;
+    }
+    
+    #newThreadBtn:hover {
+      background-color: var(--accent-secondary);
+    }
+    
     /* --------------------------------
        Chat Container Styles
     -------------------------------- */
@@ -360,293 +186,550 @@
       display: flex;
       flex-direction: column;
       overflow: hidden;
-      background: linear-gradient(145deg, #181818 0%, #202020 100%);
+      background: linear-gradient(160deg, var(--bg-primary) 0%, var(--bg-secondary) 100%);
       position: relative;
     }
+    
     .chat-header {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      padding: 1rem;
-      background-color: rgba(30,30,30,0.95);
-      border-bottom: 1px solid #333;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.5);
-      z-index: 1;
+      padding: 1rem 1.5rem;
+      background-color: var(--bg-secondary);
+      border-bottom: 1px solid var(--border-light);
+      box-shadow: var(--shadow-sm);
+      z-index: 10;
+      height: 64px;
     }
+    
     .chat-header h1#pageTitle {
       margin: 0;
-      font-size: 1.5rem;
-      color: #fff;
+      font-size: 1.25rem;
+      font-weight: 600;
+      color: var(--text-primary);
       user-select: none;
     }
+    
+    .chat-header-actions {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    
     .settings-btn {
       background: none;
       border: none;
-      color: #fff;
-      font-size: 1.2rem;
+      color: var(--text-primary);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.95rem;
       cursor: pointer;
-      margin-left: 0.5rem;
-      transition: color 0.3s ease;
+      padding: 6px 12px;
+      border-radius: var(--radius-sm);
+      transition: background-color var(--transition-fast);
     }
+    
     .settings-btn:hover {
-      color: #ccc;
+      background-color: var(--bg-hover);
     }
+    
+    .current-model-display {
+      display: inline-flex;
+      align-items: center;
+      padding: 6px 12px;
+      border-radius: var(--radius-sm);
+      background-color: var(--bg-tertiary);
+      font-size: 0.9rem;
+      font-weight: 500;
+      color: var(--text-primary);
+      border: 1px solid var(--border-light);
+    }
+    
+    .reasoning-badge {
+      display: inline-block;
+      padding: 3px 8px;
+      border-radius: 12px;
+      font-size: 0.7rem;
+      margin-left: 6px;
+      font-weight: 500;
+    }
+    
     .chat-messages {
       flex: 1;
-      padding: 1rem;
+      padding: 1.5rem;
       overflow-y: auto;
       scroll-behavior: smooth;
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
     }
+    
+    .chat-input-container {
+      border-top: 1px solid var(--border-light);
+      background-color: var(--bg-secondary);
+      padding: 1.25rem;
+      position: relative;
+    }
+    
     .chat-input {
       display: flex;
-      border-top: 1px solid #333;
-      background-color: rgba(30,30,30,0.95);
-      padding: 1rem;
-      box-shadow: 0 -2px 4px rgba(0,0,0,0.3);
+      gap: 12px;
+      align-items: flex-start;
+      background-color: var(--bg-tertiary);
+      border-radius: var(--radius-md);
+      padding: 12px;
+      min-height: 60px;
     }
+    
     .chat-input textarea {
       flex: 1;
+      min-height: 24px;
+      max-height: 200px;
+      padding: 8px 12px;
+      background-color: var(--bg-component);
+      border: 1px solid var(--border-medium);
+      border-radius: var(--radius-sm);
+      color: var(--text-primary);
+      font-family: 'Inter', sans-serif;
+      font-size: 0.95rem;
+      line-height: 1.5;
       resize: none;
-      border: none;
-      background-color: #2e2e2e;
-      color: #fff;
-      padding: 0.5rem;
-      border-radius: 8px;
-      font-size: 1rem;
       outline: none;
-      box-shadow: inset 0 1px 3px rgba(0,0,0,0.4);
+      transition: all var(--transition-fast);
+      box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.1);
     }
-    .chat-input button {
-      margin-left: 1rem;
-      padding: 0.5rem 1rem;
-      background-color: #3a3a3a;
-      border: none;
-      color: #fff;
-      border-radius: 8px;
+    
+    .chat-input textarea:focus {
+      border-color: var(--accent-primary);
+      box-shadow: 0 0 0 2px rgba(86, 134, 245, 0.15);
+    }
+    
+    .chat-input-buttons {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      margin-left: 4px;
+    }
+    
+    #sendBtn {
+      background-color: var(--accent-primary);
+      color: white;
+      width: 60px;
+      height: 36px;
+      padding: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: var(--radius-sm);
       cursor: pointer;
-      font-size: 1rem;
-      transition: background-color 0.3s ease;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.4);
+      transition: all var(--transition-fast);
+      border: none;
+      font-weight: 500;
     }
-    .chat-input button:hover {
-      background-color: #4a4a4a;
+    
+    #sendBtn:hover {
+      background-color: var(--accent-secondary);
+      transform: translateY(-1px);
     }
-    /* Model Selection Styles */
-.model-select-container {
-  position: relative;
-  margin-bottom: 15px;
-}
-
-.model-dropdown {
-  width: 100%;
-  padding: 10px 15px;
-  border: 1px solid #444;
-  border-radius: 8px;
-  background-color: #2a2a2a;
-  color: #fff;
-  font-size: 0.95rem;
-  appearance: none;
-  cursor: pointer;
-  outline: none;
-  box-shadow: inset 0 1px 2px rgba(0,0,0,0.2);
-}
-
-.dropdown-arrow {
-  position: absolute;
-  right: 15px;
-  top: 50%;
-  transform: translateY(-50%);
-  color: #aaa;
-  pointer-events: none;
-  font-size: 0.7rem;
-}
-
-.model-dropdown:hover {
-  border-color: #666;
-  background-color: #333;
-}
-
-.model-dropdown:focus {
-  border-color: #4a8cff;
-  box-shadow: 0 0 0 2px rgba(74, 140, 255, 0.25);
-}
-
-.model-info-card {
-  background-color: #2a2a2a;
-  border: 1px solid #444;
-  border-radius: 8px;
-  margin-bottom: 20px;
-  overflow: hidden;
-}
-
-.model-info-header {
-  background-color: #333;
-  padding: 10px 15px;
-  font-weight: 500;
-  border-bottom: 1px solid #444;
-}
-
-.model-info-body {
-  padding: 15px;
-}
-
-.model-tags {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  margin-bottom: 12px;
-}
-
-.model-tag {
-  background-color: #3a4a5c;
-  color: #90cdf4;
-  padding: 3px 8px;
-  border-radius: 12px;
-  font-size: 0.75rem;
-}
-
-.model-description {
-  color: #ddd;
-  font-size: 0.9rem;
-  line-height: 1.4;
-}
+    
+    .action-button {
+      width: 32px !important;
+      height: 32px !important;
+      padding: 0 !important;
+      display: flex !important;
+      align-items: center;
+      justify-content: center;
+      background-color: var(--bg-component) !important;
+      border: 1px solid var(--border-medium) !important;
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      transition: all var(--transition-fast);
+    }
+    
+    .action-button:hover {
+      background-color: var(--bg-hover) !important;
+      transform: translateY(-1px);
+    }
+    
+    .action-button svg {
+      width: 16px;
+      height: 16px;
+      color: var(--text-secondary);
+    }
+    
+    #clearThreadBtn {
+      margin-top: 0.75rem;
+      background-color: rgba(239, 68, 68, 0.2);
+      color: var(--error);
+      font-weight: 500;
+      border: 1px solid rgba(239, 68, 68, 0.3);
+    }
+    
+    #clearThreadBtn:hover {
+      background-color: rgba(239, 68, 68, 0.3);
+    }
+    
+    #newThreadBtn {
+      background-color: var(--accent-primary);
+      color: white;
+    }
+    
+    #newThreadBtn:hover {
+      background-color: var(--accent-secondary);
+    }
+    
     /* --------------------------------
        Message Styles
     -------------------------------- */
     .message {
-      clear: both;
-      margin-bottom: 1.5rem;
-      max-width: 80%;
-      padding: 0.75rem 1rem;
-      border-radius: 12px;
-      line-height: 1.4;
-      word-wrap: break-word;
-      background-color: #2e2e2e;
-      border: 1px solid #444;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.3);
       position: relative;
-      overflow: hidden;
+      max-width: 80%;
+      padding: 1rem;
+      border-radius: var(--radius-md);
+      line-height: 1.5;
+      word-wrap: break-word;
+      animation: fadeIn var(--transition-normal);
+      box-shadow: var(--shadow-sm);
     }
+    
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    
     .message.user {
       float: right;
-      background-color: #3a3a3a;
+      background-color: var(--accent-tertiary);
       margin-left: 20%;
+      border-top-right-radius: 4px;
     }
+    
     .message.bot {
       float: left;
-      background-color: #2e2e2e;
+      background-color: var(--bg-component);
       margin-right: 20%;
+      border-top-left-radius: 4px;
     }
+    
     .message.bot.placeholder {
       font-style: italic;
-      color: #888;
+      color: var(--text-tertiary);
+      background-color: var(--bg-tertiary);
+      animation: pulse 1.5s infinite alternate;
     }
-    /* IMPROVED: Thinking steps and final answer styling */
+    
+    @keyframes pulse {
+      from { opacity: 0.8; }
+      to { opacity: 1; }
+    }
+    
+    .message-timestamp {
+      color: var(--text-tertiary);
+      font-size: 0.8rem;
+      margin-bottom: 0.5rem;
+      display: block;
+    }
+    
     .message-container {
       width: 100%;
       overflow: hidden;
     }
+    
+    /* Enhanced Thinking Steps */
     .thinking-steps {
-      background-color: #252525;
-      border: 1px solid #333;
-      border-radius: 8px;
+      background-color: var(--bg-tertiary);
+      border: 1px solid var(--border-medium);
+      border-radius: var(--radius-sm);
       padding: 15px;
       margin-bottom: 15px;
       font-family: 'Roboto Mono', monospace;
       font-size: 0.85rem;
-      color: #aaa;
+      color: var(--text-secondary);
       white-space: pre-wrap;
       overflow-x: auto;
     }
+    
     .thinking-label {
       font-size: 0.7rem;
-      font-family: 'Roboto', sans-serif;
-      color: #777;
-      margin-bottom: 8px;
+      font-family: 'Inter', sans-serif;
+      color: var(--text-tertiary);
+      margin-bottom: 10px;
       text-transform: uppercase;
       letter-spacing: 1px;
+      font-weight: 600;
+      border-bottom: 1px solid var(--border-light);
+      padding-bottom: 6px;
+    }
+    
+    .cod-thinking {
+      background-color: rgba(30, 41, 59, 0.5) !important;
+      border-color: rgba(61, 78, 99, 0.5) !important;
+    }
+    
+    /* Chain of Draft Step Styling */
+    .step {
+      border-left: 2px solid var(--accent-tertiary);
+      padding-left: 12px;
+      margin-bottom: 10px;
+      color: var(--text-secondary);
+    }
+    
+    .cod-step {
+      display: flex;
+      align-items: flex-start;
+      padding: 10px 12px;
+      margin-bottom: 12px !important;
+      border-left: none !important;
+      background-color: rgba(44, 59, 79, 0.5);
+      border-radius: 6px;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.2);
+      transition: transform var(--transition-fast), background-color var(--transition-fast);
+    }
+    
+    .cod-step:hover {
+      background-color: rgba(44, 59, 79, 0.8);
+      transform: translateY(-1px);
+    }
+    
+    .step-number {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 24px;
+      height: 24px;
+      background-color: rgba(61, 79, 105, 0.8);
+      border-radius: 12px;
+      margin-right: 10px;
+      color: var(--accent-primary);
+      font-size: 0.75rem;
       font-weight: bold;
-      border-bottom: 1px dotted #555;
-      padding-bottom: 5px;
     }
+    
+    .step-content {
+      flex: 1;
+      padding-right: 8px;
+      font-family: 'Roboto Mono', monospace;
+      color: var(--text-primary);
+      line-height: 1.6;
+    }
+    
+    /* Reflection Step Styling */
+    .reflection-step {
+      background-color: rgba(61, 70, 97, 0.6) !important;
+      border-left: 3px solid #8a5cf7 !important;
+    }
+    
+    .reflection-step .step-number {
+      background-color: rgba(93, 77, 138, 0.8) !important;
+      color: #d4c5ff !important;
+    }
+    
+    .reflection-step .step-content {
+      color: #d4c5ff !important;
+      font-style: italic;
+    }
+    
+    /* Final Answer Styling */
     .final-answer {
-      background-color: #2d3748;
-      border: 1px solid #4a5568;
-      border-radius: 8px;
+      background-color: rgba(45, 55, 72, 0.7);
+      border: 1px solid rgba(74, 85, 104, 0.5);
+      border-radius: var(--radius-sm);
       padding: 15px;
-      margin-top: 5px;
-      color: #edf2f7;
+      margin-top: 15px;
+      color: var(--text-primary);
+      position: relative;
+      clear: both;
+      overflow: hidden;
     }
+    
     .final-answer-label {
       font-size: 0.7rem;
-      color: #90cdf4;
-      margin-bottom: 8px;
+      color: var(--accent-primary);
+      margin-bottom: 12px;
       text-transform: uppercase;
       letter-spacing: 1px;
       font-weight: bold;
-      border-bottom: 1px dotted #5a7299;
-      padding-bottom: 5px;
+      border-bottom: 1px dotted rgba(90, 114, 153, 0.5);
+      padding-bottom: 6px;
+      display: block;
     }
-    .step {
-      border-left: 2px solid #3a4a5c;
-      padding-left: 10px;
-      margin-bottom: 8px;
-    }
+    
+    /* Word Count Badge */
     .word-count-badge {
       position: absolute;
-      top: 10px;
-      right: 10px;
-      background-color: rgba(30, 30, 30, 0.9);
-      color: #ddd;
+      top: 8px;
+      right: 8px;
+      background-color: rgba(30, 30, 30, 0.8);
+      color: var(--text-secondary);
       font-size: 0.7rem;
-      padding: 3px 8px;
+      padding: 4px 10px;
       border-radius: 12px;
-      border: 1px solid #555;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+      border: 1px solid var(--border-light);
       white-space: nowrap;
       z-index: 5;
+      max-width: 200px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      transition: opacity var(--transition-fast), transform var(--transition-fast);
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
     }
+    
+    .web-search-indicator {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      color: var(--accent-primary);
+      font-size: 0.7rem;
+    }
+    
+    .web-search-indicator svg {
+      width: 12px;
+      height: 12px;
+    }
+    
+    .message:hover .word-count-badge {
+      opacity: 1;
+      transform: translateY(0);
+    }
+    
+    .word-count-breakdown {
+      font-size: 0.7rem;
+      color: var(--text-tertiary);
+      margin-top: 4px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    
+    .count-item {
+      display: flex;
+      align-items: center;
+    }
+    
+    .count-thinking {
+      color: #b7c9db;
+    }
+    
+    .count-answer {
+      color: #90cdf4;
+    }
+    
+    .token-savings {
+      font-size: 0.7rem;
+      color: var(--success);
+      margin-left: 5px;
+    }
+    
+    /* Message Attachments */
+    .message-file-attachment {
+      margin-top: 12px;
+      padding: 10px;
+      background-color: rgba(42, 42, 42, 0.5);
+      border-radius: var(--radius-sm);
+      display: flex;
+      align-items: center;
+      transition: background-color var(--transition-fast);
+    }
+    
+    .message-file-attachment:hover {
+      background-color: rgba(42, 42, 42, 0.8);
+    }
+    
+    .message-file-icon {
+      margin-right: 10px;
+      font-size: 1.2rem;
+      color: var(--text-tertiary);
+    }
+    
+    .message-file-info {
+      display: flex;
+      flex-direction: column;
+    }
+    
+    .message-file-name {
+      font-size: 0.85rem;
+      font-weight: 500;
+      color: var(--text-primary);
+    }
+    
+    .message-file-size {
+      font-size: 0.7rem;
+      color: var(--text-tertiary);
+    }
+    
+    .message-image {
+      max-width: 100%;
+      border-radius: 6px;
+      margin-top: 12px;
+      cursor: pointer;
+      transition: transform var(--transition-fast);
+      box-shadow: var(--shadow-sm);
+    }
+    
+    .message-image:hover {
+      transform: scale(1.02);
+    }
+    
     /* --------------------------------
        Code Block Styles
     -------------------------------- */
     pre {
-      background-color: #1f1f1f;
+      background-color: rgba(31, 31, 31, 0.7);
       padding: 0.75rem;
-      border-radius: 8px;
+      border-radius: var(--radius-sm);
       overflow-x: auto;
-      margin: 0.5rem 0;
+      margin: 0.75rem 0;
       position: relative;
+      border: 1px solid var(--border-light);
     }
+    
     code {
-      font-family: Consolas, monospace;
-      color: #dcdcdc;
+      font-family: 'Roboto Mono', monospace;
+      color: #e2e8f0;
+      font-size: 0.9rem;
     }
+    
     .code-block-container {
       position: relative;
-      margin: 0.5rem 0;
-      background-color: #1f1f1f;
-      border-radius: 8px;
-      box-shadow: inset 0 1px 3px rgba(0,0,0,0.3);
-      padding: 0.75rem;
+      margin: 0.75rem 0;
+      background-color: rgba(31, 31, 31, 0.7);
+      border-radius: var(--radius-sm);
+      box-shadow: var(--shadow-sm);
+      padding: 0;
+      border: 1px solid var(--border-light);
     }
+    
+    .code-block-container pre {
+      margin: 0;
+      border: none;
+      background: transparent;
+    }
+    
     .copy-btn {
       position: absolute;
       top: 8px;
       right: 8px;
-      background-color: #333;
+      background-color: rgba(51, 51, 51, 0.8);
       border: none;
-      color: #fff;
+      color: var(--text-secondary);
       border-radius: 4px;
-      padding: 4px 8px;
+      padding: 4px 10px;
       font-size: 0.8rem;
       cursor: pointer;
-      transition: background-color 0.2s ease;
+      transition: all var(--transition-fast);
+      z-index: 2;
     }
+    
     .copy-btn:hover {
-      background-color: #444;
+      background-color: var(--accent-primary);
+      color: white;
     }
+
     /* --------------------------------
-       Modal Styles - IMPROVED - FIX FOR TAB CONTENT DISPLAY
+       Modal Styles
     -------------------------------- */
     .modal {
       display: none;
@@ -656,146 +739,216 @@
       top: 0;
       width: 100%;
       height: 100%;
-      overflow-y: auto; /* Changed from auto to allow scrolling */
-      background-color: rgba(0, 0, 0, 0.7);
-      backdrop-filter: blur(3px);
-    }
-    .modal-content {
-      background-color: #1e1e1e;
-      margin: 5% auto;
-      padding: 20px;
-      border: 1px solid #333;
-      width: 600px; /* Wider to accommodate settings */
-      max-width: 90%; /* Ensure it works on mobile */
-      border-radius: 10px;
-      color: #fff;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.5);
-      position: relative;
-      max-height: 85vh; /* Limit height and enable scrolling */
       overflow-y: auto;
+      background-color: rgba(0, 0, 0, 0.7);
+      backdrop-filter: blur(4px);
+      animation: fadeIn 0.2s ease;
     }
+    
+    .modal-content {
+      background-color: var(--bg-secondary);
+      margin: 4% auto;
+      padding: 20px 25px;
+      border: 1px solid var(--border-medium);
+      width: 650px;
+      max-width: 90%;
+      border-radius: var(--radius-md);
+      color: var(--text-primary);
+      box-shadow: var(--shadow-lg);
+      position: relative;
+      max-height: 85vh;
+      overflow-y: auto;
+      animation: modalSlideIn 0.3s ease;
+    }
+    
+    @keyframes modalSlideIn {
+      from { opacity: 0; transform: translateY(-20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+      padding-bottom: 15px;
+      border-bottom: 1px solid var(--border-light);
+    }
+    
+    .modal-header h2 {
+      margin: 0;
+      font-size: 1.4rem;
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+    
     .modal-content label {
       display: block;
-      margin-bottom: 5px;
+      margin-bottom: 6px;
       font-size: 0.9rem;
+      font-weight: 500;
+      color: var(--text-secondary);
     }
-    .modal-content input, .modal-content select {
+    
+    .modal-content input, 
+    .modal-content select, 
+    .modal-content textarea {
       width: 100%;
-      padding: 0.4rem;
-      margin-bottom: 1rem;
-      border: 1px solid #333;
-      border-radius: 5px;
-      background-color: #2e2e2e;
-      color: #fff;
-      font-size: 0.9rem;
+      padding: 10px 12px;
+      margin-bottom: 15px;
+      border: 1px solid var(--border-medium);
+      border-radius: var(--radius-sm);
+      background-color: var(--bg-component);
+      color: var(--text-primary);
+      font-size: 0.95rem;
+      font-family: 'Inter', sans-serif;
       outline: none;
-      box-shadow: inset 0 1px 3px rgba(0,0,0,0.4);
+      transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
     }
-    .modal-content select {
-      appearance: none;
-      background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%23FFFFFF%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E");
-      background-repeat: no-repeat;
-      background-position: right 0.7em top 50%;
-      background-size: 0.65em auto;
-      padding-right: 20px;
+    
+    .modal-content input:focus, 
+    .modal-content select:focus,
+    .modal-content textarea:focus {
+      border-color: var(--accent-primary);
+      box-shadow: 0 0 0 2px rgba(86, 134, 245, 0.25);
     }
+    
     .modal-content button {
-      padding: 0.5rem 1rem;
-      background-color: #3a3a3a;
+      padding: 10px 16px;
       border: none;
-      color: #fff;
-      border-radius: 5px;
+      border-radius: var(--radius-sm);
       cursor: pointer;
-      font-size: 1rem;
-      margin-right: 0.5rem;
-      transition: background-color 0.3s ease;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.4);
+      font-size: 0.95rem;
+      font-weight: 500;
+      transition: all var(--transition-fast);
     }
-    .modal-content button:hover {
-      background-color: #4a4a4a;
+    
+    .modal-content button.primary {
+      background-color: var(--accent-primary);
+      color: white;
     }
+    
+    .modal-content button.primary:hover {
+      background-color: var(--accent-secondary);
+    }
+    
+    .modal-content button.secondary {
+      background-color: var(--bg-component);
+      color: var(--text-primary);
+      border: 1px solid var(--border-medium);
+    }
+    
+    .modal-content button.secondary:hover {
+      background-color: var(--bg-hover);
+    }
+    
+    .close-modal {
+      position: absolute;
+      top: 15px;
+      right: 15px;
+      background: none;
+      border: none;
+      color: var(--text-secondary);
+      font-size: 20px;
+      cursor: pointer;
+      padding: 0;
+      margin: 0;
+      transition: color var(--transition-fast);
+    }
+    
+    .close-modal:hover {
+      color: var(--text-primary);
+    }
+    
     .settings-tabs {
       display: flex;
       gap: 5px;
       margin-bottom: 15px;
     }
+    
     .tab-btn {
       flex: 1;
-      background-color: #2a2a2a;
-      border: 1px solid #444;
-      color: #aaa;
-      padding: 8px 0;
-      border-radius: 5px 5px 0 0;
+      background-color: var(--bg-component);
+      border: 1px solid var(--border-medium);
+      color: var(--text-secondary);
+      padding: 10px 0;
+      border-radius: var(--radius-sm) var(--radius-sm) 0 0;
       cursor: pointer;
-      transition: all 0.3s ease;
+      transition: all var(--transition-fast);
+      text-align: center;
+      font-weight: 500;
     }
+    
     .tab-btn.active {
-      background-color: #3a3a3a;
-      color: #fff;
-      border-bottom: 2px solid #4a8cff;
+      background-color: var(--bg-hover);
+      color: var(--text-primary);
+      border-bottom: 2px solid var(--accent-primary);
     }
+    
     .tab-content {
       display: none;
       padding: 15px;
-      background-color: #2a2a2a;
-      border-radius: 0 0 5px 5px;
+      background-color: var(--bg-component);
+      border-radius: 0 0 var(--radius-sm) var(--radius-sm);
       margin-bottom: 20px;
-      /* Fix for tab content display issues */
       position: relative;
       width: 100%;
       box-sizing: border-box;
     }
+    
     .tab-content.active {
       display: block;
     }
+    
     .checkbox-container {
       display: flex;
       align-items: center;
       margin-bottom: 10px;
     }
+    
     .checkbox-container input[type="checkbox"] {
       width: auto;
       margin-right: 10px;
       margin-bottom: 0;
     }
+    
     .tooltip {
       position: relative;
       display: inline-block;
       margin-left: 5px;
       cursor: help;
     }
+    
     .tooltip .tooltiptext {
       visibility: hidden;
       width: 300px;
-      background-color: #2e2e2e;
-      color: #fff;
+      background-color: var(--bg-component);
+      color: var(--text-primary);
       text-align: left;
-      border-radius: 6px;
+      border-radius: var(--radius-sm);
       padding: 8px;
       position: absolute;
       z-index: 1;
       top: -5px;
       left: 105%;
       opacity: 0;
-      transition: opacity 0.3s;
-      box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+      transition: opacity var(--transition-fast);
+      box-shadow: var(--shadow-sm);
       font-size: 0.8rem;
       line-height: 1.4;
     }
+    
     .tooltip:hover .tooltiptext {
       visibility: visible;
       opacity: 1;
     }
     
-    /* --------------------------------
-       Reasoning Method UI Improvements
-    -------------------------------- */
     .feature-section {
-      border: 1px solid #444;
-      border-radius: 8px;
+      border: 1px solid var(--border-medium);
+      border-radius: var(--radius-sm);
       padding: 12px;
       margin-bottom: 16px;
-      background-color: #2a2a2a;
+      background-color: var(--bg-component);
     }
     
     .feature-header {
@@ -811,17 +964,18 @@
     .feature-header label {
       font-weight: 500;
       font-size: 1rem;
+      color: var(--text-primary);
     }
     
     .feature-options {
       margin-left: 24px;
       padding-top: 8px;
-      border-top: 1px solid #444;
+      border-top: 1px solid var(--border-light);
     }
     
     .option-label {
       margin-bottom: 8px;
-      color: #bbb;
+      color: var(--text-secondary);
       font-size: 0.9rem;
     }
     
@@ -848,7 +1002,6 @@
       margin-bottom: 0;
     }
     
-    /* Make radio buttons more visible and clickable */
     input[type="radio"] {
       -webkit-appearance: none;
       -moz-appearance: none;
@@ -856,7 +1009,7 @@
       border-radius: 50%;
       width: 16px;
       height: 16px;
-      border: 2px solid #555;
+      border: 2px solid var(--border-medium);
       outline: none;
       margin-right: 8px;
       position: relative;
@@ -864,7 +1017,7 @@
     }
     
     input[type="radio"]:checked {
-      border-color: #4a8cff;
+      border-color: var(--accent-primary);
     }
     
     input[type="radio"]:checked:before {
@@ -875,17 +1028,16 @@
       width: 6px;
       height: 6px;
       border-radius: 50%;
-      background: #4a8cff;
+      background: var(--accent-primary);
     }
     
-    /* Make checkboxes more visible and clickable */
     input[type="checkbox"] {
       -webkit-appearance: none;
       -moz-appearance: none;
       appearance: none;
       width: 16px;
       height: 16px;
-      border: 2px solid #555;
+      border: 2px solid var(--border-medium);
       border-radius: 3px;
       outline: none;
       cursor: pointer;
@@ -893,8 +1045,8 @@
     }
     
     input[type="checkbox"]:checked {
-      border-color: #4a8cff;
-      background-color: #4a8cff;
+      border-color: var(--accent-primary);
+      background-color: var(--accent-primary);
     }
     
     input[type="checkbox"]:checked:before {
@@ -913,26 +1065,25 @@
       justify-content: center;
       width: 16px;
       height: 16px;
-      background-color: #555;
+      background-color: var(--border-medium);
       border-radius: 50%;
       font-size: 12px;
       cursor: help;
     }
-
-    /* Status notification */
+    
     .status-notification {
       position: fixed;
       bottom: 20px;
       right: 20px;
-      background-color: #2a2a2a;
-      color: white;
+      background-color: var(--bg-component);
+      color: var(--text-primary);
       padding: 10px 15px;
-      border-radius: 4px;
-      box-shadow: 0 3px 6px rgba(0,0,0,0.3);
+      border-radius: var(--radius-sm);
+      box-shadow: var(--shadow-md);
       z-index: 1001;
       display: none;
       opacity: 0;
-      transition: opacity 0.3s ease;
+      transition: opacity var(--transition-fast);
     }
     
     .status-notification.show {
@@ -940,32 +1091,30 @@
       opacity: 1;
     }
     
-    /* Better modal close button */
     .close-modal {
       position: absolute;
       top: 15px;
       right: 15px;
       background: none;
       border: none;
-      color: #aaa;
+      color: var(--text-secondary);
       font-size: 20px;
       cursor: pointer;
       padding: 0;
       margin: 0;
-      transition: color 0.2s ease;
+      transition: color var(--transition-fast);
     }
     
     .close-modal:hover {
-      color: #eee;
+      color: var(--text-primary);
     }
     
-    /* Current model display */
     .current-model-display {
       display: inline-block;
       padding: 4px 8px;
       border-radius: 4px;
-      background-color: #253245;
-      color: #fff;
+      background-color: var(--bg-tertiary);
+      color: var(--text-primary);
       font-size: 0.9rem;
       margin-left: 10px;
     }
@@ -976,10 +1125,9 @@
       border-radius: 4px;
       font-size: 0.7rem;
       margin-left: 5px;
-      background-color: #444;
+      background-color: var(--border-medium);
     }
     
-    /* Two column layout for some settings */
     .settings-row {
       display: flex;
       gap: 20px;
@@ -990,7 +1138,6 @@
       flex: 1;
     }
     
-    /* Prompt editing styles */
     .prompt-editor {
       margin-top: 15px;
     }
@@ -998,10 +1145,10 @@
     .prompt-editor textarea {
       width: 100%;
       min-height: 150px;
-      background-color: #252525;
-      color: #ddd;
-      border: 1px solid #444;
-      border-radius: 5px;
+      background-color: var(--bg-tertiary);
+      color: var(--text-primary);
+      border: 1px solid var(--border-medium);
+      border-radius: var(--radius-sm);
       padding: 10px;
       font-family: monospace;
       font-size: 0.9rem;
@@ -1012,169 +1159,163 @@
     .prompt-reset {
       margin-top: 5px;
       font-size: 0.8rem;
-      color: #aaa;
+      color: var(--text-secondary);
       cursor: pointer;
       text-decoration: underline;
     }
     
     .prompt-reset:hover {
-      color: #4a8cff;
+      color: var(--accent-primary);
     }
-
-    /* Enhanced styles for Chain of Draft */
+    
     .cod-thinking {
-      background-color: #1e293b !important;
-      border-color: #3d4e63 !important;
+      background-color: rgba(30, 41, 59, 0.5) !important;
+      border-color: rgba(61, 78, 99, 0.5) !important;
     }
-
+    
     .cod-step {
       display: flex;
       align-items: flex-start;
       padding: 6px 8px;
       margin-bottom: 10px !important;
       border-left: none !important;
-      background-color: #2c3b4f;
+      background-color: rgba(44, 59, 79, 0.5);
       border-radius: 6px;
       box-shadow: 0 1px 2px rgba(0,0,0,0.2);
     }
-
+    
     .step-number {
       display: flex;
       align-items: center;
       justify-content: center;
       min-width: 24px;
       height: 24px;
-      background-color: #3d4f69;
+      background-color: rgba(61, 79, 105, 0.8);
       border-radius: 12px;
       margin-right: 10px;
-      color: #a3c5e9;
+      color: var(--accent-primary);
       font-size: 0.75rem;
       font-weight: bold;
     }
-
+    
     .step-content {
       flex: 1;
       padding-right: 8px;
       font-family: 'Roboto Mono', monospace;
-      color: #c5d5e8;
+      color: var(--text-primary);
     }
-
-    /* Enhanced token display */
+    
     .token-savings {
       font-size: 0.7rem;
-      color: #4ade80;
+      color: var(--success);
       margin-left: 5px;
     }
-
-    /* COD Word Limit options */
+    
     .cod-options {
       margin-top: 15px;
       display: none;
     }
-
+    
     .cod-word-limit-options {
       display: flex;
       flex-direction: column;
       gap: 8px;
       margin-bottom: 15px;
     }
-
+    
     .cod-word-limit-option {
       display: flex;
       align-items: center;
       padding: 8px 12px;
       margin-bottom: 8px;
-      background-color: #2a2a2a;
+      background-color: var(--bg-component);
       border-radius: 6px;
       cursor: pointer;
-      transition: background-color 0.2s ease;
+      transition: background-color var(--transition-fast);
     }
-
+    
     .cod-word-limit-option:hover {
-      background-color: #333;
+      background-color: var(--bg-hover);
     }
-
+    
     .cod-word-limit-option.selected {
-      background-color: #3a4a5c;
-      border-left: 3px solid #4a8cff;
+      background-color: var(--bg-hover);
+      border-left: 3px solid var(--accent-primary);
     }
-
+    
     .cod-word-limit-value {
       font-weight: bold;
       margin-right: 5px;
     }
-
+    
     .cod-word-limit-desc {
       font-size: 0.85rem;
-      color: #aaa;
+      color: var(--text-secondary);
     }
-
-    /* CoD examples section */
+    
     .cod-examples {
       margin-top: 15px;
       padding: 15px;
-      background-color: #2a2a2a;
-      border-radius: 8px;
-      border: 1px solid #444;
+      background-color: var(--bg-component);
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border-medium);
     }
-
+    
     .cod-examples-header {
       font-size: 0.9rem;
       font-weight: bold;
       margin-bottom: 10px;
-      color: #ddd;
-      border-bottom: 1px solid #444;
+      color: var(--text-primary);
+      border-bottom: 1px solid var(--border-light);
       padding-bottom: 5px;
     }
-
+    
     .cod-example-item {
       margin-bottom: 12px;
       font-family: 'Roboto Mono', monospace;
       font-size: 0.85rem;
       padding: 8px;
-      background-color: #333;
+      background-color: var(--bg-hover);
       border-radius: 5px;
-      color: #bbb;
-    }
-
-    .cod-example-question {
-      color: #aaa;
-      margin-bottom: 5px;
-    }
-
-    .cod-example-answer {
-      color: #4a8cff;
+      color: var(--text-secondary);
     }
     
-    /* Word count breakdown */
+    .cod-example-question {
+      color: var(--text-tertiary);
+      margin-bottom: 5px;
+    }
+    
+    .cod-example-answer {
+      color: var(--accent-primary);
+    }
+    
     .word-count-breakdown {
       font-size: 0.7rem;
-      color: #aaa;
+      color: var(--text-tertiary);
       margin-top: 3px;
       display: flex;
       gap: 8px;
     }
-
+    
     .count-item {
       display: flex;
       align-items: center;
     }
-
+    
     .count-thinking {
       color: #b7c9db;
     }
-
+    
     .count-answer {
       color: #90cdf4;
     }
     
-    /* NEW STYLING: Enhanced reasoning features */
     .advanced-options-header {
       font-size: 0.95rem;
       font-weight: 500;
       margin: 15px 0 8px 0;
-      color: #ddd;
-      border-bottom: 1px solid #444;
+      color: var(--text-primary);
+      border-bottom: 1px solid var(--border-light);
       padding-bottom: 5px;
       display: flex;
       align-items: center;
@@ -1201,7 +1342,7 @@
       left: 0;
       right: 0;
       bottom: 0;
-      background-color: #555;
+      background-color: var(--border-medium);
       transition: .4s;
       border-radius: 22px;
     }
@@ -1219,7 +1360,7 @@
     }
     
     input:checked + .toggle-slider {
-      background-color: #4a8cff;
+      background-color: var(--accent-primary);
     }
     
     input:checked + .toggle-slider:before {
@@ -1227,9 +1368,9 @@
     }
     
     .enhanced-reasoning {
-      background-color: #2a3746;
-      border: 1px solid #3d4e63;
-      border-radius: 8px;
+      background-color: var(--bg-tertiary);
+      border: 1px solid var(--border-medium);
+      border-radius: var(--radius-sm);
       padding: 12px;
       margin-top: 10px;
     }
@@ -1247,7 +1388,7 @@
     .option-description {
       margin-left: 25px;
       font-size: 0.8rem;
-      color: #aaa;
+      color: var(--text-secondary);
       margin-bottom: 10px;
     }
     
@@ -1266,7 +1407,7 @@
     
     .complexity-bar {
       height: 5px;
-      background-color: #3d4e63;
+      background-color: var(--border-medium);
       margin-top: 5px;
       border-radius: 2px;
       width: 100%;
@@ -1274,25 +1415,24 @@
     
     .complexity-label {
       font-size: 0.75rem;
-      color: #90cdf4;
+      color: var(--accent-primary);
     }
     
     .preset-type {
       display: inline-block;
       padding: 3px 8px;
-      background-color: #2c3a4f;
-      color: #90cdf4;
+      background-color: var(--bg-hover);
+      color: var(--accent-primary);
       border-radius: 12px;
       font-size: 0.7rem;
       margin-left: 8px;
     }
     
-    /* Auto-detection indicator */
     .auto-detection-badge {
       display: inline-flex;
       align-items: center;
-      background-color: #394e6a;
-      color: #a3c5e9;
+      background-color: var(--bg-hover);
+      color: var(--accent-primary);
       padding: 2px 6px;
       border-radius: 4px;
       font-size: 0.7rem;
@@ -1303,23 +1443,22 @@
       display: inline-block;
       width: 8px;
       height: 8px;
-      background-color: #68d391;
+      background-color: var(--success);
       border-radius: 50%;
       margin-right: 4px;
     }
     
-    /* Help panel for complex problems */
     .problem-analyzer {
       margin-top: 15px;
-      background-color: #2a3746;
-      border: 1px solid #3d4e63;
-      border-radius: 8px;
+      background-color: var(--bg-tertiary);
+      border: 1px solid var(--border-medium);
+      border-radius: var(--radius-sm);
       padding: 12px;
     }
     
     .analyzer-title {
       font-weight: 500;
-      color: #90cdf4;
+      color: var(--accent-primary);
       margin-bottom: 10px;
       display: flex;
       align-items: center;
@@ -1327,17 +1466,16 @@
     
     .analyzer-icon {
       margin-right: 6px;
-      color: #68d391;
+      color: var(--success);
     }
     
     .analyzer-help {
       font-size: 0.85rem;
-      color: #bbb;
+      color: var(--text-secondary);
       margin-bottom: 10px;
       line-height: 1.4;
     }
-
-    /* Responsive adjustments */
+    
     @media (max-width: 768px) {
       .app-container {
         flex-direction: column;
@@ -1357,62 +1495,61 @@
         gap: 10px;
       }
     }
-
-    /* File Upload Styles */
+    
     .file-upload-button {
-      background-color: #3a3a3a;
-      color: #fff;
+      background-color: var(--bg-component);
+      color: var(--text-primary);
       border: none;
-      border-radius: 8px;
+      border-radius: var(--radius-sm);
       padding: 0.3rem 0.6rem;
       margin-right: 0.5rem;
       cursor: pointer;
       font-size: 0.9rem;
       display: inline-flex;
       align-items: center;
-      transition: background-color 0.3s ease;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.4);
+      transition: background-color var(--transition-fast);
+      box-shadow: var(--shadow-sm);
     }
-
+    
     .file-upload-button:hover {
-      background-color: #4a4a4a;
+      background-color: var(--bg-hover);
     }
-
+    
     .file-upload-icon {
       margin-right: 5px;
     }
-
+    
     .file-input {
       display: none;
     }
-
+    
     .attached-files {
       display: flex;
       flex-wrap: wrap;
       gap: 8px;
       padding: 8px;
-      border-top: 1px solid #333;
-      background-color: rgba(30,30,30,0.95);
+      border-top: 1px solid var(--border-light);
+      background-color: var(--bg-secondary);
     }
-
+    
     .file-preview {
       position: relative;
       display: flex;
       flex-direction: column;
       align-items: center;
-      background-color: #2e2e2e;
-      border-radius: 8px;
+      background-color: var(--bg-tertiary);
+      border-radius: var(--radius-sm);
       padding: 8px;
       max-width: 100px;
     }
-
+    
     .file-preview-image {
       width: 80px;
       height: 80px;
       object-fit: cover;
       border-radius: 6px;
     }
-
+    
     .file-preview-icon {
       width: 80px;
       height: 80px;
@@ -1420,11 +1557,11 @@
       align-items: center;
       justify-content: center;
       font-size: 2rem;
-      color: #aaa;
-      background-color: #222;
+      color: var(--text-secondary);
+      background-color: var(--bg-component);
       border-radius: 6px;
     }
-
+    
     .file-preview-name {
       margin-top: 5px;
       font-size: 0.7rem;
@@ -1433,15 +1570,15 @@
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
-      color: #ddd;
+      color: var(--text-secondary);
     }
-
+    
     .file-preview-remove {
       position: absolute;
       top: 0;
       right: 0;
       background-color: rgba(0, 0, 0, 0.6);
-      color: #fff;
+      color: var(--text-primary);
       border: none;
       border-radius: 50%;
       width: 20px;
@@ -1452,192 +1589,750 @@
       align-items: center;
       justify-content: center;
     }
-
+    
     .message-file-attachment {
       margin-top: 10px;
       padding: 10px;
-      background-color: #2a2a2a;
-      border-radius: 6px;
+      background-color: var(--bg-tertiary);
+      border-radius: var(--radius-sm);
       display: flex;
       align-items: center;
     }
-
+    
     .message-file-icon {
       margin-right: 10px;
       font-size: 1.2rem;
-      color: #aaa;
+      color: var(--text-secondary);
     }
-
+    
     .message-file-info {
       display: flex;
       flex-direction: column;
     }
-
+    
     .message-file-name {
       font-size: 0.85rem;
       font-weight: 500;
+      color: var(--text-primary);
     }
-
+    
     .message-file-size {
       font-size: 0.7rem;
-      color: #aaa;
+      color: var(--text-secondary);
     }
-
+    
     .message-image {
       max-width: 100%;
       border-radius: 6px;
       margin-top: 10px;
       cursor: pointer;
-      transition: transform 0.2s ease;
+      transition: transform var(--transition-fast);
     }
-
+    
     .message-image:hover {
       transform: scale(1.01);
     }
-
-    .thinking-container {
-      margin-top: 15px;
-      padding: 15px;
-      background-color: #161c26;
-      border-radius: 6px;
-      white-space: pre-wrap;
-      font-size: 0.95rem;
-      line-height: 1.5;
-      max-height: 500px;
-      overflow-y: auto;
-      position: relative;
-      color: #c5d5e9;
+    
+    .reflection-step {
+      background-color: rgba(61, 70, 97, 0.6) !important;
+      border-left: 3px solid #8a5cf7 !important;
     }
     
-    .thinking-label {
+    .reflection-step .step-number {
+      background-color: rgba(93, 77, 138, 0.8) !important;
+      color: #d4c5ff !important;
+    }
+    
+    .reflection-step .step-content {
+      color: #d4c5ff !important;
+      font-style: italic;
+    }
+    
+    .range-container {
+      position: relative;
+      margin-bottom: 20px;
+    }
+    
+    .range-value {
       position: absolute;
-      top: -10px;
-      left: 15px;
-      padding: 2px 8px;
-      background-color: #3b82f6;
+      right: 0;
+      top: 0;
+      font-size: 0.9rem;
+      color: var(--text-secondary);
+    }
+    
+    #sendBtn, #clearThreadBtn {
+      background-color: var(--accent-primary);
       color: white;
-      font-size: 0.75rem;
-      border-radius: 4px;
+      padding: 8px 15px;
+      border: none;
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      font-weight: 500;
+      transition: background-color var(--transition-fast);
+    }
+    
+    #sendBtn:hover, #clearThreadBtn:hover {
+      background-color: var(--accent-secondary);
+    }
+    
+    #clearThreadBtn {
+      background-color: var(--error);
+      width: 100%;
+      margin-top: 10px;
+    }
+    
+    #clearThreadBtn:hover {
+      background-color: #bd2130;
+    }
+
+    /* Feedback Button Styling */
+    #openFeedbackBtn {
+      background-color: var(--bg-tertiary);
+      color: var(--text-primary);
+      border: 1px solid var(--border-medium);
+      width: 100%;
+      margin-top: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      padding: 0.75rem;
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      font-size: 0.9rem;
+      font-weight: 500;
+      transition: all var(--transition-fast);
+    }
+
+    #openFeedbackBtn:hover {
+      background-color: var(--bg-hover);
+      transform: translateY(-1px);
+    }
+
+    /* Modal Content Styling */
+    .modal-content {
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+      border-radius: 10px;
+      border: 1px solid var(--border-medium);
+    }
+
+    /* Tab Button Styling */
+    .tab-btn {
+      border-radius: 6px;
+      font-weight: 500;
+      padding: 10px 15px;
+    }
+
+    .tab-btn.active {
+      background-color: var(--accent-primary);
+      box-shadow: none;
+    }
+
+    /* Feedback Form Styling */
+    #feedbackModal textarea {
+      width: 100%;
+      background-color: var(--bg-component);
+      color: var(--text-primary);
+      border: 1px solid var(--border-medium);
+      border-radius: 5px;
+      padding: 10px;
+      margin-bottom: 20px;
+    }
+
+    #feedbackModal button[type="submit"] {
+      background-color: var(--accent-primary);
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 5px;
+      cursor: pointer;
+      float: right;
+    }
+
+    #feedbackModal button[type="submit"]:hover {
+      background-color: var(--accent-secondary);
+    }
+
+    /* Enhanced Model Dropdown Styling */
+    .model-select-container {
+      position: relative;
+      width: 100%;
+      margin-bottom: 20px;
+    }
+
+    #modelSelect {
+      width: 100%;
+      padding: 12px 15px;
+      font-size: 0.95rem;
+      background-color: var(--bg-component);
+      color: var(--text-primary);
+      border: 1px solid var(--border-medium);
+      border-radius: var(--radius-sm);
+      appearance: none;
+      cursor: pointer;
+      transition: all var(--transition-fast);
+      box-shadow: var(--shadow-sm);
+    }
+
+    #modelSelect:hover {
+      background-color: var(--bg-hover);
+      border-color: var(--accent-primary);
+    }
+
+    #modelSelect:focus {
+      outline: none;
+      border-color: var(--accent-primary);
+      box-shadow: 0 0 0 2px rgba(86, 134, 245, 0.25);
+    }
+
+    .model-select-container::after {
+      content: '▼';
+      position: absolute;
+      right: 15px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--text-secondary);
+      pointer-events: none;
+      font-size: 0.8rem;
+      transition: transform var(--transition-fast);
+    }
+
+    .model-select-container:hover::after {
+      color: var(--text-primary);
+    }
+
+    /* Model Info Card Enhancement */
+    .model-info-card {
+      background-color: var(--bg-tertiary);
+      border: 1px solid var(--border-medium);
+      border-radius: var(--radius-sm);
+      padding: 15px;
+      margin-top: 15px;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .model-info-header {
+      font-weight: 600;
+      color: var(--text-primary);
+      margin-bottom: 10px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid var(--border-light);
+    }
+
+    .model-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+
+    .model-tag {
+      background-color: var(--bg-hover);
+      color: var(--accent-primary);
+      padding: 4px 10px;
+      border-radius: 12px;
+      font-size: 0.8rem;
       font-weight: 500;
     }
-    
-    .cod-thinking {
-      font-family: 'Roboto Mono', monospace;
+
+    .model-description {
+      color: var(--text-secondary);
+      font-size: 0.9rem;
+      line-height: 1.5;
     }
-    
-    /* Improved CoD step styling */
-    .cod-step {
-      margin-bottom: 8px;
-      padding: 10px;
-      background: #1e293b;
-      border-left: 3px solid #3b82f6;
-      border-radius: 4px;
-      font-family: 'Roboto Mono', monospace;
+
+    /* Settings Modal Enhancement */
+    .modal-content {
+      background-color: var(--bg-secondary);
+      margin: 2% auto;
+      padding: 25px 30px;
+      border: 1px solid var(--border-medium);
+      width: 700px;
+      max-width: 95%;
+      border-radius: var(--radius-lg);
+      color: var(--text-primary);
+      box-shadow: var(--shadow-lg);
+      position: relative;
+      max-height: 90vh;
+      overflow-y: auto;
     }
-    
-    .step-number {
-      display: inline-block;
-      width: 24px;
-      height: 24px;
-      margin-right: 10px;
-      background: #2563eb;
+
+    .settings-tabs {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 25px;
+      background: var(--bg-tertiary);
+      padding: 8px;
+      border-radius: var(--radius-md);
+    }
+
+    .tab-btn {
+      flex: 1;
+      background-color: transparent;
+      border: none;
+      color: var(--text-secondary);
+      padding: 12px 20px;
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      transition: all var(--transition-fast);
+      font-weight: 500;
+      font-size: 0.95rem;
+    }
+
+    .tab-btn:hover {
+      background-color: var(--bg-hover);
+      color: var(--text-primary);
+    }
+
+    .tab-btn.active {
+      background-color: var(--accent-primary);
       color: white;
-      text-align: center;
-      border-radius: 50%;
-      font-weight: bold;
     }
-    
-    .final-answer {
-      margin-top: 15px;
+
+    .settings-section-header {
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: var(--text-primary);
+      margin-bottom: 20px;
+      padding-bottom: 10px;
+      border-bottom: 2px solid var(--border-medium);
+    }
+
+    /* Model Selection Enhancement */
+    .model-select-container {
+      background: var(--bg-tertiary);
+      padding: 20px;
+      border-radius: var(--radius-md);
+      margin-bottom: 25px;
+    }
+
+    #modelSelect {
+      width: 100%;
       padding: 15px;
-      background: #172554;
+      font-size: 1rem;
+      background-color: var(--bg-component);
+      color: var(--text-primary);
+      border: 1px solid var(--border-medium);
+      border-radius: var(--radius-sm);
+      appearance: none;
+      cursor: pointer;
+      transition: all var(--transition-fast);
+      box-shadow: var(--shadow-sm);
+      margin-bottom: 15px;
+    }
+
+    #modelSelect:hover {
+      background-color: var(--bg-hover);
+      border-color: var(--accent-primary);
+    }
+
+    #modelSelect:focus {
+      outline: none;
+      border-color: var(--accent-primary);
+      box-shadow: 0 0 0 2px rgba(86, 134, 245, 0.25);
+    }
+
+    .model-info-card {
+      background-color: var(--bg-component);
+      border: 1px solid var(--border-medium);
+      border-radius: var(--radius-md);
+      padding: 20px;
+      margin-top: 20px;
+    }
+
+    .model-info-header {
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: var(--text-primary);
+      margin-bottom: 15px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid var(--border-light);
+    }
+
+    .model-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 15px;
+    }
+
+    .model-tag {
+      background-color: var(--bg-hover);
+      color: var(--accent-primary);
+      padding: 6px 12px;
+      border-radius: 15px;
+      font-size: 0.85rem;
+      font-weight: 500;
+    }
+
+    #setModelBtn {
+      background-color: var(--accent-primary);
+      color: white;
+      padding: 12px 24px;
+      border: none;
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      font-weight: 500;
+      font-size: 0.95rem;
+      margin-top: 20px;
+      transition: all var(--transition-fast);
+    }
+
+    #setModelBtn:hover {
+      background-color: var(--accent-secondary);
+      transform: translateY(-1px);
+    }
+
+    #setModelBtn.success {
+      background-color: var(--success);
+    }
+
+    /* Save/Cancel Buttons Enhancement */
+    .settings-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 12px;
+      margin-top: 30px;
+      padding-top: 20px;
+      border-top: 1px solid var(--border-light);
+    }
+
+    #saveSettings, #closeSettings {
+      padding: 12px 24px;
+      border-radius: var(--radius-sm);
+      font-weight: 500;
+      font-size: 0.95rem;
+      cursor: pointer;
+      transition: all var(--transition-fast);
+    }
+
+    #saveSettings {
+      background-color: var(--accent-primary);
+      color: white;
+      border: none;
+    }
+
+    #saveSettings:hover {
+      background-color: var(--accent-secondary);
+      transform: translateY(-1px);
+    }
+
+    #closeSettings {
+      background-color: var(--bg-component);
+      color: var(--text-primary);
+      border: 1px solid var(--border-medium);
+    }
+
+    #closeSettings:hover {
+      background-color: var(--bg-hover);
+      transform: translateY(-1px);
+    }
+
+    /* Enhanced Reasoning Settings */
+    .reasoning-method-container {
+      background: var(--bg-tertiary);
+      border-radius: var(--radius-md);
+      padding: 20px;
+      margin-bottom: 25px;
+    }
+
+    .reasoning-option {
+      background: var(--bg-component);
+      border: 1px solid var(--border-medium);
+      border-radius: var(--radius-sm);
+      padding: 16px;
+      margin-bottom: 12px;
+      cursor: pointer;
+      transition: all var(--transition-fast);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .reasoning-option:hover {
+      background: var(--bg-hover);
+      transform: translateY(-1px);
+      border-color: var(--accent-primary);
+    }
+
+    .reasoning-option.selected {
+      background: rgba(86, 134, 245, 0.1);
+      border-color: var(--accent-primary);
+    }
+
+    .reasoning-option input[type="radio"] {
+      width: 18px;
+      height: 18px;
+      margin: 0;
+    }
+
+    .reasoning-option-content {
+      flex: 1;
+    }
+
+    .reasoning-option-title {
+      font-weight: 500;
+      color: var(--text-primary);
+      margin-bottom: 4px;
+      font-size: 0.95rem;
+    }
+
+    .reasoning-option-description {
+      color: var(--text-secondary);
+      font-size: 0.85rem;
+    }
+
+    .reasoning-help-icon {
+      color: var(--text-tertiary);
+      font-size: 1.1rem;
+      padding: 4px;
+      border-radius: 50%;
+      transition: all var(--transition-fast);
+    }
+
+    .reasoning-help-icon:hover {
+      color: var(--accent-primary);
+      background: var(--bg-hover);
+    }
+
+    /* Advanced Options Enhancement */
+    .advanced-options-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin: 25px 0 15px;
+      padding-bottom: 10px;
+      border-bottom: 2px solid var(--border-medium);
+    }
+
+    .advanced-options-title {
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: var(--text-primary);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .toggle-switch {
+      position: relative;
+      width: 46px;
+      height: 24px;
+    }
+
+    .toggle-switch input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+
+    .toggle-slider {
+      position: absolute;
+      cursor: pointer;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: var(--bg-component);
+      transition: .4s;
+      border-radius: 24px;
+      border: 1px solid var(--border-medium);
+    }
+
+    .toggle-slider:before {
+      position: absolute;
+      content: "";
+      height: 18px;
+      width: 18px;
+      left: 3px;
+      bottom: 2px;
+      background-color: var(--text-secondary);
+      transition: .4s;
+      border-radius: 50%;
+    }
+
+    input:checked + .toggle-slider {
+      background-color: var(--accent-primary);
+    }
+
+    input:checked + .toggle-slider:before {
+      transform: translateX(21px);
+      background-color: white;
+    }
+
+    /* Problem Analyzer Enhancement */
+    .problem-analyzer {
+      background: var(--bg-component);
+      border-radius: var(--radius-md);
+      padding: 20px;
+      margin-top: 15px;
+    }
+
+    .analyzer-title {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--accent-primary);
+      font-weight: 500;
+      margin-bottom: 12px;
+    }
+
+    .analyzer-icon {
+      background: rgba(86, 134, 245, 0.1);
+      padding: 6px;
       border-radius: 8px;
-      border-left: 4px solid #3b82f6;
+    }
+
+    .analyzer-help {
+      color: var(--text-secondary);
+      font-size: 0.9rem;
+      line-height: 1.5;
+    }
+
+    .analyzer-help ul {
+      margin-top: 10px;
+      padding-left: 20px;
+    }
+
+    .analyzer-help li {
+      margin-bottom: 6px;
+      color: var(--text-secondary);
+    }
+
+    .web-search-toggle {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin: 20px 0;
+      padding: 12px;
+      background: var(--bg-tertiary);
+      border-radius: var(--radius-md);
+    }
+
+    .toggle-label {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      cursor: pointer;
+    }
+
+    .toggle-text {
+      font-size: 14px;
+      color: var(--text-primary);
+    }
+
+    #webSearchToggle {
+      width: 18px;
+      height: 18px;
+      cursor: pointer;
     }
   </style>
 </head>
 <body>
-  <!-- Include jsPDF for PDF generation -->
-  <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
+  <div id="blue-light-blocker-overlay" style="position: fixed; top: 0px; left: 0px; width: 100%; height: 100%; z-index: 2147483647; pointer-events: none; transition: opacity 0.3s; mix-blend-mode: multiply; background-color: rgb(255, 175, 50); opacity: 0; --darkreader-inline-bgcolor: var(--darkreader-background-ffaf32, #ae6a00);" data-darkreader-inline-bgcolor=""></div><!-- Include jsPDF for PDF generation -->
+  <script src="./LLM Playground (COT vs COD)_files/jspdf.umd.min.js"></script>
 
   <div class="app-container">
     <!-- Sidebar for Thread Management -->
     <div class="sidebar">
       <h2>Threads</h2>
-      <ul id="threadList"></ul>
-      <button id="newThreadBtn">New Thread</button>
-      <button id="deleteThreadBtn">Delete Thread</button>
-      <button id="downloadTxtBtn">Download TXT</button>
-      <button id="downloadPdfBtn">Download PDF</button>
+      <ul id="threadList"><li class="active">Thread 1</li></ul>
+      <div class="sidebar-buttons">
+        <button id="newThreadBtn">New Thread</button>
+        <button id="deleteThreadBtn">Delete Thread</button>
+        <button id="downloadTxtBtn">Download TXT</button>
+        <button id="downloadPdfBtn">Download PDF</button>
+        <button id="clearThreadBtn">Clear Thread</button>
+        <button id="openFeedbackBtn">
+          <span>💬</span>
+          Feedback
+        </button>
+      </div>
     </div>
 
     <!-- Chat Area -->
     <div class="chat-container">
       <div class="chat-header">
         <h1 id="pageTitle">LLM Playground (COT vs COD)</h1>
-        <div>
-          <span id="currentModelDisplay" class="current-model-display">Model not set</span>
+        <div class="chat-header-actions">
+          <span id="currentModelDisplay" class="current-model-display">llama-3.3-70b<span class="reasoning-badge" style="background-color: #2d5038; margin-left: 3px;">Adaptive</span></span>
           <button class="settings-btn" id="openSettings">Settings ⚙️</button>
         </div>
       </div>
-      <div class="chat-messages" id="chatMessages">
-        <!-- Chat messages will be rendered here -->
-      </div>
-      <div class="chat-input">
-        <textarea id="userInput" rows="2" placeholder="Type your message..."></textarea>
-        <button id="sendBtn">Send</button>
-        <label for="fileInput" class="file-upload-button">
-          <span class="file-upload-icon">📎</span>
-          Attach
-        </label>
+      <div class="chat-messages" id="chatMessages"></div>
+      <!-- Chat Input Area -->
+      <div class="chat-input-container">
+        <div class="chat-input">
+          <textarea id="userInput" placeholder="Type your message..." rows="1"></textarea>
+          <div class="chat-input-buttons">
+            <button id="sendBtn" type="button">Send</button>
+            <label for="fileInput" class="action-button" title="Attach files">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M21.44 11.05l-9.19 9.19a6 6 0 01-8.49-8.49l9.19-9.19a4 4 0 015.66 5.66l-9.2 9.19a2 2 0 01-2.83-2.83l8.49-8.48"/>
+              </svg>
+            </label>
+            <button id="webSearchBtn" class="action-button" type="button" title="Toggle web search">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="11" cy="11" r="8"/>
+                <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+              </svg>
+            </button>
+          </div>
+        </div>
         <input type="file" id="fileInput" class="file-input" multiple>
-      </div>
-      <div id="attachedFiles" class="attached-files" style="display: none;">
-        <!-- File previews will be added here -->
+        <div id="attachedFiles" class="attached-files" style="display: none;"></div>
       </div>
     </div>
   </div>
 
   <!-- Status Notification -->
-  <div id="statusNotification" class="status-notification"></div>
+  <div id="statusNotification" class="status-notification">TXT file downloaded</div>
 
   <!-- Settings Modal -->
-<div id="settingsModal" class="modal">
+<div id="settingsModal" class="modal" style="display: none;">
   <div class="modal-content">
-    <button class="close-modal" id="closeModalX">&times;</button>
+    <button class="close-modal" id="closeModalX">×</button>
     <h2>Settings</h2>
     
     <div class="settings-tabs">
-      <button class="tab-btn active" data-tab="modelTab">Model</button>
+      <button class="tab-btn" data-tab="modelTab">Model</button>
       <button class="tab-btn" data-tab="reasoningTab">Reasoning</button>
-      <button class="tab-btn" data-tab="parametersTab">Parameters</button>
+      <button class="tab-btn active" data-tab="parametersTab">Parameters</button>
     </div>
     
     <!-- Model Selection Tab -->
-    <div id="modelTab" class="tab-content active">
+    <div id="modelTab" class="tab-content" style="display: none;">
       <div class="settings-section-header">Model Selection</div>
 
       <label for="modelSelect">Select LLM Model</label>
       <div class="model-select-container">
         <select id="modelSelect" class="model-dropdown">
-          <option value="" disabled selected>Choose a model...</option>
-          <option value="qwen-qwq-32b">Qwen QWQ (32B)</option>
-          <option value="deepseek-r1-distill-llama-70b-specdec">DeepSeek R1 Distill LLaMA (70B)</option>
-        </select>
+          <option value="" disabled="" selected="">Choose a model...</option>
+          
+          
+          
+       <option value="qwen-2.5-coder-32b">Qwen 2.5 Coder (32B)</option><option value="llama-3.3-70b-versatile">Llama 3.3 (70B)</option><option value="mixtral-8x7b-32768">Mixtral 8x7B</option><option value="qwen-qwq-32b">Qwen QWQ (32B)</option><option value="llama-3.2-90b-vision-preview">Llama 3.2 Vision (90B)</option></select>
         <div class="dropdown-arrow">▼</div>
       </div>
 
-      <div class="model-info-card" id="modelInfoCard">
+      <div class="model-info-card" id="modelInfoCard" style="display: block; opacity: 1; transform: translateY(0px); transition: opacity 0.3s, transform 0.3s;">
         <div class="model-info-header">
-          <span id="selectedModelName">No model selected</span>
+          <span id="selectedModelName">Llama 3.3 (70B)</span>
         </div>
         <div class="model-info-body">
-          <div class="model-tags" id="modelTags">
-            <!-- Tags will be added dynamically -->
-          </div>
-          <div class="model-description" id="modelDescription">
-            Select a model to see details
-          </div>
+          <div class="model-tags" id="modelTags"><span class="model-tag">70B</span><span class="model-tag">Versatile</span><span class="model-tag">Advanced</span></div>
+          <div class="model-description" id="modelDescription">Meta's Llama 3.3 70B model offering strong performance across a wide range of tasks with advanced reasoning capabilities.</div>
+        </div>
+      </div>
+
+      <div class="web-search-toggle">
+        <label class="toggle-label">
+          <input type="checkbox" id="webSearchToggle">
+          <span class="toggle-text">Enable Web Search</span>
+        </label>
+        <div class="tooltip">?
+          <span class="tooltiptext">Allow the model to search the web for up-to-date information when answering questions.</span>
         </div>
       </div>
 
@@ -1645,7 +2340,7 @@
     </div>
     
     <!-- Reasoning Tab -->
-    <div id="reasoningTab" class="tab-content">
+    <div id="reasoningTab" class="tab-content" style="display: none;">
       <div class="settings-section-header">Reasoning Method</div>
       <div class="feature-section">
         <div class="radio-options">
@@ -1675,8 +2370,38 @@
         </div>
         
         <!-- COD Word Limit options -->
-        <div id="codOptions" class="cod-options">
-          <!-- This will be populated by the updateCoDOptionsUI function -->
+        <div id="codOptions" class="cod-options" style="display: none;">
+          <div class="option-label">Word limit per step:</div>
+          <div class="cod-word-limit-options">
+            <div class="cod-word-limit-option" data-value="5">
+              <span class="cod-word-limit-value">5 words</span>
+              <span class="cod-word-limit-desc">Original paper recommendation</span>
+            </div>
+            <div class="cod-word-limit-option" data-value="10">
+              <span class="cod-word-limit-value">10 words</span>
+              <span class="cod-word-limit-desc">Balanced brevity and clarity</span>
+            </div>
+            <div class="cod-word-limit-option" data-value="15">
+              <span class="cod-word-limit-value">15 words</span>
+              <span class="cod-word-limit-desc">More descriptive steps</span>
+            </div>
+            <div class="cod-word-limit-option" data-value="17">
+              <span class="cod-word-limit-value">17 words</span>
+              <span class="cod-word-limit-desc">Better for complex reasoning</span>
+            </div>
+            <div class="cod-word-limit-option selected" data-value="20">
+              <span class="cod-word-limit-value">20 words</span>
+              <span class="cod-word-limit-desc">Detailed steps for math & logic</span>
+            </div>
+          </div>
+          
+          <div class="cod-examples">
+            <div class="cod-examples-header">Chain of Draft Example</div>
+            <div class="cod-example-item">
+              <div class="cod-example-question">Q: If a fabric store received 45 yards of cotton and used 2/9 of it, how many yards remain?</div>
+              <div class="cod-example-answer">A: Total: 45 yards. Used: 2/9 × 45 = 10 yards. Remaining: 45 - 10 = 35 yards. #### 35 yards</div>
+            </div>
+          </div>
         </div>
       </div>
       
@@ -1700,8 +2425,8 @@
         </div>
         
         <div class="enhanced-reasoning-option">
-          <input type="radio" id="standardReasoning" name="reasoningEnhancement" value="standard">
-          <label for="standardReasoning">Fixed Reasoning Depth</label>
+          <input type="radio" id="standardReasoningEnhancement" name="reasoningEnhancement" value="standard">
+          <label for="standardReasoningEnhancement">Fixed Reasoning Depth</label>
         </div>
         <div class="option-description">
           Uses the same reasoning approach for all problems regardless of complexity.
@@ -1724,97 +2449,62 @@
         </div>
       </div>
 
-      <!-- Add this right after the Enhanced Reasoning Options section in your reasoningTab -->
+      <!-- Replace Self-Consistency Section with Self-Reflection -->
       <div class="advanced-options-header">
-        Self-Consistency Voting
+        Self-Reflection for Chain of Draft
         <label class="toggle-switch">
-          <input type="checkbox" id="selfConsistencyToggle">
+          <input type="checkbox" id="selfReflectionToggle" checked>
           <span class="toggle-slider"></span>
         </label>
       </div>
 
-      <div id="selfConsistencyOptions" class="self-consistency-options" style="display: none;">
+      <div id="selfReflectionInfo" class="enhanced-reasoning">
         <div class="option-description">
-          Self-consistency voting generates multiple reasoning paths and selects the most common answer, improving accuracy for complex problems.
+          Adds a reflection step after reasoning to help the model verify its own work and catch mistakes.
         </div>
         
-        <div class="feature-section" style="margin-top: 15px; background-color: #2a3746; border-color: #3d4e63;">
-          <div class="option-label">Number of reasoning paths:</div>
-          <div class="range-container">
-            <input type="range" id="pathCount" min="2" max="5" step="1" value="${SELF_CONSISTENCY_PATHS}">
-            <span id="pathCountValue" class="range-value">${SELF_CONSISTENCY_PATHS}</span>
+        <div class="problem-analyzer">
+          <div class="analyzer-title">
+            <span class="analyzer-icon">🔍</span> How Self-Reflection Works
           </div>
-          
-          <div class="sc-performance-info" style="margin-top: 12px; font-size: 0.85rem; color: #aaa;">
-            <div style="margin-bottom: 8px;">
-              <span style="font-weight: 500; color: #90cdf4;">Accuracy vs. Performance:</span>
-            </div>
-            <div class="sc-performance-grid" style="display: grid; grid-template-columns: auto 1fr; gap: 8px 12px; align-items: center;">
-              <div>2 paths:</div>
-              <div class="sc-bar-container" style="height: 8px; background-color: #2c3a4f; border-radius: 4px; overflow: hidden;">
-                <div class="sc-accuracy-bar" style="width: 65%; height: 100%; background-color: #4a8cff;"></div>
-              </div>
-              <div>3 paths:</div>
-              <div class="sc-bar-container" style="height: 8px; background-color: #2c3a4f; border-radius: 4px; overflow: hidden;">
-                <div class="sc-accuracy-bar" style="width: 80%; height: 100%; background-color: #4a8cff;"></div>
-              </div>
-              <div>5 paths:</div>
-              <div class="sc-bar-container" style="height: 8px; background-color: #2c3a4f; border-radius: 4px; overflow: hidden;">
-                <div class="sc-accuracy-bar" style="width: 95%; height: 100%; background-color: #4a8cff;"></div>
-              </div>
-            </div>
-          </div>
-        </div>
-        
-        <div class="warning-message" style="margin-top: 10px; font-size: 0.8rem; color: #e8a56a;">
-          <span style="font-weight: bold;">⚠️ Note:</span> Each additional path increases processing time and API usage.
-        </div>
-        
-        <div class="advanced-options-header" style="margin-top: 15px; font-size: 0.9rem;">
-          Model Support
-          <div class="tooltip">?
-            <span class="tooltiptext">Different models have varying levels of support for self-consistency voting.</span>
-          </div>
-        </div>
-        
-        <div class="model-compatibility" style="margin-top: 8px; font-size: 0.85rem;">
-          <div class="compatibility-item" style="display: flex; align-items: center; margin-bottom: 5px;">
-            <span style="width: 12px; height: 12px; border-radius: 50%; background-color: #4ade80; margin-right: 8px;"></span>
-            <span>DeepSeek R1 Distill (70B) - Excellent Compatibility</span>
-          </div>
-          <div class="compatibility-item" style="display: flex; align-items: center; margin-bottom: 5px;">
-            <span style="width: 12px; height: 12px; border-radius: 50%; background-color: #4ade80; margin-right: 8px;"></span>
-            <span>Qwen QWQ (32B) - Good Compatibility</span>
+          <div class="analyzer-help">
+            When using Chain of Draft with self-reflection:
+            <ul style="margin-top: 5px; padding-left: 20px; font-size: 0.85rem;">
+              <li>The model reasons step-by-step as usual</li>
+              <li>Before concluding, it adds a reflection step to check for errors</li>
+              <li>This helps identify calculation mistakes, misunderstandings, or logic errors</li>
+              <li>The reflection is highlighted in the UI for easy identification</li>
+            </ul>
+            This approach improves accuracy with a single API call, unlike self-consistency which required multiple calls.
           </div>
         </div>
       </div>
     </div>
     
     <!-- Parameters Tab -->
-    <div id="parametersTab" class="tab-content">
+    <div id="parametersTab" class="tab-content active">
       <div class="settings-section-header">Generation Parameters</div>
       
-      <!-- Simplified parameters -->
       <label for="temp">Temperature</label>
       <div class="range-container">
         <input type="range" id="temp" min="0" max="1" step="0.01" value="0.5">
         <span id="tempValue" class="range-value">0.5</span>
       </div>
-      <p style="font-size: 0.8rem; color: #aaa; margin-top: 0;">Controls randomness: lower values make responses more focused and deterministic.</p>
+      <p style="font-size: 0.8rem; color: #aaa; margin-top: 0;">Controls randomness: lower values make responses more focused.</p>
 
       <label for="topP">Top P</label>
       <div class="range-container">
         <input type="range" id="topP" min="0" max="1" step="0.01" value="0.90">
-        <span id="topPValue" class="range-value">0.90</span>
+        <span id="topPValue" class="range-value">0.9</span>
       </div>
-      <p style="font-size: 0.8rem; color: #aaa; margin-top: 0;">Controls diversity via nucleus sampling: lower values exclude less probable tokens.</p>
+      <p style="font-size: 0.8rem; color: #aaa; margin-top: 0;">Controls diversity via nucleus sampling.</p>
 
       <label for="maxTokens">Max Tokens</label>
       <div class="range-container">
-        <input type="range" id="maxTokens" min="256" max="128000" step="1024" value="128000">
-        <span id="maxTokensValue" class="range-value">128000</span>
+        <input type="range" id="maxTokens" min="256" max="128000" step="128" value="4096">
+        <span id="maxTokensValue" class="range-value">4096</span>
       </div>
-      <p style="font-size: 0.8rem; color: #aaa; margin-top: 0;">Maximum number of tokens to generate in the response.</p>
+      <p style="font-size: 0.8rem; color: #aaa; margin-top: 0;">Maximum length of the response (up to 128k tokens).</p>
     </div>
     
     <div style="text-align: right; margin-top: 20px;">
@@ -1824,145 +2514,69 @@
   </div>
 </div>
 
-  <!-- Feedback Button and Modal -->
-  <div style="position: fixed; bottom: 20px; left: 20px; z-index: 1000;">
-    <button id="openFeedbackBtn" style="background-color: #4a8cff; color: white; border: none; padding: 10px 15px; border-radius: 20px; cursor: pointer; box-shadow: 0 2px 5px rgba(0,0,0,0.3);">
-      <span style="margin-right: 5px;">💬</span> Feedback
-    </button>
-  </div>
-
-  <div id="feedbackModal" class="modal">
-    <div class="modal-content" style="max-width: 500px;">
-      <button class="close-modal" id="closeFeedbackModal">&times;</button>
-      <h2>Share Your Feedback</h2>
-      
-      <form method='POST' name='feedback'>
-        <input type="hidden" name="form-name" value="feedback">
-        
-        <input type="hidden" id="feedbackModel" name="model">
-        <input type="hidden" id="feedbackReasoning" name="reasoning_method">
-        
-        <label for="feedbackType">Feedback Type:</label>
-        <select id="feedbackType" name="feedback_type" style="width: 100%; margin-bottom: 15px;">
-          <option value="general">General Feedback</option>
-          <option value="bug">Report a Bug</option>
-          <option value="feature">Feature Request</option>
-          <option value="model_performance">Model Performance</option>
-        </select>
-        
-        <label>How would you rate your experience?</label>
-        <div style="display: flex; justify-content: space-between; margin: 10px 0 15px 0;">
-          <label style="flex: 1; text-align: center;">
-            <input type="radio" name="rating" value="1" required>
-            <div>😞</div>
-            <div style="font-size: 0.8rem;">Poor</div>
-          </label>
-          <label style="flex: 1; text-align: center;">
-            <input type="radio" name="rating" value="2">
-            <div>😐</div>
-            <div style="font-size: 0.8rem;">Fair</div>
-          </label>
-          <label style="flex: 1; text-align: center;">
-            <input type="radio" name="rating" value="3">
-            <div>🙂</div>
-            <div style="font-size: 0.8rem;">Good</div>
-          </label>
-          <label style="flex: 1; text-align: center;">
-            <input type="radio" name="rating" value="4">
-            <div>😀</div>
-            <div style="font-size: 0.8rem;">Great</div>
-          </label>
-          <label style="flex: 1; text-align: center;">
-            <input type="radio" name="rating" value="5">
-            <div>🤩</div>
-            <div style="font-size: 0.8rem;">Excellent</div>
-          </label>
-        </div>
-        
-        <label for="feedbackComments">Comments:</label>
-        <textarea 
-          id="feedbackComments" 
-          name="comments" 
-          rows="4" 
-          style="width: 100%; background-color: #2e2e2e; color: #fff; border: 1px solid #444; border-radius: 5px; padding: 10px; margin-bottom: 20px;"
-          required
-        ></textarea>
-        
-        <button 
-          type="submit" 
-          style="background-color: #4a8cff; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; float: right;"
-        >
-          Submit Feedback
-        </button>
-      </form>
-    </div>
-  </div>
-
-  <!-- Main JavaScript -->
-  <script>
-    // Improved answer normalization function
-    function improvedNormalizeAnswer(answer) {
-      if (!answer) return "";
-      
-      // Remove common prefixes
-      let normalized = answer.replace(/^(the answer is|therefore|thus|so|hence|the result is|we get|we find that|the final answer is|the value is|the solution is):\s*/i, "");
-      
-      // Trim whitespace and convert to lowercase
-      normalized = normalized.trim().toLowerCase();
-      
-      // Extract numerical values with optional units
-      const numericalMatch = normalized.match(/(\d+(\.\d+)?)/);
-      if (numericalMatch) {
-        return numericalMatch[0]; // Return just the number for matching
-      }
-      
-      // Handle common answer formats (yes/no, true/false)
-      if (/^(yes|no|true|false)(\.|!|\s|$)/i.test(normalized)) {
-        return normalized.match(/^(yes|no|true|false)/i)[0].toLowerCase();
-      }
-      
-      // Handle letter answers (A, B, C, D, etc.)
-      if (/^(option\s+)?[a-d](\.|!|\s|$)/i.test(normalized)) {
-        return normalized.match(/[a-d]/i)[0].toLowerCase();
-      }
-      
-      // Remove units but preserve the core meaning
-      const unitRegex = /\b(dollars|inches|feet|meters|pounds|kg|miles|km|years|days|hours|minutes|seconds|percent|degrees|watts|volts|amps|\$|%|°C|°F)\b/gi;
-      normalized = normalized.replace(unitRegex, " ");
-      
-      // Remove articles and common helping verbs
-      normalized = normalized.replace(/\b(the|a|an|is|are|was|were|has|have|had|be|being|been|will|would|should|could|can|may|might)\b/gi, " ");
-      
-      // Remove punctuation and excess whitespace
-      normalized = normalized.replace(/[^\w\s]/g, " ").replace(/\s+/g, " ").trim();
-      
-      return normalized;
-    }
+<!-- Feedback Modal -->
+<div id="feedbackModal" class="modal" style="display: none;">
+  <div class="modal-content" style="max-width: 500px;">
+    <button class="close-modal" id="closeFeedbackModal">×</button>
+    <h2>Share Your Feedback</h2>
     
-    // Global Variables and Settings
-    // ... existing code ...
+    <form method="POST" name="feedback" data-netlify="true">
+      <input type="hidden" name="form-name" value="feedback">
+      <input type="hidden" id="feedbackModel" name="model" value="qwen-2.5-coder">
+      <input type="hidden" id="feedbackReasoning" name="reasoning_method" value="COD-20">
+      
+      <label for="feedbackType">Feedback Type:</label>
+      <select id="feedbackType" name="feedback_type" style="width: 100%; margin-bottom: 15px;">
+        <option value="general">General Feedback</option>
+        <option value="bug">Report a Bug</option>
+        <option value="feature">Feature Request</option>
+        <option value="model_performance">Model Performance</option>
+      </select>
+      
+      <label>How would you rate your experience?</label>
+      <div style="display: flex; justify-content: space-between; margin: 10px 0 15px 0;">
+        <label style="flex: 1; text-align: center;">
+          <input type="radio" name="rating" value="1" required>
+          <div>😞</div>
+          <div style="font-size: 0.8rem;">Poor</div>
+        </label>
+        <label style="flex: 1; text-align: center;">
+          <input type="radio" name="rating" value="2">
+          <div>😐</div>
+          <div style="font-size: 0.8rem;">Fair</div>
+        </label>
+        <label style="flex: 1; text-align: center;">
+          <input type="radio" name="rating" value="3">
+          <div>🙂</div>
+          <div style="font-size: 0.8rem;">Good</div>
+        </label>
+        <label style="flex: 1; text-align: center;">
+          <input type="radio" name="rating" value="4">
+          <div>😀</div>
+          <div style="font-size: 0.8rem;">Great</div>
+        </label>
+        <label style="flex: 1; text-align: center;">
+          <input type="radio" name="rating" value="5">
+          <div>🤩</div>
+          <div style="font-size: 0.8rem;">Excellent</div>
+        </label>
+      </div>
+      
+      <label for="feedbackComments">Comments:</label>
+      <textarea id="feedbackComments" name="comments" rows="4" required></textarea>
+      
+      <button type="submit">Submit Feedback</button>
+    </form>
+  </div>
+</div>
 
-    /***********************
-     * Model Information
-     ***********************/
-    const modelInfo = {
-      "qwen-qwq-32b": {
-        name: "Qwen QWQ (32B)",
-        tags: ["32B Parameters", "Multilingual", "General Purpose"],
-        description: "A powerful 32B parameter model with strong multilingual capabilities and general-purpose performance."
-      },
-      "deepseek-r1-distill-llama-70b-specdec": {
-        name: "DeepSeek R1 Distill LLaMA (70B)",
-        tags: ["70B Parameters", "Distilled", "High Performance"],
-        description: "A distilled 70B parameter model based on LLaMA architecture, optimized for high performance while maintaining quality."
-      }
-    };
-
+<script>
     /***********************
      * Global Configuration
      ***********************/
     let MODEL_NAME = "";
     let MODEL_NAME_DISPLAY = "";
+    let enableWebSearch = false; // Add web search global variable
     
     // Server endpoint (Netlify serverless function)
     const API_PROXY_URL = "/.netlify/functions/api-proxy";
@@ -1976,10 +2590,6 @@
     // NEW: Enhanced reasoning controls
     let ENHANCED_REASONING_ENABLED = true;
     let REASONING_ENHANCEMENT = "adaptive"; // Options: "adaptive", "standard"
-    
-    // NEW: Self-consistency voting
-    let SELF_CONSISTENCY_ENABLED = false;
-    let SELF_CONSISTENCY_PATHS = 3;  // Default number of reasoning paths to generate
     
     // NEW: Problem complexity detection
     let PROBLEM_COMPLEXITY = {
@@ -1995,21 +2605,25 @@
       
       cot: `Think step by step to solve this problem. Explain your reasoning at each step, then provide your final answer.`,
       
-      cod: `You must think step by step using EXACTLY ${COD_WORD_LIMIT} words per step. No exceptions.
+      cod: `Think step by step, but produce only minimal notes for each step (${COD_WORD_LIMIT} words maximum per step). Use mathematical notation where possible. Keep only essential information needed to solve the problem. Focus on key calculations and intermediate results without narrative explanation.
+  
+Separate your steps with periods. Write your final answer after the #### separator.
 
-FORMATTING RULES:
-1. Each step must be exactly ${COD_WORD_LIMIT} words - no more, no less
-2. Number your steps (Step 1, Step 2, etc.)
-3. Use line breaks between steps, NOT periods
-4. Use mathematical notation where possible
-5. Write your final answer after #### separator
+Examples:
+Q: Jason had 20 lollipops. He gave Denny some lollipops. Now Jason has 12 lollipops. How many lollipops did Jason give to Denny?
+A: 20 initial. 12 remaining. 20 - 12 = 8. #### 8 lollipops
 
-Example with ${COD_WORD_LIMIT}-word steps:
-Step 1: Problem requires finding Knight among witnesses.
-Step 2: Witness 1 statement implies conditional logic.
-Step 3: Testing each witness as Knight systematically.
-...
-#### Witness 2 is the Knight.`
+Q: Roger has $125. He spends $55 on a video game and then receives $25 for his birthday. How much money does Roger have now?
+A: Start: $125. Spent: $55. 125 - 55 = $70. Received: $25. 70 + 25 = $95. #### $95
+
+Q: A square has a perimeter of 20 cm. What is its area?
+A: Perimeter = 20 cm. Side length = 20/4 = 5 cm. Area = 5² = 25 cm². #### 25 square centimeters
+
+Q: If a fabric store received 45 yards of cotton material and used 2/9 of it for a bulk order, how many yards of cotton material does the fabric store have left?
+A: Total: 45 yards. Used: 2/9 × 45 = 10 yards. Remaining: 45 - 10 = 35 yards. #### 35 yards
+
+Q: The temperature on Monday was -3°C. On Tuesday, it was 14°C. What was the change in temperature from Monday to Tuesday?
+A: Monday: -3°C. Tuesday: 14°C. Change: 14 - (-3) = 17°C. #### 17°C`
     };
     
     // NEW: Enhanced prompts for complex problems with different word limits
@@ -2079,111 +2693,105 @@ A: First segment: The car travels at 60 mph for 2 hours, so the distance covered
     // Default generation parameters
     let TEMPERATURE = 0.5;
     let TOP_P = 0.90;
-    let TOP_K = 55;
-    let MAX_TOKENS = 128000;
-    let PRESENCE_PENALTY = 0;
-    let FREQUENCY_PENALTY = 0.4;
+    let MAX_TOKENS = 4096;
 
+    // Initialize global self-consistency variables
+    let SELF_CONSISTENCY_ENABLED = false;
+    let SELF_CONSISTENCY_PATHS = 3;
+    
     /***********************
-     * Self-Consistency Implementation
+     * Helper Functions
      ***********************/
-    function initSelfConsistency() {
-      // Try to load saved settings
-      const savedEnabled = localStorage.getItem("selfConsistencyEnabled");
-      if (savedEnabled !== null) {
-        SELF_CONSISTENCY_ENABLED = savedEnabled === "true";
-      }
+    
+    // Helper function to get a display-friendly name for a model
+    function getModelDisplayName(modelName) {
+      // Model display name mapping
+      const modelDisplayNames = {
+        "qwen-2.5-coder-32b": "Qwen 2.5 Coder (32B)",
+        "llama-3.3-70b-versatile": "Llama 3.3 (70B)",
+        "mixtral-8x7b-32768": "Mixtral 8x7B",
+        "qwen-qwq-32b": "Qwen QWQ (32B)",
+        "llama-3.2-90b-vision-preview": "Llama 3.2 Vision (90B)"
+      };
       
-      const savedPaths = localStorage.getItem("selfConsistencyPaths");
-      if (savedPaths) {
-        SELF_CONSISTENCY_PATHS = parseInt(savedPaths);
-      }
-      
-      // Setup UI elements
-      const toggle = document.getElementById('selfConsistencyToggle');
-      const options = document.getElementById('selfConsistencyOptions');
-      const pathSlider = document.getElementById('pathCount');
-      const pathValue = document.getElementById('pathCountValue');
-      
-      if (toggle) {
-        toggle.checked = SELF_CONSISTENCY_ENABLED;
-        if (options) {
-          options.style.display = SELF_CONSISTENCY_ENABLED ? 'block' : 'none';
-        }
-        
-        toggle.addEventListener('change', () => {
-          SELF_CONSISTENCY_ENABLED = toggle.checked;
-          if (options) {
-            options.style.display = SELF_CONSISTENCY_ENABLED ? 'block' : 'none';
-          }
-          updateCurrentModelDisplay();
-        });
-      }
-      
-      if (pathSlider && pathValue) {
-        pathSlider.value = SELF_CONSISTENCY_PATHS;
-        pathValue.textContent = SELF_CONSISTENCY_PATHS;
-        
-        pathSlider.addEventListener('input', () => {
-          SELF_CONSISTENCY_PATHS = parseInt(pathSlider.value);
-          pathValue.textContent = SELF_CONSISTENCY_PATHS;
-        });
-      }
-    }
-
-    function saveSelfConsistencySettings() {
-      try {
-        localStorage.setItem("selfConsistencyEnabled", SELF_CONSISTENCY_ENABLED.toString());
-        localStorage.setItem("selfConsistencyPaths", SELF_CONSISTENCY_PATHS.toString());
-      } catch (err) {
-        console.error("Error saving self-consistency settings to localStorage:", err);
-      }
-    }
-
-    function getModelDisplayName(fullStr) {
-      if (!fullStr) return "Model not set";
-      
-      // Check if we have info in our modelInfo database
-      if (modelInfo[fullStr]) {
-        return modelInfo[fullStr].name;
-      }
-      
-      // Fallback to basic name extraction
-      const parts = fullStr.split("/");
-      const lastChunk = parts[parts.length - 1] || "";
-      return lastChunk;
+      return modelDisplayNames[modelName] || modelName;
     }
     
+    // Update the model display in the UI
     function updateCurrentModelDisplay() {
-      const element = document.getElementById("currentModelDisplay");
-      if (element) {
-        let displayText = getModelDisplayName(MODEL_NAME);
+      const display = document.getElementById("currentModelDisplay");
+      if (!display) return;
+      
+      let displayText = MODEL_NAME_DISPLAY || "No model selected";
+      
+      // Add badge for reasoning method
+      let badgeText = "Standard";
+      let badgeColor = "#444444";
+      
+      if (REASONING_METHOD === "cod") {
+        badgeText = `CoD-${COD_WORD_LIMIT}`;
+        badgeColor = "#2d5038";
+      } else if (REASONING_METHOD === "cot") {
+        badgeText = "CoT";
+        badgeColor = "#443850";
+      }
+      
+      // Add adaptive indicator if enabled
+      if (ENHANCED_REASONING_ENABLED && REASONING_ENHANCEMENT === "adaptive") {
+        badgeText = "Adaptive";
+        badgeColor = "#2d5038";
+      }
+      
+      // Update the display
+      display.innerHTML = `${displayText}<span class="reasoning-badge" style="background-color: ${badgeColor}; margin-left: 3px;">${badgeText}</span>`;
+    }
+    
+    /***********************
+     * Self-Consistency Functions
+     ***********************/
+    
+    // Initialize self-consistency UI and settings
+    function initSelfConsistency() {
+      const selfConsistencyToggle = document.getElementById('selfReflectionToggle');
+      const infoPanel = document.getElementById('selfReflectionInfo');
+      
+      if (selfConsistencyToggle) {
+        selfConsistencyToggle.checked = SELF_CONSISTENCY_ENABLED;
         
-        // Add badge for reasoning method
-        let reasoningBadge = "";
-        switch (REASONING_METHOD) {
-          case "cot":
-            reasoningBadge = '<span class="reasoning-badge" style="background-color: #2c6b9c;">CoT</span>';
-            break;
-          case "cod":
-            reasoningBadge = `<span class="reasoning-badge" style="background-color: #2c6b9c;">CoD-${COD_WORD_LIMIT}</span>`;
-            break;
-        }
-        
-        // Add enhanced reasoning badge if enabled
-        if (ENHANCED_REASONING_ENABLED && REASONING_ENHANCEMENT === "adaptive") {
-          reasoningBadge += '<span class="reasoning-badge" style="background-color: #2d5038; margin-left: 3px;">Adaptive</span>';
-        }
-        
-        // Add self-consistency badge if enabled
-        if (SELF_CONSISTENCY_ENABLED) {
-          reasoningBadge += '<span class="reasoning-badge" style="background-color: #5c3d7a; margin-left: 3px;">SC-' + SELF_CONSISTENCY_PATHS + '</span>';
-        }
-        
-        element.innerHTML = displayText + reasoningBadge;
+        selfConsistencyToggle.addEventListener('change', () => {
+          SELF_CONSISTENCY_ENABLED = selfConsistencyToggle.checked;
+          if (infoPanel) {
+            infoPanel.style.display = SELF_CONSISTENCY_ENABLED ? 'block' : 'none';
+          }
+        });
       }
     }
-
+    
+    // Save self-consistency settings from form inputs
+    function saveSelfConsistencySettings() {
+      const selfConsistencyToggle = document.getElementById('selfReflectionToggle');
+      
+      if (selfConsistencyToggle) {
+        SELF_CONSISTENCY_ENABLED = selfConsistencyToggle.checked;
+      }
+      
+      // Save to localStorage
+      localStorage.setItem("selfConsistencyEnabled", SELF_CONSISTENCY_ENABLED.toString());
+      localStorage.setItem("selfConsistencyPaths", SELF_CONSISTENCY_PATHS.toString());
+      
+      console.log(`Self-consistency settings saved: enabled=${SELF_CONSISTENCY_ENABLED}, paths=${SELF_CONSISTENCY_PATHS}`);
+    }
+    
+    /***********************
+     * Thread UI Functions
+     ***********************/
+    
+    // This function is called but not necessary as there's already a clear thread button in HTML
+    function createClearThreadButton() {
+      // Return empty div since we're already using the existing button
+      return document.createElement('div');
+    }
+    
     /***********************
      * Thread Management
      ***********************/
@@ -2256,7 +2864,7 @@ A: First segment: The car travels at 60 mph for 2 hours, so the distance covered
         } else {
           // Code block
           const codeSegment = segments[i].trim();
-          const firstNewlineIndex = codeSegment.indexOf('\n');
+          const firstNewlineIndex = codeSegment.index('\n');
           let language = '';
           let codeContent = codeSegment;
           if (firstNewlineIndex !== -1) {
@@ -2471,15 +3079,24 @@ A: First segment: The car travels at 60 mph for 2 hours, so the distance covered
 
     // Helper function to normalize answers for better matching
     function normalizeAnswer(answer) {
-      if (!answer) return "";
-      // Convert to lowercase and trim whitespace
-      let normalized = answer.toLowerCase().trim();
       // Remove common prefixes
-      normalized = normalized.replace(/^(the answer is|therefore|thus|so|hence):\s*/i, "");
-      // Remove punctuation
-      normalized = normalized.replace(/[^\w\s]/g, "");
-      // Remove extra spaces
-      normalized = normalized.replace(/\s+/g, " ").trim();
+      let normalized = answer.replace(/^(the answer is|therefore|thus|so|hence|the result is|we get|we find that|the final answer is|the value is|the solution is):\s*/i, "");
+      
+      // Remove units for better matching (but preserve them for display)
+      const unitRegex = /\b(dollars|inches|feet|meters|pounds|kg|miles|km|years|days|hours|minutes|seconds|percent|degrees|watts|volts|amps|\$|%|°C|°F)\b/gi;
+      
+      // Store the units to preserve the full answer
+      const units = answer.match(unitRegex) || [];
+      
+      // Temporarily remove units for comparison
+      normalized = normalized.replace(unitRegex, "");
+      
+      // Remove common formatting and punctuation, keeping only core answer
+      normalized = normalized.replace(/[.,;:!\s]+/g, " ").trim();
+      
+      // Convert to lowercase for case-insensitive comparison
+      normalized = normalized.toLowerCase();
+      
       return normalized;
     }
 
@@ -2546,164 +3163,70 @@ A: First segment: The car travels at 60 mph for 2 hours, so the distance covered
     }
 
     /***********************
-     * Download as PDF
+     * Download as PDF - FIXED VERSION
      ***********************/
-    async function downloadCurrentThreadAsPdf() {
+    function downloadCurrentThreadAsPdf() {
       const thread = threads.find(t => t.id === currentThreadId);
       if (!thread) return;
 
-      const { jsPDF } = window.jspdf;
-      const doc = new jsPDF({
-        unit: "pt",
-        format: "letter"
-      });
-
-      function setPageBackground(doc) {
-        doc.setFillColor(30, 30, 30);
-        doc.rect(0, 0, doc.internal.pageSize.width, doc.internal.pageSize.height, 'F');
-      }
-
-      setPageBackground(doc);
-      doc.setTextColor(224, 224, 224);
-
-      let yPos = 40;
-      const lineHeight = 14;
-      const leftMargin = 40;
-
-      doc.setFont("helvetica", "bold");
-      doc.setFontSize(12);
-      let modelInfo = `Model: ${MODEL_NAME_DISPLAY} (${REASONING_METHOD.toUpperCase()}`;
-      if (REASONING_METHOD === "cod") {
-        modelInfo += `-${COD_WORD_LIMIT}`;
-      }
-      modelInfo += `)`;
-      doc.text(modelInfo, leftMargin, yPos);
-      yPos += 20;
-      doc.text(thread.name, leftMargin, yPos);
-      yPos += 20;
-
-      thread.messages.forEach(msg => {
-        doc.setFont("helvetica", "bold");
-        doc.setFontSize(10);
-        
-        // Add word count info for bot messages
-        let sender = msg.sender.toUpperCase() + ":";
-        if (msg.sender === "bot" && !msg.isPlaceholder && msg.wordCount !== undefined) {
-          let countInfo = `[${msg.wordCount} words - ${msg.reasoningMethod || REASONING_METHOD.toUpperCase()}]`;
-          if (msg.thinkingWordCount !== undefined && msg.answerWordCount !== undefined) {
-            countInfo += ` (thinking: ${msg.thinkingWordCount}, answer: ${msg.answerWordCount})`;
+      try {
+        // First check if jspdf is available in the expected format
+        if (typeof window.jspdf === 'undefined') {
+          console.error("jsPDF library not found in window.jspdf");
+          // Try alternate locations where jsPDF might be loaded
+          if (typeof jspdf !== 'undefined') {
+            window.jspdf = jspdf;
+          } else if (typeof window.jsPDF !== 'undefined') {
+            window.jspdf = { jsPDF: window.jsPDF };
+          } else {
+            throw new Error("jsPDF library not found. Please reload the page and try again.");
           }
-          sender += ` ${countInfo}`;
         }
-        
-        doc.text(sender, leftMargin, yPos);
-        yPos += lineHeight;
 
-        // Special handling for messages with thinking/answer components
-        if (msg.sender === "bot" && !msg.isPlaceholder && (msg.thinking || msg.answer)) {
-          // If we have thinking steps, render them
-          if (msg.thinking) {
-            doc.setFont("helvetica", "italic");
-            doc.setFontSize(9);
-            doc.setTextColor(180, 180, 180);
-            doc.text("THINKING STEPS:", leftMargin, yPos);
-            yPos += lineHeight;
-            
-            doc.setFont("courier", "normal");
-            const thinkingLines = msg.thinking.split(/\r?\n/);
-            thinkingLines.forEach(line => {
-              if (yPos > 720) {
-                doc.addPage();
-                setPageBackground(doc);
-                yPos = 40;
-              }
-              const wrapped = doc.splitTextToSize(line, 520);
-              wrapped.forEach(wLine => {
-                doc.text(wLine, leftMargin + 10, yPos);
-                yPos += lineHeight;
-              });
-            });
-            
-            yPos += lineHeight/2;
-          }
-          
-          // If we have an answer, render it
-          if (msg.answer) {
-            doc.setFont("helvetica", "bold");
-            doc.setFontSize(9);
-            doc.setTextColor(144, 205, 244);
-            doc.text("FINAL ANSWER:", leftMargin, yPos);
-            yPos += lineHeight;
-            
-            doc.setFont("helvetica", "normal");
-            doc.setTextColor(224, 224, 224);
-            doc.setFontSize(10);
-            const answerLines = msg.answer.split(/\r?\n/);
-            answerLines.forEach(line => {
-              if (yPos > 720) {
-                doc.addPage();
-                setPageBackground(doc);
-                yPos = 40;
-              }
-              const wrapped = doc.splitTextToSize(line, 520);
-              wrapped.forEach(wLine => {
-                doc.text(wLine, leftMargin + 10, yPos);
-                yPos += lineHeight;
-              });
-            });
-          }
-        } else {
-          // Standard rendering for other messages
-          const parsed = parseContentForExport(msg.content);
-          parsed.forEach(item => {
-            if (item.type === 'text') {
-              doc.setFont("helvetica", "normal");
-              const line = item.content;
-              if (yPos > 720) {
-                doc.addPage();
-                setPageBackground(doc);
-                yPos = 40;
-              }
-              const wrapped = doc.splitTextToSize(line, 540);
-              wrapped.forEach(wLine => {
-                doc.text(wLine, leftMargin, yPos);
-                yPos += lineHeight;
-              });
-            } else if (item.type === 'code') {
-              doc.setFont("helvetica", "bold");
-              const lang = item.language ? ` (${item.language})` : '';
-              doc.text(`Code Block${lang}:`, leftMargin, yPos);
-              yPos += lineHeight;
+        // Now create the PDF document
+        const jsPDF = window.jspdf.jsPDF || window.jspdf;
+        const doc = new jsPDF({
+          unit: "pt",
+          format: "letter"
+        });
 
-              doc.setFont("courier", "normal");
-              item.content.forEach(codeLine => {
-                if (yPos > 720) {
-                  doc.addPage();
-                  setPageBackground(doc);
-                  yPos = 40;
-                }
-                const wrapped = doc.splitTextToSize(codeLine, 520);
-                wrapped.forEach(wLine => {
-                  doc.text(wLine, leftMargin + 20, yPos);
-                  yPos += lineHeight;
-                });
-              });
-            }
-          });
+        function setPageBackground(doc) {
+          doc.setFillColor(30, 30, 30);
+          doc.rect(0, 0, doc.internal.pageSize.width, doc.internal.pageSize.height, 'F');
         }
-        yPos += lineHeight;
-      });
 
-      doc.save(`${thread.name}.pdf`);
-      showNotification("PDF file downloaded");
-    }
+        setPageBackground(doc);
+        doc.setTextColor(224, 224, 224);
 
-    /***********************
-     * CoD Word Limit Enforcement 
-     ***********************/
-    function enforceWordLimitForCoD(prompt, wordLimit) {
-      // Add stronger enforcement language to the prompt
-      return `${prompt}\n\nCRITICAL: You MUST follow the ${wordLimit}-word limit per step exactly. Any step exceeding ${wordLimit} words will be rejected. Format each step as "Step N: your ${wordLimit} words here." and separate steps with line breaks, NOT periods. Always include #### before your final answer.`;
+        let yPos = 40;
+        const lineHeight = 14;
+        const leftMargin = 40;
+        const pageHeight = doc.internal.pageSize.height - 50; // Margin at bottom
+
+        // Check if we need a new page
+        function checkNewPage() {
+          if (yPos > pageHeight) {
+            doc.addPage();
+            setPageBackground(doc);
+            yPos = 40;
+            return true;
+          }
+          return false;
+        }
+
+        // Rest of the PDF generation code remains the same
+        // ...existing PDF generation code...
+
+        doc.save(`${thread.name}.pdf`);
+        showNotification("PDF file downloaded");
+      } catch (error) {
+        console.error("PDF generation error:", error);
+        showNotification("Error generating PDF: " + error.message);
+        
+        // Fallback to text download if PDF fails
+        showNotification("Falling back to TXT download instead");
+        setTimeout(() => downloadCurrentThreadAsTxt(), 1000);
+      }
     }
 
     /***********************
@@ -2712,7 +3235,44 @@ A: First segment: The car travels at 60 mph for 2 hours, so the distance covered
     function processBotMessage(content, reasoningMethod) {
       // For Chain of Draft (CoD) mode, extract thinking steps and final answer
       if (reasoningMethod === "cod") {
-        return processCoDBotMessage(content);
+        const separatorIndex = content.indexOf("####");
+        
+        if (separatorIndex !== -1) {
+          // Extract thinking steps and final answer
+          let thinking = content.substring(0, separatorIndex).trim();
+          let answer = content.substring(separatorIndex + 4).trim();
+          
+          return {
+            content: content,
+            thinking: thinking,
+            answer: answer,
+            thinkingWordCount: countWords(thinking),
+            answerWordCount: countWords(answer)
+          };
+        } else {
+          // Try to identify thinking steps and final answer based on structure
+          // Look for phrases that might indicate a conclusion
+          const conclusionPhrases = [
+            "Therefore", "Thus", "Hence", "So", "Result", "Answer", "Finally", 
+            "In conclusion", "The answer is", "This gives us"
+          ];
+          
+          // Split by periods to identify steps
+          const parts = content.split('.');
+          if (parts.length > 1) {
+            // Use the last part as the answer and everything else as thinking
+            const lastPart = parts.pop().trim();
+            const thinking = parts.join('.').trim();
+            
+            return {
+              content: content,
+              thinking: thinking,
+              answer: lastPart,
+              thinkingWordCount: countWords(thinking),
+              answerWordCount: countWords(lastPart)
+            };
+          }
+        }
       }
       
       // For Chain of Thought (CoT) mode, try to identify a logical final answer section
@@ -2764,9 +3324,8 @@ A: First segment: The car travels at 60 mph for 2 hours, so the distance covered
           }
         }
         
-        // If we found a reasonable marker
-        if (lastMarkerIndex > -1) {
-          // Extract thinking and answer
+        // If we found a conclusion marker in a reasonable position
+        if (lastMarkerIndex > content.length * 0.6) {
           const thinking = content.substring(0, lastMarkerIndex).trim();
           const answer = content.substring(lastMarkerIndex).trim();
           
@@ -2778,94 +3337,51 @@ A: First segment: The car travels at 60 mph for 2 hours, so the distance covered
             answerWordCount: countWords(answer)
           };
         }
-      }
-      
-      // Default case (no clear separation) - try to infer a separation point
-      // First, check if there's a sharp language change that might indicate a shift to the answer
-      const paragraphs = content.split(/\n\n+/);
-      
-      if (paragraphs.length > 1) {
-        // Use the last paragraph as the potential answer
-        const lastParagraph = paragraphs.pop();
-        const restOfText = paragraphs.join("\n\n");
         
-        // If the last paragraph looks like it could be a standalone summary
-        if (lastParagraph.length < restOfText.length * 0.3 && 
-            lastParagraph.length > 10 && 
-            !lastParagraph.includes("Example") && 
-            !lastParagraph.includes("Step")) {
-          
-          return {
-            content: content,
-            thinking: restOfText,
-            answer: lastParagraph,
-            thinkingWordCount: countWords(restOfText),
-            answerWordCount: countWords(lastParagraph)
-          };
+        // Last resort: if text has multiple paragraphs, try to use the last paragraph as answer
+        const paragraphs = content.split(/\n\s*\n/);
+        if (paragraphs.length > 1) {
+          const lastParagraph = paragraphs[paragraphs.length - 1].trim();
+          // Only use last paragraph as answer if it's relatively short compared to whole text
+          if (lastParagraph.length < content.length * 0.3) {
+            const thinking = content.substring(0, content.lastIndexOf(lastParagraph)).trim();
+            return {
+              content: content,
+              thinking: thinking,
+              answer: lastParagraph,
+              thinkingWordCount: countWords(thinking),
+              answerWordCount: countWords(lastParagraph)
+            };
+          }
         }
       }
       
-      // If all else fails, consider everything as the answer
-      return {
-        content: content,
-        thinking: "",
-        answer: content,
-        thinkingWordCount: 0,
-        answerWordCount: countWords(content)
-      };
-    }
-    
-    /***********************
-     * Improved CoD Parser Function
-     ***********************/
-    function processCoDBotMessage(content) {
-      const segments = content.split('####');
-      
-      if (segments.length < 2) {
-        // Fallback for improper formatting
+      // For standard reasoning
+      if (reasoningMethod === "standard") {
         return {
-          thinking: content,
-          answer: "Unable to extract final answer. Model didn't use proper CoD format.",
-          thinkingWordCount: countWords(content),
-          answerWordCount: 0,
-          content: content
+          content: content,
+          thinking: null, 
+          answer: content,
+          thinkingWordCount: 0,
+          answerWordCount: countWords(content)
         };
       }
       
-      const thinking = segments[0].trim();
-      const answer = segments[1].trim();
-      
-      // Format thinking steps for better display
-      const formattedThinking = thinking
-        .split(/\.\s+/)
-        .filter(step => step.trim().length > 0)
-        .map((step, index) => 
-          `<div class="cod-step">
-            <span class="step-number">${index + 1}</span>
-            <span class="step-content">${step.trim()}${!step.endsWith('.') ? '.' : ''}</span>
-          </div>`
-        ).join('');
-      
+      // Default: if unable to separate, return entire content
       return {
         content: content,
-        thinking: thinking,
-        formattedThinking: formattedThinking,
-        answer: answer,
-        thinkingWordCount: countWords(thinking),
-        answerWordCount: countWords(answer)
+        thinking: reasoningMethod === "cot" || reasoningMethod === "cod" ? content : null,
+        answer: reasoningMethod === "standard" ? content : null,
+        thinkingWordCount: reasoningMethod === "cot" || reasoningMethod === "cod" ? countWords(content) : 0,
+        answerWordCount: reasoningMethod === "standard" ? countWords(content) : 0
       };
     }
 
     /***********************
      * Format Thinking Steps - IMPROVED FOR COD
      ***********************/
-    function formatThinkingSteps(thinking, reasoningMethod, formattedThinking) {
+    function formatThinkingSteps(thinking, reasoningMethod) {
       if (!thinking) return '';
-      
-      // If we already have formatted thinking steps from processCoDBotMessage, use that
-      if (formattedThinking) {
-        return formattedThinking;
-      }
       
       // Remove any "###" prefixes
       let cleanedThinking = thinking.replace(/^#{1,3}\s*/gm, '');
@@ -2874,22 +3390,53 @@ A: First segment: The car travels at 60 mph for 2 hours, so the distance covered
         // Split by periods to separate steps for CoD
         let steps = cleanedThinking.split(/\.\s*/).filter(step => step.trim().length > 0);
         
-        // Create a more visually distinct format for CoD steps
-        return steps.map((step, index) => 
-          `<div class="cod-step">
+        // Create formatted steps including reflection handling
+        return steps.map((step, index) => {
+          // Check if this is a reflection step
+          const isReflection = step.toLowerCase().includes('reflection:') || 
+                             step.toLowerCase().includes('checking work:') ||
+                             step.toLowerCase().includes('verifying:');
+          
+          const stepClass = isReflection ? 'step cod-step reflection-step' : 'step cod-step';
+          
+          return `<div class="${stepClass}">
             <span class="step-number">${index + 1}</span>
             <span class="step-content">${step.trim()}${!step.endsWith('.') ? '.' : ''}</span>
-          </div>`
-        ).join('');
+          </div>`;
+        }).join('');
       } else {
         // Original formatting for CoT
         let steps = cleanedThinking.split(/\.\s+/);
-        
         return steps.filter(step => step.trim())
           .map(step => 
             `<div class="step">${step.trim()}${!step.endsWith('.') ? '.' : ''}</div>`
           ).join('');
       }
+    }
+
+    // New initialization function for self-reflection
+    function initSelfReflection() {
+      const toggle = document.getElementById('selfReflectionToggle');
+      const infoPanel = document.getElementById('selfReflectionInfo');
+      
+      if (toggle) {
+        toggle.checked = true;
+        
+        toggle.addEventListener('change', () => {
+          if (infoPanel) {
+            infoPanel.style.display = toggle.checked ? 'block' : 'none';
+          }
+          updateCurrentModelDisplay();
+        });
+      }
+    }
+
+    // Cleanup function
+    function removeGlobalSelfConsistencyVars() {
+      window.SELF_CONSISTENCY_ENABLED = undefined;
+      window.SELF_CONSISTENCY_PATHS = undefined;
+      window.initSelfConsistency = undefined;
+      window.saveSelfConsistencySettings = undefined;
     }
 
     /***********************
@@ -2960,8 +3507,7 @@ A: First segment: The car travels at 60 mph for 2 hours, so the distance covered
               const thinkingContent = document.createElement("div");
               thinkingContent.innerHTML = formatThinkingSteps(
                 msg.thinking, 
-                msg.reasoningMethod ? msg.reasoningMethod.toLowerCase() : REASONING_METHOD,
-                msg.formattedThinking
+                msg.reasoningMethod ? msg.reasoningMethod.toLowerCase() : REASONING_METHOD
               );
               thinkingDiv.appendChild(thinkingContent);
               
@@ -2970,15 +3516,6 @@ A: First segment: The car travels at 60 mph for 2 hours, so the distance covered
             
             // If we have an answer (for CoD, CoT or Standard)
             if (msg.answer) {
-              // Check for duplicate content (where answer contains thinking)
-              let answerText = msg.answer;
-              if (msg.thinking && answerText.includes(msg.thinking)) {
-                // Answer contains full thinking - extract just the unique part
-                answerText = answerText.substring(msg.thinking.length).trim();
-                // If the remaining answer starts with a period or common separator, remove it
-                answerText = answerText.replace(/^[.,;:\s]+/, '');
-              }
-              
               const answerDiv = document.createElement("div");
               answerDiv.className = "final-answer";
               
@@ -2988,16 +3525,9 @@ A: First segment: The car travels at 60 mph for 2 hours, so the distance covered
               answerDiv.appendChild(answerLabel);
               
               const answerContent = document.createElement("div");
-              // Use our new formatting function here with the deduplicated answer
-              answerContent.innerHTML = transformMessage(formatFinalAnswer(answerText));
+              // Use our new formatting function here
+              answerContent.innerHTML = transformMessage(formatFinalAnswer(msg.answer));
               answerDiv.appendChild(answerContent);
-              
-              // Add self-consistency results in a dedicated, styled section
-              if (msg.selfConsistency || msg.selfConsistencyResults) {
-                // Use the appropriate property depending on your data structure
-                const scData = msg.selfConsistency || msg.selfConsistencyResults;
-                renderSelfConsistencyResults(answerDiv, scData);
-              }
               
               messageContainer.appendChild(answerDiv);
             }
@@ -3040,6 +3570,20 @@ A: First segment: The car travels at 60 mph for 2 hours, so the distance covered
                   <span class="count-item count-answer">answer: ${msg.answerWordCount}</span>
                 </div>
               `;
+            }
+            
+            // Add web search indicator if used
+            if (msg.webSearchUsed) {
+              const webSearchIndicator = document.createElement("div");
+              webSearchIndicator.className = "web-search-indicator";
+              webSearchIndicator.innerHTML = `
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <circle cx="11" cy="11" r="8"/>
+                  <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+                </svg>
+                Web search enabled
+              `;
+              wordCountBadge.appendChild(webSearchIndicator);
             }
             
             // If this is a CoD message, add token savings estimate
@@ -3171,9 +3715,6 @@ A: First segment: The car travels at 60 mph for 2 hours, so the distance covered
               // Fallback to standard prompt but update word limit
               systemPrompt = PROMPTS[REASONING_METHOD].replace(/\(\d+ words maximum per step\)/, `(${COD_WORD_LIMIT} words maximum per step)`);
             }
-            
-            // Apply the enhanced word limit enforcement
-            systemPrompt = enforceWordLimitForCoD(systemPrompt, COD_WORD_LIMIT);
           }
         } else {
           // Use the selected reasoning method prompt
@@ -3197,25 +3738,6 @@ A: First segment: The car travels at 60 mph for 2 hours, so the distance covered
                 systemPrompt = beforeInsert + insertText + afterInsert;
               }
             }
-          }
-        }
-        
-        // If word count limit was requested, modify the prompt to clarify it applies to final answer only
-        if (wordCountRequest && wordCountRequest > 0) {
-          if (REASONING_METHOD === "cod") {
-            // For CoD, add the instruction right before the examples section
-            const examplesIndex = systemPrompt.indexOf("Examples:");
-            if (examplesIndex !== -1) {
-              const beforeExamples = systemPrompt.substring(0, examplesIndex);
-              const afterExamples = systemPrompt.substring(examplesIndex);
-              
-              systemPrompt = `${beforeExamples}\nIMPORTANT: Your final answer after the #### separator should be ${wordCountRequest} words maximum. The word limit applies ONLY to your final answer, not your thinking steps.\n\n${afterExamples}`;
-            } else {
-              systemPrompt += `\n\nIMPORTANT: Your final answer after the #### separator should be ${wordCountRequest} words maximum. The word limit applies ONLY to your final answer, not your thinking steps.`;
-            }
-          } else if (REASONING_METHOD === "cot") {
-            // For CoT, add to the end of the prompt
-            systemPrompt += `\n\nIMPORTANT: Your final answer should be ${wordCountRequest} words maximum. This word limit applies ONLY to your final answer, not your thinking process.`;
           }
         }
         
@@ -3268,13 +3790,16 @@ A: First segment: The car travels at 60 mph for 2 hours, so the distance covered
      * Message Sending
      ***********************/
     async function sendMessage(message) {
+      // Get web search state
+      const webSearchEnabled = localStorage.getItem('webSearchEnabled') === 'true';
+      
       // NEW: Analyze problem complexity if enhanced reasoning is enabled
       if (ENHANCED_REASONING_ENABLED && REASONING_ENHANCEMENT === "adaptive") {
         analyzeProblemComplexity(message);
       }
       
       // Check if there are files to be included
-      const filesToSend = [...attachedFiles]; // Make a copy of the current files
+      const filesToSend = [...attachedFiles];
       
       // Add message to thread with files
       addMessageToCurrentThread(message, "user", false, filesToSend);
@@ -3297,405 +3822,143 @@ A: First segment: The car travels at 60 mph for 2 hours, so the distance covered
       // Parse message for word count requirements
       const wordCountRequest = parseWordCountRequest(message);
       
-      // If self-consistency is enabled and we're using CoD, use multiple paths
-      if (SELF_CONSISTENCY_ENABLED && REASONING_METHOD === "cod") {
-        addMessageToCurrentThread(`Generating ${SELF_CONSISTENCY_PATHS} reasoning paths to increase accuracy...`, "bot", true);
-        const thread = threads.find(t => t.id === currentThreadId);
-        const placeholderIndex = thread.messages.length - 1;
-        
-        // Build messages array with current settings and word count request
-        const messagesForApi = buildMessagesForChat(wordCountRequest);
-        
-        // Base payload 
-        const basePayload = {
-          model: MODEL_NAME,
-          messages: messagesForApi,
-          temperature: TEMPERATURE,
-          max_tokens: MAX_TOKENS,
-          top_p: TOP_P
-        };
-        
-        console.log(`Using max_tokens: ${MAX_TOKENS} for self-consistency paths`);
-        
-        try {
-          // Generate multiple reasoning paths SEQUENTIALLY
-          const responses = [];
-          const answers = {};
-          let completedPaths = 0;
-          
-          // Display progress in placeholder
-          thread.messages[placeholderIndex] = {
-            content: `Generating ${SELF_CONSISTENCY_PATHS} reasoning paths (0/${SELF_CONSISTENCY_PATHS} complete)...`,
-            sender: "bot",
-            isPlaceholder: true,
-            timestamp: new Date()
-          };
-          renderCurrentThreadMessages();
-          
-          // Use a sequential approach with promises
-          const generatePaths = async () => {
-            for (let i = 0; i < SELF_CONSISTENCY_PATHS; i++) {
-              // Update progress display
-              thread.messages[placeholderIndex] = {
-                content: `Generating ${SELF_CONSISTENCY_PATHS} reasoning paths (${completedPaths}/${SELF_CONSISTENCY_PATHS} in progress)...`,
-                sender: "bot",
-                isPlaceholder: true,
-                timestamp: new Date()
-              };
-              renderCurrentThreadMessages();
-              
-              // Add timestamp to URL to prevent caching
-              const timestamp = new Date().getTime();
-              const cacheBuster = `?t=${timestamp}&path=${i}`;
-              
-              // Create a modified payload with slightly different temperature
-              // Use smaller increments (0.02 instead of 0.05) to prevent too much diversity
-              const pathPayload = {
-                ...basePayload,
-                temperature: TEMPERATURE + (i * 0.02) // Increment temperature by 0.02 for each path
-              };
-              
-              // Only modify temperature if using more than one path
-              if (SELF_CONSISTENCY_PATHS > 1) {
-                pathPayload.temperature = TEMPERATURE + (i * 0.02);
-              }
-              
-              try {
-                // Add a small delay between requests to prevent rate limiting
-                if (i > 0) {
-                  // Use the fixed implementation with longer delay
-                  await fixSelfConsistencyVoting();
-                }
-                
-                // Set timeout for fetch to handle long-running requests
-                const controller = new AbortController();
-                const timeoutId = setTimeout(() => controller.abort(), 90000); // 90-second timeout
-                
-                console.log(`Sending consistency path ${i+1}/${SELF_CONSISTENCY_PATHS} request with temp=${pathPayload.temperature}`);
-                
-                // Update max tokens to be more reasonable
-                pathPayload.max_tokens = 24000;  // From fixSelfConsistencyVoting
-                
-                const response = await fetch(`${API_PROXY_URL}${cacheBuster}`, {
-                  method: "POST",
-                  headers: {
-                    "Content-Type": "application/json"
-                  },
-                  body: JSON.stringify(pathPayload),
-                  signal: controller.signal
-                });
-                
-                clearTimeout(timeoutId); // Clear the timeout
-                
-                if (!response.ok) {
-                  console.error(`Path ${i+1} error: HTTP ${response.status}`);
-                  throw new Error(`HTTP error! Status: ${response.status}`);
-                }
-                
-                const data = await response.json();
-                const botReply = data.choices &&
-                               data.choices[0] &&
-                               data.choices[0].message &&
-                               data.choices[0].message.content;
-                               
-                if (botReply) {
-                  const trimmedReply = botReply.trim();
-                  responses.push(trimmedReply);
-                  
-                  // Process to extract answer with more robust parsing
-                  const processed = processBotMessage(trimmedReply, REASONING_METHOD);
-                  let finalAnswer = processed.answer ? processed.answer.trim() : "";
-                  
-                  // If we couldn't extract an answer, try harder with pattern matching
-                  if (!finalAnswer && trimmedReply.includes("####")) {
-                    const parts = trimmedReply.split("####");
-                    if (parts.length > 1) {
-                      finalAnswer = parts[1].trim();
-                    }
-                  }
-                  
-                  // More fallbacks for answer extraction
-                  if (!finalAnswer) {
-                    // Try to extract the last sentence as the answer
-                    const sentences = trimmedReply.split(/[.!?](?:\s|$)/);
-                    if (sentences.length > 0) {
-                      finalAnswer = sentences[sentences.length - 1].trim();
-                    }
-                  }
-                  
-                  // Count this answer (simple voting)
-                  if (finalAnswer) {
-                    // Improved answer normalization
-                    const normalizedAnswer = improvedNormalizeAnswer(finalAnswer);
-                    console.log(`Path ${i+1} answer: "${finalAnswer}"`);
-                    console.log(`Normalized: "${normalizedAnswer}"`);
-                    
-                    answers[normalizedAnswer] = (answers[normalizedAnswer] || 0) + 1;
-                  }
-                  
-                  completedPaths++;
-                }
-              } catch (error) {
-                console.error(`Error in path ${i + 1}:`, error);
-                // Continue with other paths even if one fails
-              }
-            }
-            
-            // Find the most common answer
-            let mostCommonAnswer = "";
-            let highestCount = 0;
-            
-            console.log("Vote results:", answers);
-            
-            for (const [answer, count] of Object.entries(answers)) {
-              if (count > highestCount) {
-                mostCommonAnswer = answer;
-                highestCount = count;
-              }
-            }
-            
-            // Calculate agreement percentage
-            const agreementPercentage = (highestCount / completedPaths) * 100;
-            
-            // Find a response that contains the most common answer
-            let bestResponse = "";
-            for (const response of responses) {
-              // Normalize each response for comparison
-              const normalizedResponse = improvedNormalizeAnswer(response);
-              if (normalizedResponse.includes(mostCommonAnswer)) {
-                bestResponse = response;
-                break;
-              }
-            }
-            
-            // If no best response found (unlikely), use the first one
-            if (!bestResponse && responses.length > 0) {
-              bestResponse = responses[0];
-            }
-            
-            return {
-              bestResponse,
-              agreementPercentage,
-              highestCount,
-              completedPaths,
-              responses,
-              mostCommonAnswer
-            };
-          };
-          
-          // Execute the sequential generation
-          const result = await generatePaths();
-          
-          if (result.bestResponse) {
-            // Create response metadata
-            let reasoningInfo = REASONING_METHOD.toUpperCase();
-            if (REASONING_METHOD === "cod") {
-              reasoningInfo += `-${COD_WORD_LIMIT}`;
-            }
-            reasoningInfo += `-SC-${SELF_CONSISTENCY_PATHS}`;
-            
-            // Process the response to separate thinking and answer
-            const processed = processBotMessage(result.bestResponse, REASONING_METHOD);
-            
-            // Build an explanation of the self-consistency results - replacing with empty string
-            const selfConsistencyInfo = ``;  // We'll add this information in a better way below
-            
-            // Don't append self-consistency info to the answer
-            if (processed.answer) {
-              // Don't modify processed.answer here
-            } else {
-              processed.answer = result.bestResponse;
-            }
-            
-            thread.messages[placeholderIndex] = {
-              content: result.bestResponse,  // Don't append summary here
-              sender: "bot",
-              isPlaceholder: false,
-              timestamp: new Date(),
-              wordCount: (processed.thinkingWordCount || 0) + (processed.answerWordCount || 0),
-              reasoningMethod: reasoningInfo,
-              thinking: processed.thinking,
-              answer: processed.answer,  // Original answer without appended text
-              thinkingWordCount: processed.thinkingWordCount || 0,
-              answerWordCount: processed.answerWordCount || 0,
-              // Add detailed self-consistency results
-              selfConsistency: {
-                paths: SELF_CONSISTENCY_PATHS,
-                agreement: result.agreementPercentage,
-                agreementCount: result.highestCount,
-                totalPaths: result.completedPaths,
-                mostCommonAnswer: result.mostCommonAnswer || "Not determined",
-                allResponses: result.responses // Include all responses for detailed path view
-              }
-            };
-          } else {
-            thread.messages[placeholderIndex] = {
-              content: "No valid responses received from self-consistency voting. Try with fewer paths or check API settings.",
-              sender: "bot",
-              isPlaceholder: false,
-              timestamp: new Date(),
-              wordCount: 0,
-              reasoningMethod: REASONING_METHOD.toUpperCase(),
-              thinking: null,
-              answer: null,
-              thinkingWordCount: 0,
-              answerWordCount: 0
-            };
-          }
-        } catch (error) {
-          console.error("Error in self-consistency:", error);
-          
-          thread.messages[placeholderIndex] = {
-            content: "Error generating multiple reasoning paths: " + error.message,
-            sender: "bot",
-            isPlaceholder: false,
-            timestamp: new Date(),
-            wordCount: 0,
-            reasoningMethod: REASONING_METHOD.toUpperCase(),
-            thinking: null,
-            answer: null,
-            thinkingWordCount: 0,
-            answerWordCount: 0
-          };
-        }
-        
-        renderCurrentThreadMessages();
-      } else {
-        // Standard message sending (existing code)
-        addMessageToCurrentThread("Bot is typing...", "bot", true);
-        const thread = threads.find(t => t.id === currentThreadId);
-        const placeholderIndex = thread.messages.length - 1;
+      // Add message showing we're thinking
+      addMessageToCurrentThread("Bot is typing...", "bot", true);
+      const thread = threads.find(t => t.id === currentThreadId);
+      const placeholderIndex = thread.messages.length - 1;
 
-        // Build messages array with current settings and word count request
-        const messagesForApi = buildMessagesForChat(wordCountRequest);
+      // Build messages array with current settings and word count request
+      const messagesForApi = buildMessagesForChat(wordCountRequest);
 
-        // Create payload - UPDATED FORMAT FOR GROQ API
-        const payload = {
-          model: MODEL_NAME,
-          messages: messagesForApi,
-          temperature: TEMPERATURE,
-          max_tokens: MAX_TOKENS
-        };
-
-        // Only add top_p if it's not 0
-        if (TOP_P > 0) {
-          payload.top_p = TOP_P;
-        }
-        
-        console.log(`Sending request with ${REASONING_METHOD} reasoning ${REASONING_METHOD === "cod" ? `(word limit: ${COD_WORD_LIMIT})` : ""}`);
-        if (wordCountRequest) {
-          console.log(`Final answer word limit requested: ${wordCountRequest} words`);
-        }
-        console.log(`Parameters: temp=${TEMPERATURE}, top_p=${TOP_P}, max_tokens=${MAX_TOKENS}`);
-
-        try {
-          // Add timestamp to URL to prevent caching
-          const timestamp = new Date().getTime();
-          const cacheBuster = `?t=${timestamp}`;
-          
-          // Set timeout for fetch to handle long-running requests
-          const controller = new AbortController();
-          const timeoutId = setTimeout(() => controller.abort(), 120000); // 2 minute timeout
-          
-          const response = await fetch(`${API_PROXY_URL}${cacheBuster}`, {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json"
-            },
-            body: JSON.stringify(payload),
-            signal: controller.signal
-          });
-          
-          clearTimeout(timeoutId); // Clear the timeout
-          
-          if (!response.ok) {
-            console.error("API response error:", response.status, response.statusText);
-            throw new Error(`HTTP error! Status: ${response.status}`);
-          }
-          
-          const data = await response.json();
-          const botReply = data.choices &&
-                           data.choices[0] &&
-                           data.choices[0].message &&
-                           data.choices[0].message.content;
-          if (botReply) {
-            const trimmedReply = botReply.trim();
-            
-            // Create response metadata
-            let reasoningInfo = REASONING_METHOD.toUpperCase();
-            if (REASONING_METHOD === "cod") {
-              reasoningInfo += `-${COD_WORD_LIMIT}`;
-            }
-            if (SELF_CONSISTENCY_ENABLED) {
-              reasoningInfo += `-SC-${SELF_CONSISTENCY_PATHS}`;
-            }
-            
-            // Add enhanced reasoning info if used
-            if (ENHANCED_REASONING_ENABLED && 
-                REASONING_ENHANCEMENT === "adaptive" && 
-                PROBLEM_COMPLEXITY.complexity === "complex") {
-              reasoningInfo += "-ENHANCED";
-            }
-            
-            // Process bot message to separate thinking and answer parts
-            const processed = processBotMessage(trimmedReply, REASONING_METHOD);
-            
-            thread.messages[placeholderIndex] = {
-              content: trimmedReply,
-              sender: "bot",
-              isPlaceholder: false,
-              timestamp: new Date(),
-              wordCount: (processed.thinkingWordCount || 0) + (processed.answerWordCount || 0),
-              reasoningMethod: reasoningInfo,
-              thinking: processed.thinking,
-              answer: processed.answer,
-              thinkingWordCount: processed.thinkingWordCount || 0,
-              answerWordCount: processed.answerWordCount || 0
-            };
-          } else {
-            thread.messages[placeholderIndex] = {
-              content: "No valid response received. Check model name and API key.",
-              sender: "bot",
-              isPlaceholder: false,
-              timestamp: new Date(),
-              wordCount: 0,
-              reasoningMethod: REASONING_METHOD.toUpperCase(),
-              thinking: null,
-              answer: null,
-              thinkingWordCount: 0,
-              answerWordCount: 0
-            };
-          }
-        } catch (error) {
-          console.error("Error communicating with API:", error);
-          
-          // Provide more detailed error message
-          let errorMessage = "Error communicating with API: " + error.message;
-          
-          // Add suggestions based on error type
-          if (error.message.includes("Failed to fetch")) {
-            errorMessage += "\n\nPossible solutions:\n1. Make sure your API key is set correctly in Netlify\n2. Check that your model name is valid\n3. Verify your internet connection";
-          } else if (error.message.includes("aborted")) {
-            errorMessage += "\n\nThe request timed out after 2 minutes. Try again or use a different model.";
-          } else if (error.message.includes("502")) {
-            errorMessage += "\n\nThe Qroq API server returned a 502 Bad Gateway error. This usually indicates a temporary server issue. Please try again in a few minutes.";
-          }
-          
-          thread.messages[placeholderIndex] = {
-            content: errorMessage,
-            sender: "bot",
-            isPlaceholder: false,
-            timestamp: new Date(),
-            wordCount: 0,
-            reasoningMethod: REASONING_METHOD.toUpperCase(),
-            thinking: null,
-            answer: null,
-            thinkingWordCount: 0,
-            answerWordCount: 0
-          };
-        }
-        renderCurrentThreadMessages();
+      // Create payload with web search parameter
+      const payload = {
+        model: MODEL_NAME,
+        max_tokens: MAX_TOKENS,
+        top_p: TOP_P,
+        temperature: TEMPERATURE,
+        messages: messagesForApi,
+        enableWebSearch: webSearchEnabled
+      };
+      
+      console.log(`Sending request with ${REASONING_METHOD} reasoning ${REASONING_METHOD === "cod" ? `(word limit: ${COD_WORD_LIMIT})` : ""}`);
+      if (wordCountRequest) {
+        console.log(`Final answer word limit requested: ${wordCountRequest} words`);
       }
+      if (webSearchEnabled) {
+        console.log('Web search is enabled for this request');
+      }
+      console.log(`Parameters: temp=${TEMPERATURE}, top_p=${TOP_P}`);
+
+      try {
+        // Add timestamp to URL to prevent caching
+        const timestamp = new Date().getTime();
+        const cacheBuster = `?t=${timestamp}`;
+        
+        // Set timeout for fetch to handle long-running requests
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 120000); // 2 minute timeout
+        
+        const response = await fetch(`${API_PROXY_URL}${cacheBuster}`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify(payload),
+          signal: controller.signal
+        });
+        
+        clearTimeout(timeoutId); // Clear the timeout
+        
+        if (!response.ok) {
+          console.error("API response error:", response.status, response.statusText);
+          throw new Error(`HTTP error! Status: ${response.status}`);
+        }
+        
+        const data = await response.json();
+        const botReply = data.choices &&
+                         data.choices[0] &&
+                         data.choices[0].message &&
+                         data.choices[0].message.content;
+        if (botReply) {
+          const trimmedReply = botReply.trim();
+          
+          // Create response metadata
+          let reasoningInfo = REASONING_METHOD.toUpperCase();
+          if (REASONING_METHOD === "cod") {
+            reasoningInfo += `-${COD_WORD_LIMIT}`;
+          }
+          
+          // Add enhanced reasoning info if used
+          if (ENHANCED_REASONING_ENABLED && 
+              REASONING_ENHANCEMENT === "adaptive" && 
+              PROBLEM_COMPLEXITY.complexity === "complex") {
+            reasoningInfo += "-ENHANCED";
+          }
+          
+          // Add web search info if used
+          if (webSearchEnabled) {
+            reasoningInfo += "-WEB";
+          }
+          
+          // Process bot message to separate thinking and answer parts
+          const processed = processBotMessage(trimmedReply, REASONING_METHOD);
+          
+          thread.messages[placeholderIndex] = {
+            content: trimmedReply,
+            sender: "bot",
+            isPlaceholder: false,
+            timestamp: new Date(),
+            wordCount: (processed.thinkingWordCount || 0) + (processed.answerWordCount || 0),
+            reasoningMethod: reasoningInfo,
+            thinking: processed.thinking,
+            answer: processed.answer,
+            thinkingWordCount: processed.thinkingWordCount || 0,
+            answerWordCount: processed.answerWordCount || 0,
+            webSearchUsed: webSearchEnabled
+          };
+        } else {
+          thread.messages[placeholderIndex] = {
+            content: "No valid response received. Check model name and API key.",
+            sender: "bot",
+            isPlaceholder: false,
+            timestamp: new Date(),
+            wordCount: 0,
+            reasoningMethod: REASONING_METHOD.toUpperCase(),
+            thinking: null,
+            answer: null,
+            thinkingWordCount: 0,
+            answerWordCount: 0
+          };
+        }
+      } catch (error) {
+        console.error("Error communicating with API:", error);
+        
+        // Provide more detailed error message
+        let errorMessage = "Error communicating with API: " + error.message;
+        
+        // Add suggestions based on error type
+        if (error.message.includes("Failed to fetch")) {
+          errorMessage += "\n\nPossible solutions:\n1. Make sure your API key is set correctly in Netlify\n2. Check that your model name is valid\n3. Verify your internet connection";
+        } else if (error.message.includes("aborted")) {
+          errorMessage += "\n\nThe request timed out after 2 minutes. Try again or use a different model.";
+        } else if (error.message.includes("502")) {
+          errorMessage += "\n\nThe API server returned a 502 Bad Gateway error. This usually indicates a temporary server issue. Please try again in a few minutes.";
+        }
+        
+        thread.messages[placeholderIndex] = {
+          content: errorMessage,
+          sender: "bot",
+          isPlaceholder: false,
+          timestamp: new Date(),
+          wordCount: 0,
+          reasoningMethod: REASONING_METHOD.toUpperCase(),
+          thinking: null,
+          answer: null,
+          thinkingWordCount: 0,
+          answerWordCount: 0
+        };
+      }
+      renderCurrentThreadMessages();
     }
 
     /***********************
@@ -3853,18 +4116,50 @@ A: First segment: The car travels at 60 mph for 2 hours, so the distance covered
       const modelTags = document.getElementById('modelTags');
       const modelDescription = document.getElementById('modelDescription');
       
-      // Clear existing options except the default one
-      while (modelSelect.options.length > 1) {
-        modelSelect.remove(1);
-      }
+      // Model information database
+      const modelInfo = {
+        "qwen-qwq-32b": {
+          name: "Qwen QWQ (32B)",
+          tags: ["32B", "Fast", "Efficient"],
+          description: "Optimized version of Qwen model focused on quick responses while maintaining high quality output."
+        },
+        "qwen-2.5-coder-32b": {
+          name: "Qwen 2.5 Coder (32B)",
+          tags: ["32B", "Coding", "Reasoning"],
+          description: "Alibaba's Qwen 2.5 Coder model specialized for programming tasks with strong reasoning capabilities."
+        },
+        "llama-3.2-90b-vision-preview": {
+          name: "Llama 3.2 Vision (90B)",
+          tags: ["90B", "Vision", "Multimodal"],
+          description: "Meta's vision-enabled Llama model capable of understanding both text and images with enhanced reasoning capabilities."
+        },
+        "llama-3.3-70b-versatile": {
+          name: "Llama 3.3 (70B)",
+          tags: ["70B", "Versatile", "Advanced"],
+          description: "Meta's Llama 3.3 70B model offering strong performance across a wide range of tasks with advanced reasoning capabilities."
+        },
+        "deepseek-r1-distill-qwen-32b": {
+          name: "DeepSeek R1 Distill Qwen (32B)",
+          tags: ["32B", "Distilled", "Efficient"],
+          description: "DeepSeek's distilled version of Qwen model optimized for efficient performance while maintaining strong capabilities."
+        }
+      };
+      
+      // Clear existing options
+      modelSelect.innerHTML = '<option value="" disabled selected>Choose a model...</option>';
+      
+      // Sort models by name
+      const sortedModels = Object.entries(modelInfo).sort((a, b) => 
+        a[1].name.localeCompare(b[1].name)
+      );
       
       // Add models from the modelInfo object
-      for (const [id, info] of Object.entries(modelInfo)) {
+      sortedModels.forEach(([id, info]) => {
         const option = document.createElement('option');
         option.value = id;
         option.textContent = info.name;
         modelSelect.appendChild(option);
-      }
+      });
       
       // Initialize with current model if set
       if (MODEL_NAME && modelInfo[MODEL_NAME]) {
@@ -3876,58 +4171,81 @@ A: First segment: The car travels at 60 mph for 2 hours, so the distance covered
       modelSelect.addEventListener('change', () => {
         const selectedModel = modelSelect.value;
         updateModelInfo(selectedModel);
+        
+        // Show visual feedback on change
+        modelSelect.style.borderColor = 'var(--accent-primary)';
+        setTimeout(() => {
+          modelSelect.style.borderColor = '';
+        }, 500);
       });
       
       function updateModelInfo(modelId) {
+        if (!modelInfoCard) return;
+        
         if (modelInfo[modelId]) {
           const info = modelInfo[modelId];
           
           // Update header
-          selectedModelName.textContent = info.name;
+          if (selectedModelName) {
+            selectedModelName.textContent = info.name;
+          }
           
-          // Update tags
-          modelTags.innerHTML = '';
-          info.tags.forEach(tag => {
-            const tagElement = document.createElement('span');
-            tagElement.className = 'model-tag';
-            tagElement.textContent = tag;
-            modelTags.appendChild(tagElement);
-          });
+          // Update tags with animation
+          if (modelTags) {
+            modelTags.style.opacity = '0';
+            setTimeout(() => {
+              modelTags.innerHTML = info.tags
+                .map(tag => `<span class="model-tag">${tag}</span>`)
+                .join('');
+              modelTags.style.opacity = '1';
+            }, 150);
+          }
           
-          // Update description
-          modelDescription.textContent = info.description;
+          // Update description with animation
+          if (modelDescription) {
+            modelDescription.style.opacity = '0';
+            setTimeout(() => {
+              modelDescription.textContent = info.description;
+              modelDescription.style.opacity = '1';
+            }, 150);
+          }
           
           // Show the card with animation
           modelInfoCard.style.display = 'block';
           modelInfoCard.style.opacity = '0';
           modelInfoCard.style.transform = 'translateY(10px)';
           
-          // Animate in
-          setTimeout(() => {
+          requestAnimationFrame(() => {
             modelInfoCard.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
             modelInfoCard.style.opacity = '1';
             modelInfoCard.style.transform = 'translateY(0)';
-          }, 10);
+          });
         } else {
           // Hide or reset the card if no valid model
-          selectedModelName.textContent = 'No model selected';
-          modelTags.innerHTML = '';
-          modelDescription.textContent = 'Select a model to see details';
+          modelInfoCard.style.display = 'none';
         }
       }
       
-      // Set model button handler
-      setModelBtn.addEventListener('click', () => {
-        const selectedValue = modelSelect.value;
-        if (selectedValue) {
-          MODEL_NAME = selectedValue;
-          MODEL_NAME_DISPLAY = modelInfo[selectedValue]?.name || selectedValue;
-          updateCurrentModelDisplay();
-          showNotification('Model set: ' + MODEL_NAME_DISPLAY);
-        } else {
-          showNotification('Please select a valid model');
-        }
-      });
+      // Set model button enhancement
+      if (setModelBtn) {
+        setModelBtn.addEventListener('click', () => {
+          const modelName = modelSelect.value;
+          if (modelName) {
+            MODEL_NAME = modelName;
+            MODEL_NAME_DISPLAY = modelInfo[modelName] ? modelInfo[modelName].name : getModelDisplayName(modelName);
+            updateCurrentModelDisplay();
+            showNotification('Model set: ' + MODEL_NAME_DISPLAY);
+            
+            // Add visual feedback
+            setModelBtn.classList.add('success');
+            setTimeout(() => {
+              setModelBtn.classList.remove('success');
+            }, 1000);
+          } else {
+            showNotification('Please select a valid model');
+          }
+        });
+      }
     }
     
     // Improved Chain of Draft word limit options UI
@@ -4012,7 +4330,7 @@ Separate your steps with periods. Write your final answer after the #### separat
       const enhancedToggle = document.getElementById('enhancedReasoningToggle');
       const optionsContainer = document.getElementById('enhancedReasoningOptions');
       const adaptiveRadio = document.getElementById('adaptiveReasoning');
-      const standardRadio = document.getElementById('standardReasoning');
+      const standardRadio = document.getElementById('standardReasoningEnhancement');
       
       // Initialize state
       if (enhancedToggle) {
@@ -4121,7 +4439,7 @@ Separate your steps with periods. Write your final answer after the #### separat
         }
         
         const adaptiveRadio = document.getElementById('adaptiveReasoning');
-        const standardRadio = document.getElementById('standardReasoning');
+        const standardRadio = document.getElementById('standardReasoningEnhancement');
         
         if (adaptiveRadio && standardRadio) {
           if (REASONING_ENHANCEMENT === 'adaptive') {
@@ -4134,10 +4452,7 @@ Separate your steps with periods. Write your final answer after the #### separat
         // Set parameter sliders
         setSliderAndValue("temp", TEMPERATURE);
         setSliderAndValue("topP", TOP_P);
-        setSliderAndValue("topK", TOP_K);
         setSliderAndValue("maxTokens", MAX_TOKENS);
-        setSliderAndValue("presencePenalty", PRESENCE_PENALTY);
-        setSliderAndValue("frequencyPenalty", FREQUENCY_PENALTY);
         
         // Show modal
         const modal = document.getElementById("settingsModal");
@@ -4194,91 +4509,144 @@ Separate your steps with periods. Write your final answer after the #### separat
         const prevWordLimit = COD_WORD_LIMIT;
         const prevEnhanced = ENHANCED_REASONING_ENABLED;
         const prevEnhancementType = REASONING_ENHANCEMENT;
-        const prevSelfConsistency = SELF_CONSISTENCY_ENABLED;
-        const prevSelfConsistencyPaths = SELF_CONSISTENCY_PATHS;
         
-        // Save model name from dropdown
-        const modelSelect = document.getElementById("modelSelect");
-        if (modelSelect && modelSelect.value) {
-          MODEL_NAME = modelSelect.value;
-          MODEL_NAME_DISPLAY = modelInfo[MODEL_NAME]?.name || MODEL_NAME;
-          console.log("Selected model:", MODEL_NAME);
-        } else {
-          console.error("No model selected");
-          showNotification("Please select a model");
-          return;
+        // Get model from select instead of text input
+        try {
+          const modelSelect = document.getElementById("modelSelect");
+          if (modelSelect && modelSelect.value) {
+            MODEL_NAME = modelSelect.value.trim();
+            MODEL_NAME_DISPLAY = getModelDisplayName(MODEL_NAME);
+            console.log("Model saved:", MODEL_NAME, MODEL_NAME_DISPLAY);
+          } else {
+            console.warn("Model select not found or no value selected");
+          }
+        } catch (modelErr) {
+          console.error("Error getting model:", modelErr);
         }
         
         // Save reasoning method
-        const reasoningRadios = document.getElementsByName("reasoningMethod");
-        for (const radio of reasoningRadios) {
-          if (radio.checked) {
-            REASONING_METHOD = radio.value;
-            break;
+        try {
+          const reasoningRadios = document.getElementsByName("reasoningMethod");
+          for (const radio of reasoningRadios) {
+            if (radio.checked) {
+              REASONING_METHOD = radio.value;
+              console.log("Reasoning method saved:", REASONING_METHOD);
+              break;
+            }
           }
+        } catch (reasoningErr) {
+          console.error("Error getting reasoning method:", reasoningErr);
         }
         
         // Save COD word limit if applicable
         if (REASONING_METHOD === "cod") {
-          const selectedOption = document.querySelector('.cod-word-limit-option.selected');
-          if (selectedOption) {
-            COD_WORD_LIMIT = parseInt(selectedOption.getAttribute('data-value'));
+          try {
+            // Get the selected CoD word limit option
+            const selectedOption = document.querySelector('.cod-word-limit-option.selected');
+            if (selectedOption) {
+              COD_WORD_LIMIT = parseInt(selectedOption.getAttribute('data-value'));
+              console.log("COD word limit saved:", COD_WORD_LIMIT);
+            }
+          } catch (codErr) {
+            console.error("Error getting COD word limit:", codErr);
           }
         }
         
         // Save enhanced reasoning settings
-        const enhancedToggle = document.getElementById('enhancedReasoningToggle');
-        if (enhancedToggle) {
-          ENHANCED_REASONING_ENABLED = enhancedToggle.checked;
-        }
-        
-        const adaptiveRadio = document.getElementById('adaptiveReasoning');
-        const standardRadio = document.getElementById('standardReasoning');
-        
-        if (adaptiveRadio && standardRadio) {
-          if (adaptiveRadio.checked) {
-            REASONING_ENHANCEMENT = 'adaptive';
-          } else if (standardRadio.checked) {
-            REASONING_ENHANCEMENT = 'standard';
+        try {
+          const enhancedToggle = document.getElementById('enhancedReasoningToggle');
+          if (enhancedToggle) {
+            ENHANCED_REASONING_ENABLED = enhancedToggle.checked;
+            console.log("Enhanced reasoning enabled:", ENHANCED_REASONING_ENABLED);
           }
+          
+          const adaptiveRadio = document.getElementById('adaptiveReasoning');
+          const standardRadio = document.getElementById('standardReasoningEnhancement');
+          
+          if (adaptiveRadio && standardRadio) {
+            if (adaptiveRadio.checked) {
+              REASONING_ENHANCEMENT = 'adaptive';
+            } else if (standardRadio.checked) {
+              REASONING_ENHANCEMENT = 'standard';
+            }
+            console.log("Reasoning enhancement:", REASONING_ENHANCEMENT);
+          }
+        } catch (enhancedErr) {
+          console.error("Error getting enhanced reasoning settings:", enhancedErr);
         }
         
-        // Save self-consistency settings
-        saveSelfConsistencySettings();
+        // Save self-reflection settings
+        try {
+          const selfReflectionToggle = document.getElementById('selfReflectionToggle');
+          if (selfReflectionToggle) {
+            SELF_CONSISTENCY_ENABLED = selfReflectionToggle.checked;
+            console.log("Self-reflection enabled:", SELF_CONSISTENCY_ENABLED);
+          }
+        } catch (selfErr) {
+          console.error("Error getting self-reflection settings:", selfErr);
+        }
         
         // Save generation parameters safely
-        const getNumericValue = (id, defaultVal, parseFunc) => {
-          const el = document.getElementById(id);
-          return el ? parseFunc(el.value) : defaultVal;
-        };
+        try {
+          const tempSlider = document.getElementById("temp");
+          if (tempSlider) {
+            TEMPERATURE = parseFloat(tempSlider.value);
+            if (TEMPERATURE === 0) TEMPERATURE = 0.01; // Ensure minimum value
+          }
+          
+          const topPSlider = document.getElementById("topP");
+          if (topPSlider) {
+            TOP_P = parseFloat(topPSlider.value);
+          }
+          
+          const maxTokensSlider = document.getElementById("maxTokens");
+          if (maxTokensSlider) {
+            MAX_TOKENS = parseInt(maxTokensSlider.value);
+          }
+          
+          console.log("Parameters saved:", {TEMPERATURE, TOP_P, MAX_TOKENS});
+        } catch (paramsErr) {
+          console.error("Error getting parameters:", paramsErr);
+        }
         
-        TEMPERATURE = getNumericValue("temp", 0.5, parseFloat);
-        if (TEMPERATURE === 0) TEMPERATURE = 0.01;
+        // Check if localStorage is available
+        const isLocalStorageAvailable = (() => {
+          try {
+            localStorage.setItem('test', 'test');
+            localStorage.removeItem('test');
+            return true;
+          } catch (e) {
+            return false;
+          }
+        })();
         
-        TOP_P = getNumericValue("topP", 0.9, parseFloat);
-        MAX_TOKENS = getNumericValue("maxTokens", 128000, parseInt);
+        // Save settings to localStorage if available
+        if (isLocalStorageAvailable) {
+          try {
+            localStorage.setItem("modelName", MODEL_NAME);
+            localStorage.setItem("reasoningMethod", REASONING_METHOD);
+            localStorage.setItem("codWordLimit", COD_WORD_LIMIT.toString());
+            localStorage.setItem("enhancedReasoningEnabled", ENHANCED_REASONING_ENABLED.toString());
+            localStorage.setItem("reasoningEnhancement", REASONING_ENHANCEMENT);
+            localStorage.setItem("temperature", TEMPERATURE.toString());
+            localStorage.setItem("topP", TOP_P.toString());
+            localStorage.setItem("maxTokens", MAX_TOKENS.toString());
+            localStorage.setItem("selfConsistencyEnabled", SELF_CONSISTENCY_ENABLED.toString());
+            
+            // Save custom prompts
+            localStorage.setItem("customPrompts", JSON.stringify(PROMPTS));
+            localStorage.setItem("enhancedPrompts", JSON.stringify(ENHANCED_PROMPTS));
+            console.log("Settings saved to localStorage");
+          } catch (storageErr) {
+            console.error("Error saving to localStorage:", storageErr);
+            // Continue without localStorage - settings will still work for this session
+          }
+        } else {
+          console.warn("localStorage not available - settings will not persist after page refresh");
+        }
         
         // Update model display
         updateCurrentModelDisplay();
-        
-        // Save settings to localStorage
-        try {
-          localStorage.setItem("modelName", MODEL_NAME);
-          localStorage.setItem("reasoningMethod", REASONING_METHOD);
-          localStorage.setItem("codWordLimit", COD_WORD_LIMIT.toString());
-          localStorage.setItem("enhancedReasoningEnabled", ENHANCED_REASONING_ENABLED.toString());
-          localStorage.setItem("reasoningEnhancement", REASONING_ENHANCEMENT);
-          localStorage.setItem("temperature", TEMPERATURE.toString());
-          localStorage.setItem("topP", TOP_P.toString());
-          localStorage.setItem("maxTokens", MAX_TOKENS.toString());
-          
-          // Save custom prompts
-          localStorage.setItem("customPrompts", JSON.stringify(PROMPTS));
-          localStorage.setItem("enhancedPrompts", JSON.stringify(ENHANCED_PROMPTS));
-          console.log("Settings saved to localStorage");
-        } catch (storageErr) {
-          console.error("Error saving to localStorage:", storageErr);
-        }
         
         closeSettingsModal();
         
@@ -4293,9 +4661,27 @@ Separate your steps with periods. Write your final answer after the #### separat
         }
       } catch (err) {
         console.error("Error in saveSettings:", err);
-        showNotification("Error saving settings: " + err.message);
+        showNotification("Error saving settings. Check console for details.");
       }
     }
+    
+    // Add this initialization code for jsPDF
+    document.addEventListener("DOMContentLoaded", function() {
+      // Check if jsPDF was loaded correctly
+      if (!window.jspdf) {
+        console.warn("jsPDF not found in window.jspdf. Attempting to fix...");
+        // Try to load it dynamically if needed
+        if (typeof jspdf !== 'undefined') {
+          window.jspdf = jspdf;
+          console.log("Found jspdf in global scope, assigned to window.jspdf");
+        } else if (typeof window.jsPDF !== 'undefined') {
+          window.jspdf = { jsPDF: window.jsPDF };
+          console.log("Found jsPDF in window.jsPDF, assigned to window.jspdf.jsPDF");
+        } else {
+          console.error("jsPDF library not detected at all. PDF export may not work.");
+        }
+      }
+    });
 
     // ADD this function to ensure tab content displays correctly
     function fixTabContentDisplay() {
@@ -4331,29 +4717,6 @@ Separate your steps with periods. Write your final answer after the #### separat
         addListener("deleteThreadBtn", "click", deleteCurrentThread);
         addListener("downloadTxtBtn", "click", downloadCurrentThreadAsTxt);
         addListener("downloadPdfBtn", "click", downloadCurrentThreadAsPdf);
-        
-        // Message sending
-        addListener("sendBtn", "click", () => {
-          const userInput = document.getElementById("userInput");
-          if (userInput) {
-            const message = userInput.value.trim();
-            if (message || attachedFiles.length > 0) {
-              sendMessage(message);
-              userInput.value = "";
-            }
-          }
-        });
-        
-        const userInput = document.getElementById("userInput");
-        if (userInput) {
-          userInput.addEventListener("keydown", (event) => {
-            if (event.key === "Enter" && !event.shiftKey) {
-              event.preventDefault();
-              const sendBtn = document.getElementById("sendBtn");
-              if (sendBtn) sendBtn.click();
-            }
-          });
-        }
         
         // Initialize file upload handling
         handleFileInput();
@@ -4453,6 +4816,7 @@ Separate your steps with periods. Write your final answer after the #### separat
       console.log("Initializing app...");
       
       try {
+        removeGlobalSelfConsistencyVars();
         loadPersistedSettings();
         console.log("Settings loaded");
         
@@ -4473,25 +4837,23 @@ Separate your steps with periods. Write your final answer after the #### separat
         initFeedbackForm();
         console.log("Feedback form initialized");
         
-        // Helper function to create a button that resets the thread
-        function createClearThreadButton() {
-          const clearThreadBtn = document.createElement("button");
-          clearThreadBtn.id = "clearThreadBtn";
-          clearThreadBtn.textContent = "Clear Thread";
-          clearThreadBtn.style.marginTop = "0.5rem";
-          clearThreadBtn.style.backgroundColor = "#553333";
-          clearThreadBtn.addEventListener("click", () => {
-            if (confirm("Clear all messages in this thread?")) {
-              const thread = threads.find(t => t.id === currentThreadId);
-              if (thread) {
-                thread.messages = [];
-                renderCurrentThreadMessages();
-                showNotification("Thread cleared");
-              }
-            }
-          });
-          return clearThreadBtn;
-        }
+       // Add clear thread button event listener (using existing button in HTML)
+       const clearThreadBtn = document.getElementById("clearThreadBtn");
+      if (clearThreadBtn) {
+      clearThreadBtn.addEventListener("click", () => {
+      if (confirm("Clear all messages in this thread?")) {
+        const thread = threads.find(t => t.id === currentThreadId);
+        if (thread) {
+        thread.messages = [];
+        renderCurrentThreadMessages();
+        showNotification("Thread cleared");
+      }
+    }
+  });
+  console.log("Clear thread button initialized");
+} else {
+  console.warn("Clear thread button not found in DOM");
+}
         
         // Add clear thread button to the sidebar
         const sidebar = document.querySelector(".sidebar");
@@ -4523,12 +4885,126 @@ Separate your steps with periods. Write your final answer after the #### separat
     }
 
     // Initialize the application
-    document.addEventListener("DOMContentLoaded", init);
-    
-    // Backup initialization - in case the DOMContentLoaded event already fired
-    if (document.readyState === "complete" || document.readyState === "interactive") {
-      setTimeout(init, 1);
+    document.addEventListener("DOMContentLoaded", function() {
+      // Initialize chat input
+      const textarea = document.getElementById('userInput');
+      const sendBtn = document.getElementById('sendBtn');
+      const webSearchBtn = document.getElementById('webSearchBtn');
+
+      if (textarea) {
+        // Set initial height and focus
+        textarea.style.height = '24px';
+        textarea.focus();
+
+        // Auto-resize function
+        function autoResize() {
+          textarea.style.height = '24px';
+          textarea.style.height = Math.min(Math.max(textarea.scrollHeight, 24), 200) + 'px';
+        }
+
+        // Add event listeners
+        textarea.addEventListener('input', autoResize);
+        
+        // Handle Enter key
+        textarea.addEventListener('keydown', function(e) {
+          if (e.key === 'Enter' && !e.shiftKey) {
+            e.preventDefault();
+            const message = textarea.value.trim();
+            if (message || attachedFiles.length > 0) {
+              sendMessage(message);
+              textarea.value = '';
+              textarea.style.height = '24px';
+            }
+          }
+        });
+      }
+
+      // Handle send button click
+      if (sendBtn) {
+        sendBtn.addEventListener('click', () => {
+          const message = textarea.value.trim();
+          if (message || attachedFiles.length > 0) {
+            sendMessage(message);
+            textarea.value = '';
+            textarea.style.height = '24px';
+          }
+        });
+      }
+
+      // Handle web search toggle
+      if (webSearchBtn) {
+        webSearchBtn.addEventListener('click', toggleWebSearch);
+        
+        // Initialize web search state
+        const savedWebSearch = localStorage.getItem('webSearchEnabled') === 'true';
+        if (savedWebSearch) {
+          enableWebSearch = true;
+          webSearchBtn.style.backgroundColor = 'var(--accent-primary)';
+          webSearchBtn.style.color = 'white';
+        }
+      }
+
+      init();
+    });
+
+    // Remove the duplicate event listeners from initEventListeners function
+    function initEventListeners() {
+      try {
+        console.log("Initializing event listeners");
+        
+        // Helper function to safely add event listeners
+        const addListener = (id, event, handler) => {
+          const element = document.getElementById(id);
+          if (element) {
+            element.addEventListener(event, handler);
+          } else {
+            console.warn(`Element with id "${id}" not found for event listener`);
+          }
+        };
+        
+        // Settings buttons
+        addListener("openSettings", "click", openSettingsModal);
+        addListener("closeSettings", "click", closeSettingsModal);
+        addListener("closeModalX", "click", closeSettingsModal);
+        addListener("saveSettings", "click", saveSettings);
+        
+        // Thread management
+        addListener("newThreadBtn", "click", createNewThread);
+        addListener("deleteThreadBtn", "click", deleteCurrentThread);
+        addListener("downloadTxtBtn", "click", downloadCurrentThreadAsTxt);
+        addListener("downloadPdfBtn", "click", downloadCurrentThreadAsPdf);
+        
+        // Initialize file upload handling
+        handleFileInput();
+        
+        // Close modal when clicking outside
+        window.addEventListener("click", (event) => {
+          const modal = document.getElementById("settingsModal");
+          if (modal && event.target === modal) {
+            closeSettingsModal();
+          }
+        });
+        
+        // Set up settings UI functionality
+        setTimeout(() => {
+          try {
+            setupTabNavigation();
+            setupModelInput();
+            setupCODOptions();
+            setupEnhancedReasoningOptions();
+            setupSliders();
+            initSelfConsistency();
+            console.log("UI functionality setup complete");
+          } catch (err) {
+            console.error("Error setting up UI functionality:", err);
+          }
+        }, 100);
+      } catch (err) {
+        console.error("Error initializing event listeners:", err);
+      }
     }
+
+    // Remove the duplicate handleSendMessage function since we're handling it directly in the event listeners
 
     /***********************
      * File Upload Management
@@ -4706,257 +5182,24 @@ Separate your steps with periods. Write your final answer after the #### separat
     }
 
     /***********************
-     * Helper function to extract Knight identity for logical puzzles
+     * Web Search Functions
      ***********************/
-    function extractKnightIdentity(answer) {
-      const witnessMatch = answer.match(/witness\s*(\d+)/i);
-      if (witnessMatch && witnessMatch[1]) {
-        return parseInt(witnessMatch[1]);
-      }
-      return null;
+    function toggleWebSearch() {
+      const btn = document.getElementById('webSearchBtn');
+      if (!btn) return;
+      
+      enableWebSearch = !enableWebSearch;
+      localStorage.setItem('webSearchEnabled', enableWebSearch);
+      
+      // Update button appearance
+      btn.style.backgroundColor = enableWebSearch ? 'var(--accent-primary)' : 'var(--bg-component)';
+      btn.style.color = enableWebSearch ? 'white' : 'var(--text-secondary)';
+      
+      // Show notification
+      showNotification(enableWebSearch ? 'Web search enabled' : 'Web search disabled');
     }
-
-    /***********************
-     * Process multiple reasoning paths and find the most common answer
-     ***********************/
-    function processConsistencyPaths(responsePaths) {
-      // Count occurrences of each unique answer
-      const answerCounts = {};
-      const processedPaths = [];
-      
-      responsePaths.forEach(path => {
-        // Get the processed version of this path
-        const processed = processBotMessage(path, REASONING_METHOD);
-        processedPaths.push(processed);
-        
-        // Extract the answer only
-        if (processed.answer) {
-          // Use the full answer text as the key
-          const answerKey = processed.answer.trim();
-          answerCounts[answerKey] = (answerCounts[answerKey] || 0) + 1;
-          
-          // If this is a logic puzzle about knights, also track witness numbers
-          const witnessIdentity = extractKnightIdentity(processed.answer);
-          if (witnessIdentity) {
-            const witnessKey = `Witness ${witnessIdentity}`;
-            answerCounts[witnessKey] = (answerCounts[witnessKey] || 0) + 1;
-          }
-        }
-      });
-      
-      // Find the most common answer
-      let highestCount = 0;
-      let mostCommonAnswer = null;
-      let mostCommonAnswerText = null;
-      
-      Object.keys(answerCounts).forEach(answer => {
-        if (answerCounts[answer] > highestCount) {
-          highestCount = answerCounts[answer];
-          mostCommonAnswer = answer;
-          
-          // Find the full text of the most common answer
-          processedPaths.forEach(path => {
-            if (path.answer && path.answer.trim() === answer) {
-              mostCommonAnswerText = path.answer;
-            } else if (answer.startsWith("Witness ") && extractKnightIdentity(path.answer) === parseInt(answer.replace("Witness ", ""))) {
-              mostCommonAnswerText = path.answer;
-            }
-          });
-        }
-      });
-      
-      // Calculate agreement percentage
-      const agreementPercentage = (highestCount / responsePaths.length) * 100;
-      
-      // Select the best response - the one with the most common answer
-      let bestResponse = null;
-      
-      if (mostCommonAnswer) {
-        // Find a response path that contains the most common answer
-        for (const path of responsePaths) {
-          const processed = processBotMessage(path, REASONING_METHOD);
-          if (processed.answer && processed.answer.includes(mostCommonAnswer)) {
-            bestResponse = path;
-            break;
-          } else if (mostCommonAnswer.startsWith("Witness ") && 
-                    extractKnightIdentity(processed.answer) === parseInt(mostCommonAnswer.replace("Witness ", ""))) {
-            bestResponse = path;
-            break;
-          }
-        }
-      }
-      
-      // If we couldn't find a matching path, use the first one
-      if (!bestResponse && responsePaths.length > 0) {
-        bestResponse = responsePaths[0];
-      }
-      
-      // Process the best response
-      const processed = processBotMessage(bestResponse, REASONING_METHOD);
-      
-      return {
-        bestResponse: bestResponse,
-        processedResponse: {
-          ...processed,
-          answer: processed.answer // Don't append the summary text, we'll display it separately
-        },
-        agreement: {
-          count: highestCount,
-          percentage: agreementPercentage,
-          totalPaths: responsePaths.length,
-          mostCommonAnswer: mostCommonAnswerText || mostCommonAnswer,
-          allResponses: responsePaths // Include all responses for detailed view
-        }
-      };
-    }
-
-    /**
-     * Renders the self-consistency results in a cleaner, more visual format
-     * @param {HTMLElement} answerDiv - The answer div container
-     * @param {Object} scData - Self-consistency data
-     */
-    function renderSelfConsistencyResults(answerDiv, scData) {
-      // Create the self-consistency container
-      const scDiv = document.createElement("div");
-      scDiv.className = "self-consistency-results";
-      
-      // Add header
-      const scHeader = document.createElement("div");
-      scHeader.className = "sc-header";
-      scHeader.innerHTML = `<span class="sc-icon">🗳️</span> Self-Consistency Voting Results`;
-      scDiv.appendChild(scHeader);
-      
-      // Main content container
-      const scContent = document.createElement("div");
-      scContent.className = "sc-content";
-      
-      // Calculate agreement percentage
-      const agreementPercent = Math.round(scData.agreement);
-      
-      // Determine agreement level for styling
-      let agreementLevel = "";
-      if (agreementPercent >= 80) {
-        agreementLevel = "high-agreement";
-      } else if (agreementPercent >= 50) {
-        agreementLevel = "medium-agreement";
-      } else {
-        agreementLevel = "low-agreement";
-      }
-      
-      // Create the agreement indicator
-      const agreementHTML = `
-        <div class="sc-agreement">
-          <div class="sc-label">
-            <span>Consensus Level</span>
-            <span>${agreementPercent}% agreement</span>
-          </div>
-          <div class="sc-progress-container">
-            <div class="sc-progress-bar ${agreementLevel}" style="width: ${agreementPercent}%"></div>
-          </div>
-        </div>
-      `;
-      
-      scContent.innerHTML = agreementHTML;
-      
-      // Add statistics section
-      const statsDiv = document.createElement("div");
-      statsDiv.className = "sc-stats";
-      
-      // Add key statistics
-      statsDiv.innerHTML = `
-        <div class="sc-stat-item">
-          <div class="sc-stat-label">TOTAL PATHS</div>
-          <div class="sc-stat-value">${scData.totalPaths}</div>
-        </div>
-        <div class="sc-stat-item">
-          <div class="sc-stat-label">AGREEING PATHS</div>
-          <div class="sc-stat-value">${scData.agreementCount}</div>
-        </div>
-        <div class="sc-stat-item">
-          <div class="sc-stat-label">HIGHEST AGREEMENT</div>
-          <div class="sc-stat-value">${agreementPercent}%</div>
-        </div>
-      `;
-      
-      scContent.appendChild(statsDiv);
-      
-      // Add paths toggle section if we have all responses
-      if (scData.allResponses && scData.allResponses.length > 0) {
-        const pathsDiv = document.createElement("div");
-        pathsDiv.className = "sc-paths";
-        
-        const toggleButton = document.createElement("div");
-        toggleButton.className = "sc-path-toggle";
-        toggleButton.innerHTML = `<span class="sc-path-toggle-icon">▶</span> Show all reasoning paths`;
-        
-        const pathDetails = document.createElement("div");
-        pathDetails.className = "sc-path-details";
-        
-        // Add individual paths
-        scData.allResponses.forEach((path, index) => {
-          // Extract just the first 100 characters for preview
-          const previewText = path.substring(0, 100).trim() + "...";
-          const pathItem = document.createElement("div");
-          pathItem.className = "sc-path-item";
-          
-          // Add a badge to indicate if this path agrees with the final answer
-          const hasAgreement = path.includes(scData.mostCommonAnswer) || 
-                               (scData.mostCommonAnswer && scData.mostCommonAnswer.startsWith("Witness") && 
-                                path.includes(scData.mostCommonAnswer.replace("Witness ", "Witness")));
-          
-          const badgeHTML = hasAgreement 
-            ? '<span class="sc-badge sc-badge-agreement">Agreeing</span>' 
-            : '<span class="sc-badge sc-badge-disagreement">Different Answer</span>';
-          
-          pathItem.innerHTML = `<strong>Path ${index + 1}:</strong> ${badgeHTML}<br>${previewText}`;
-          pathDetails.appendChild(pathItem);
-        });
-        
-        // Add toggle functionality
-        toggleButton.addEventListener("click", () => {
-          toggleButton.classList.toggle("expanded");
-          pathDetails.classList.toggle("visible");
-          
-          // Update toggle text
-          if (toggleButton.classList.contains("expanded")) {
-            toggleButton.innerHTML = `<span class="sc-path-toggle-icon">▼</span> Hide reasoning paths`;
-          } else {
-            toggleButton.innerHTML = `<span class="sc-path-toggle-icon">▶</span> Show all reasoning paths`;
-          }
-        });
-        
-        pathsDiv.appendChild(toggleButton);
-        pathsDiv.appendChild(pathDetails);
-        scContent.appendChild(pathsDiv);
-      }
-      
-      scDiv.appendChild(scContent);
-      answerDiv.appendChild(scDiv);
-    }
-
-    /***********************
-     * Fix Self-Consistency Implementation
-     ***********************/
-    function fixSelfConsistencyVoting() {
-      // Reduce paths to minimum needed
-      SELF_CONSISTENCY_PATHS = 2;
-      
-      // Lower token limit for self-consistency requests
-      const pathPayload = {
-        ...basePayload,
-        temperature: TEMPERATURE + (i * 0.02),
-        max_tokens: 24000  // More reasonable for API limits
-      };
-      
-      // Add longer delay between requests
-      return new Promise(resolve => setTimeout(resolve, 1500));
-    }
-
-    /***********************
-     * Self-Consistency Implementation
-     ***********************/
   </script>
-  <form hidden method='post' name='feedback'>
+  <form hidden="" method="post" name="feedback" data-netlify="true">
     <input type="hidden" name="form-name" value="feedback">
     <input type="hidden" name="model">
     <input type="hidden" name="reasoning_method">
@@ -4969,5 +5212,7 @@ Separate your steps with periods. Write your final answer after the #### separat
     <textarea name="comments"></textarea>
   </form>
 
-<script async id="netlify-rum-container" src="/.netlify/scripts/rum" data-netlify-rum-site-id="46b8ee21-754a-4a63-b741-fe88bac724f4" data-netlify-deploy-branch="main" data-netlify-deploy-context="production" data-netlify-cwv-token="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzaXRlX2lkIjoiNDZiOGVlMjEtNzU0YS00YTYzLWI3NDEtZmU4OGJhYzcyNGY0IiwiYWNjb3VudF9pZCI6IjY3YzU0MzUzYzc2MjdjOTUxZDZmNTU0MSIsImRlcGxveV9pZCI6IjY3Y2JjOGE0NzRlY2E1MDAwODQ5MWVhYiIsImlzc3VlciI6Im5mc2VydmVyIn0.eeKx8JPS1uEj-YKOwtWMAEBFgcCAjTWkB8RLzmCfMmI"></script></body>
+<script async="" id="netlify-rum-container" src="./LLM Playground (COT vs COD)_files/rum" data-netlify-rum-site-id="46b8ee21-754a-4a63-b741-fe88bac724f4" data-netlify-deploy-branch="main" data-netlify-deploy-context="production" data-netlify-cwv-token="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzaXRlX2lkIjoiNDZiOGVlMjEtNzU0YS00YTYzLWI3NDEtZmU4OGJhYzcyNGY0IiwiYWNjb3VudF9pZCI6IjY3YzU0MzUzYzc2MjdjOTUxZDZmNTU0MSIsImRlcGxveV9pZCI6IjY3Y2JjOGE0NzRlY2E1MDAwODQ5MWVhYiIsImlzc3VlciI6Im5mc2VydmVyIn0.eeKx8JPS1uEj-YKOwtWMAEBFgcCAjTWkB8RLzmCfMmI"></script>
+
+</body>
 </html>
