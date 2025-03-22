@@ -60,15 +60,40 @@ exports.handler = async function(event, context) {
       console.log(`Warning: Using a very high token limit of ${requestBody.max_tokens}. Make sure your model supports this.`);
     }
     
-    // Set default max tokens to 128k if not specified
+    // Set default max tokens to 8192 if not specified (reduced from 128k to be safer)
     if (!requestBody.max_tokens) {
-      requestBody.max_tokens = 128000;
-      console.log('Setting default max_tokens to 128000');
+      requestBody.max_tokens = 8192;
+      console.log('Setting default max_tokens to 8192');
     }
     
     // We'll use the Groq API endpoint
     const apiEndpoint = 'https://api.groq.com/openai/v1/chat/completions';
     console.log(`Using Groq API endpoint: ${apiEndpoint}`);
+    
+    // IMPORTANT FIX: Filter out parameters not supported by Groq API
+    const groqSupportedParams = {
+      model: requestBody.model,
+      messages: requestBody.messages,
+      max_tokens: requestBody.max_tokens,
+      temperature: requestBody.temperature,
+      top_p: requestBody.top_p,
+      n: requestBody.n,
+      stream: requestBody.stream,
+      stop: requestBody.stop,
+      presence_penalty: requestBody.presence_penalty,
+      frequency_penalty: requestBody.frequency_penalty
+    };
+    
+    // Remove null or undefined values
+    const cleanedParams = Object.entries(groqSupportedParams)
+      .reduce((acc, [key, value]) => {
+        if (value !== null && value !== undefined) {
+          acc[key] = value;
+        }
+        return acc;
+      }, {});
+    
+    console.log('Sending cleaned params to Groq API (removing unsupported parameters)');
     
     // Implement retry logic
     let retries = 3;
@@ -88,7 +113,7 @@ exports.handler = async function(event, context) {
             'Content-Type': 'application/json',
             'Authorization': `Bearer ${apiKey}`
           },
-          body: JSON.stringify(requestBody),
+          body: JSON.stringify(cleanedParams), // Use the cleaned parameters
           signal: controller.signal
         });
         
@@ -134,6 +159,12 @@ exports.handler = async function(event, context) {
         if (errorMessage.includes('token') && errorMessage.includes('limit')) {
           errorMessage = `Token limit exceeded. The model may not support ${requestBody.max_tokens || 'the requested'} tokens. Try reducing the max_tokens value or using a different model.`;
         }
+        
+        // Check for invalid model error
+        if (errorMessage.includes('model') && (errorMessage.includes('not found') || errorMessage.includes('invalid'))) {
+          errorMessage = `Invalid model: "${requestBody.model}". Please check that you're using a model ID supported by Groq API.`;
+          console.error(`Model error detected. Requested model: ${requestBody.model}`);
+        }
       } catch {
         // If parsing fails, use the raw text
         errorMessage = errorData || `Error ${response.status}`;
@@ -147,6 +178,12 @@ exports.handler = async function(event, context) {
       // Special handling for timeouts (504)
       if (response.status === 504) {
         errorMessage = "Request timed out. The response may be too long for the current token limit. Try reducing the max_tokens value.";
+      }
+      
+      // Special handling for 400 errors - most likely model or parameter issue
+      if (response.status === 400) {
+        // Log entire request for debugging
+        console.error('Full request that caused 400 error:', JSON.stringify(cleanedParams, null, 2));
       }
       
       return {
